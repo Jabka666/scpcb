@@ -20,8 +20,10 @@ Global AchvMSGenabled% = GetINIInt("options.ini", "options", "achievement popup 
 Dim AchievementStrings$(MAXACHIEVEMENTS)
 Dim AchievementDescs$(MAXACHIEVEMENTS)
 Dim AchvIMG%(MAXACHIEVEMENTS)
+
 For i = 0 To MAXACHIEVEMENTS-1
 	Local loc2% = GetINISectionLocation("Data\achievementstrings.ini", "s"+Str(i))
+	
 	AchievementStrings(i) = GetINIString2("Data\achievementstrings.ini", loc2, "string1")
 	AchievementDescs(i) = GetINIString2("Data\achievementstrings.ini", loc2, "AchvDesc")
 	
@@ -40,55 +42,40 @@ Function GiveAchievement(achvname%, showMessage%=True)
 		If AchvMSGenabled And showMessage Then
 			Local loc2% = GetINISectionLocation("Data\achievementstrings.ini", "s"+achvname)
 			Local AchievementName$ = GetINIString2("Data\achievementstrings.ini", loc2, "string1")
-			;Msg = "Achievement Unlocked - "+AchievementName
-			;MsgTimer=70*7
+			
 			CreateAchievementMsg(achvname,AchievementName)
 		EndIf
 	EndIf
 End Function
 
 Function AchievementTooltip(achvno%)
-    Local scale# = GraphicHeight/768.0
-    
-    AASetFont Font3
-    Local width = AAStringWidth(AchievementStrings(achvno))
-    AASetFont Font1
-    If (AAStringWidth(AchievementDescs(achvno))>width) Then
-        width = AAStringWidth(AchievementDescs(achvno))
-    EndIf
-    width = width+20*MenuScale
-    
-    Local height = 38*scale
-    
-    Color 25,25,25
-    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,True)
-    Color 150,150,150
-    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,False)
-    AASetFont Font3
-    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), AchievementStrings(achvno), True, True)
-    AASetFont Font1
-    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs(achvno), True, True)
+	Local scale# = GraphicHeight/768.0
+	
+	AASetFont Font3
+	Local width = AAStringWidth(AchievementStrings(achvno))
+	AASetFont Font1
+	If (AAStringWidth(AchievementDescs(achvno))>width) Then
+		width = AAStringWidth(AchievementDescs(achvno))
+	EndIf
+	width = width+20*MenuScale
+	
+	Local height = 38*scale
+	
+	Color 25,25,25
+	Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,True)
+	Color 150,150,150
+	Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,False)
+	AASetFont Font3
+	AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), AchievementStrings(achvno), True, True)
+	AASetFont Font1
+	AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs(achvno), True, True)
 End Function
 
 Function DrawAchvIMG(x%, y%, achvno%)
 	Local row%
 	Local scale# = GraphicHeight/768.0
 	Local SeparationConst2 = 76 * scale
-;	If achvno >= 0 And achvno < 4 Then 
-;		row = achvno
-;	ElseIf achvno >= 3 And achvno <= 6 Then
-;		row = achvno-3
-;	ElseIf achvno >= 7 And achvno <= 10 Then
-;		row = achvno-7
-;	ElseIf achvno >= 11 And achvno <= 14 Then
-;		row = achvno-11
-;	ElseIf achvno >= 15 And achvno <= 18 Then
-;		row = achvno-15
-;	ElseIf achvno >= 19 And achvno <= 22 Then
-;		row = achvno-19
-;	ElseIf achvno >= 24 And achvno <= 26 Then
-;		row = achvno-24
-;	EndIf
+	
 	row = achvno Mod 4
 	Color 0,0,0
 	Rect((x+((row)*SeparationConst2)), y, 64*scale, 64*scale, True)
@@ -170,12 +157,7 @@ Function UpdateAchievementMsg()
 			Delete amsg
 		EndIf
 	Next
-	
 End Function
 
-
-
-
 ;~IDEal Editor Parameters:
-;~F#31#48
 ;~C#Blitz3D

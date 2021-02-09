@@ -5,17 +5,16 @@ Dim ParticleTextures%(10)
 Type Particles
 	Field obj%, pvt%
 	Field image%
-	
 	Field R#, G#, B#, A#, size#
 	Field speed#, yspeed#, gravity#
 	Field Rchange#, Gchange#, Bchange#, Achange#
 	Field SizeChange#
-	
 	Field lifetime#
 End Type 
 	
 Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lifetime% = 200)
 	Local p.Particles = New Particles
+	
 	p\lifetime = lifetime
 	
 	p\obj = CreateSprite()
@@ -46,14 +45,13 @@ End Function
 	
 Function UpdateParticles()
 	Local p.Particles
+	
 	For p.Particles = Each Particles
 		MoveEntity(p\pvt, 0, 0, p\speed * FPSfactor)
 		If p\gravity <> 0 Then p\yspeed = p\yspeed - p\gravity * FPSfactor
 		TranslateEntity(p\pvt, 0, p\yspeed * FPSfactor, 0, True)
 		
 		PositionEntity(p\obj, EntityX(p\pvt,True), EntityY(p\pvt,True), EntityZ(p\pvt,True), True)
-		
-		;TurnEntity(p\obj, 0, 0, FPSfactor)
 		
 		If p\Achange <> 0 Then
 			p\A=Min(Max(p\A+p\Achange * FPSfactor,0.0),1.0)
@@ -68,7 +66,7 @@ Function UpdateParticles()
 		p\lifetime=p\lifetime-FPSfactor
 		If p\lifetime <= 0 Lor p\size < 0.00001 Lor p\A =< 0 Then
 			RemoveParticle(p)
-		End If
+		EndIf
 	Next
 End Function
 	
@@ -84,18 +82,13 @@ Global SmokeDelay# = 0.0
 
 Type Emitters
 	Field Obj%
-	
 	Field Size#
 	Field MinImage%, MaxImage%
 	Field Gravity#
 	Field LifeTime%
-	
 	Field Disable%
-	
 	Field Room.Rooms
-	
 	Field SoundCHN%
-	
 	Field Speed#, RandAngle#
 	Field SizeChange#, Achange#
 End Type 
@@ -104,7 +97,6 @@ Function UpdateEmitters()
 	InSmoke = False
 	For e.emitters = Each Emitters
 		If FPSfactor > 0 And (PlayerRoom = e\room Lor e\room\dist < 8) Then
-			;If ParticleAmount = 2 Lor SmokeDelay#=0.0
 			Local p.Particles = CreateParticle(EntityX(e\obj, True), EntityY(e\obj, True), EntityZ(e\obj, True), Rand(e\minimage, e\maximage), e\size, e\gravity, e\lifetime)
 			p\speed = e\speed
 			RotateEntity(p\pvt, EntityPitch(e\Obj, True), EntityYaw(e\Obj, True), EntityRoll(e\Obj, True), True)
@@ -115,7 +107,6 @@ Function UpdateEmitters()
 			p\SizeChange = e\SizeChange
 			
 			p\Achange = e\achange
-			;EndIf
 			e\SoundCHN = LoopSound2(HissSFX, e\SoundCHN, Camera, e\Obj)
 			
 			If InSmoke = False Then
@@ -126,13 +117,6 @@ Function UpdateEmitters()
 					EndIf
 				EndIf					
 			EndIf
-			;If ParticleAmount <> 2
-			;	If SmokeDelay#<(10-(5*ParticleAmount))
-			;		SmokeDelay#=SmokeDelay#+FPSfactor
-			;	Else
-			;		SmokeDelay#=0.0
-			;	EndIf
-			;EndIf
 		EndIf
 	Next
 	
@@ -149,23 +133,22 @@ Function UpdateEmitters()
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else
 					If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
-				End If
+				EndIf
 			EndIf
 		EndIf
-		
 		EyeIrritation=EyeIrritation+FPSfactor * 4
 	EndIf	
 End Function
 	
 Function CreateEmitter.Emitters(x#, y#, z#, emittertype%) 
 	Local e.Emitters = New Emitters
-		
+	
 	e\Obj = CreatePivot()
 	NameEntity e\Obj,"Emitter1"
 	PositionEntity(e\Obj, x, y, z, True)
 		
 	Select emittertype
-		Case 0 ;savu
+		Case 0
 			e\Size = 0.03
 			e\Gravity = -0.2
 			e\LifeTime = 200
@@ -190,9 +173,7 @@ Function CreateEmitter.Emitters(x#, y#, z#, emittertype%)
 			e\Room = r
 		EndIf
 	Next
-	
 	Return e
-		
 End Function
 
 Type DevilEmitters
@@ -264,26 +245,16 @@ Function UpdateDevilEmitters()
 					CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 				Else
 					If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
-				End If
+				EndIf
 			EndIf
 		EndIf
-		
 		EyeIrritation=EyeIrritation+FPSfactor * 4
 	EndIf
-	
 End Function
 
 Function DeleteDevilEmitters()
-	
 	Delete Each DevilEmitters
-	
 End Function
 
-
-
-
-
-
 ;~IDEal Editor Parameters:
-;~F#4#10#4A#54#C5#D0
 ;~C#Blitz3D

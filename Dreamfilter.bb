@@ -4,6 +4,7 @@ Global ark_blur_cam%
 Function CreateBlurImage()
 	;Create blur Camera
 	Local cam% = CreateCamera()
+	
 	CameraProjMode cam,2
 	CameraZoom cam,0.1
 	CameraClsMode cam, 0, 0
@@ -11,13 +12,14 @@ Function CreateBlurImage()
 	MoveEntity cam, 0, 0, 10000
 	ark_blur_cam = cam
 	
-	ark_sw = GraphicWidth;GraphicsWidth()
-	ark_sh = GraphicHeight;GraphicsHeight()
+	ark_sw = GraphicWidth
+	ark_sh = GraphicHeight
 	CameraViewport cam,0,0,ark_sw,ark_sh
 	
 	;Create sprite
 	Local spr% = CreateMesh(cam)
 	Local sf% = CreateSurface(spr)
+	
 	AddVertex sf, -1, 1, 0, 0, 0
 	AddVertex sf, 1, 1, 0, 1, 0
 	AddVertex sf, -1, -1, 0, 0, 1
@@ -37,14 +39,9 @@ Function CreateBlurImage()
 End Function
 
 Function UpdateBlur(power#)
-	
 	EntityAlpha ark_blur_image, power#
-	
-	;CopyRect ark_sw / 2 - 1024, ark_sh / 2 - 1024, 2048, 2048, 0, 0, BackBuffer(), TextureBuffer(ark_blur_texture)
 	CopyRect 0, 0, GraphicWidth, GraphicHeight, 1024.0 - GraphicWidth/2, 1024.0 - GraphicHeight/2, BackBuffer(), TextureBuffer(ark_blur_texture)
-	
 End Function
 
 ;~IDEal Editor Parameters:
-;~F#3#26
 ;~C#Blitz3D

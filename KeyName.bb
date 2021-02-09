@@ -1,9 +1,11 @@
-;[Block]
 Dim KeyName$(211)
+
 KeyName(1)="Esc"
+
 For i = 2 To 10
 	KeyName(i)=i-1
 Next
+
 KeyName(11)="0"
 KeyName(12)="-"
 KeyName(13)="="
@@ -65,4 +67,6 @@ KeyName(200)="Up"
 KeyName(203)="Left"
 KeyName(205)="Right"
 KeyName(208)="Down"
-;[End Block]
+
+;~IDEal Editor Parameters:
+;~C#Blitz3D

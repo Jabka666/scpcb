@@ -12,32 +12,25 @@ Global LastItemID%
 Type ItemTemplates
 	Field name$
 	Field tempname$
-	
 	Field sound%
-	
 	Field found%
-	
-	Field obj%, objpath$, parentobjpath$
+	Field obj%, objpath$
 	Field invimg%,invimg2%,invimgpath$
 	Field imgpath$, img%
-	
 	Field isAnim%
-	
 	Field scale#
-	;Field bumptex%
 	Field tex%, texpath$
 End Type 
 
 Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath$, imgpath$, scale#, texturepath$ = "",invimgpath2$="",Anim%=0, texflags%=9)
 	Local it.ItemTemplates = New ItemTemplates, n
 	
-	
 	;if another item shares the same object, copy it
 	For it2.itemtemplates = Each ItemTemplates
-		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : it\parentobjpath=it2\objpath : Exit
+		If it2\objpath = objpath And it2\obj <> 0 Then it\obj = CopyEntity(it2\obj) : Exit
 	Next
 	
-	If it\obj = 0 Then; it\obj = LoadMesh(objpath)
+	If it\obj = 0 Then
 		If Anim<>0 Then
 			it\obj = LoadAnimMesh_Strict(objpath)
 			it\isAnim=True
@@ -58,7 +51,7 @@ Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath
 				Exit
 			EndIf
 		Next
-		If texture=0 Then texture=LoadTexture_Strict(texturepath,texflags%) : it\texpath = texturepath; : DebugLog texturepath
+		If texture=0 Then texture=LoadTexture_Strict(texturepath,texflags%) : it\texpath = texturepath
 		EntityTexture it\obj, texture
 		it\tex = texture
 	EndIf  
@@ -69,9 +62,9 @@ Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath
 	;if another item shares the same object, copy it
 	For it2.itemtemplates = Each ItemTemplates
 		If it2\invimgpath = invimgpath And it2\invimg <> 0 Then
-			it\invimg = it2\invimg ;CopyImage()
+			it\invimg = it2\invimg
 			If it2\invimg2<>0 Then
-				it\invimg2=it2\invimg2 ;CopyImage()
+				it\invimg2=it2\invimg2
 			EndIf
 			Exit
 		EndIf
@@ -93,14 +86,6 @@ Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath
 	
 	it\imgpath = imgpath
 	
-	;If imgpath<>"" Then
-	;	it\img=LoadImage(imgpath)
-	;	
-	;	;DebugLog imgpath
-	;	
-	;	If it\img<>0 Then ResizeImage(it\img, ImageWidth(it\img) * MenuScale, ImageHeight(it\img) * MenuScale)
-	;EndIf
-	
 	it\tempname = tempname
 	it\name = name
 	
@@ -109,7 +94,6 @@ Function CreateItemTemplate.ItemTemplates(name$, tempname$, objpath$, invimgpath
 	HideEntity it\obj
 	
 	Return it
-	
 End Function
 
 Function InitItemTemplates()
@@ -238,7 +222,7 @@ Function InitItemTemplates()
 	CreateItemTemplate("S-NAV Navigator Ultimate", "nav", "GFX\items\navigator.x", "GFX\items\INVnavigator.jpg", "GFX\items\navigator.png", 0.0008)
 	CreateItemTemplate("S-NAV 310 Navigator", "nav", "GFX\items\navigator.x", "GFX\items\INVnavigator.jpg", "GFX\items\navigator.png", 0.0008)
 	
-	CreateItemTemplate("Radio Transceiver", "radio", "GFX\items\radio.x", "GFX\items\INVradio.jpg", "GFX\items\radioHUD.png", 1.0);0.0010)
+	CreateItemTemplate("Radio Transceiver", "radio", "GFX\items\radio.x", "GFX\items\INVradio.jpg", "GFX\items\radioHUD.png", 1.0)
 	CreateItemTemplate("Radio Transceiver", "fineradio", "GFX\items\radio.x", "GFX\items\INVradio.jpg", "GFX\items\radioHUD.png", 1.0)
 	CreateItemTemplate("Radio Transceiver", "veryfineradio", "GFX\items\radio.x", "GFX\items\INVradio.jpg", "GFX\items\radioHUD.png", 1.0)
 	CreateItemTemplate("Radio Transceiver", "18vradio", "GFX\items\radio.x", "GFX\items\INVradio.jpg", "GFX\items\radioHUD.png", 1.02)
@@ -270,14 +254,9 @@ Function InitItemTemplates()
 	it = CreateItemTemplate("SCP-513", "scp513", "GFX\items\513.x", "GFX\items\INV513.jpg", "", 0.1)
 	it\sound = 2
 	
-	;BoH items
-	
 	it = CreateItemTemplate("Clipboard", "clipboard", "GFX\items\clipboard.b3d", "GFX\items\INVclipboard.jpg", "", 0.003, "", "GFX\items\INVclipboard2.jpg", 1)
 	
 	it = CreateItemTemplate("SCP-1123", "1123", "GFX\items\HGIB_Skull1.b3d", "GFX\items\inv1123.jpg", "", 0.015) : it\sound = 2
-	
-	;it = CreateItemTemplate("Document SCP-1074", "paper", "GFX\items\paper.x", "GFX\items\INVpaper.jpg", "GFX\items\doc1074.jpg", 0.003) : it\sound = 0
-	;it = CreateItemTemplate("SCP-1074 Containment Notice", "paper", "GFX\items\paper.x", "GFX\items\INVpaper.jpg", "GFX\items\doc_arce.jpg", 0.003) : it\sound = 0
 	
 	it = CreateItemTemplate("Night Vision Goggles", "supernv", "GFX\items\NVG.b3d", "GFX\items\INVsupernightvision.jpg", "", 0.02) : it\sound = 2
 	it = CreateItemTemplate("Night Vision Goggles", "nvgoggles", "GFX\items\NVG.b3d", "GFX\items\INVnightvision.jpg", "", 0.02) : it\sound = 2
@@ -287,9 +266,6 @@ Function InitItemTemplates()
 	it = CreateItemTemplate("Syringe", "finesyringe", "GFX\items\Syringe\syringe.b3d", "GFX\items\Syringe\inv.png", "", 0.005) : it\sound = 2
 	it = CreateItemTemplate("Syringe", "veryfinesyringe", "GFX\items\Syringe\syringe.b3d", "GFX\items\Syringe\inv.png", "", 0.005) : it\sound = 2
 	
-	;.........
-	
-	;new Items in SCP:CB 1.3 - ENDSHN
 	it = CreateItemTemplate("SCP-1499","scp1499","GFX\items\SCP-1499.b3d","GFX\items\INVscp1499.jpg", "", 0.023) : it\sound = 2
 	it = CreateItemTemplate("SCP-1499","super1499","GFX\items\SCP-1499.b3d","GFX\items\INVscp1499.jpg", "", 0.023) : it\sound = 2
 	CreateItemTemplate("Emily Ross' Badge", "badge", "GFX\items\badge.x", "GFX\items\INVbadge.jpg", "GFX\items\badge1.jpg", 0.0001, "GFX\items\badge1_tex.jpg")
@@ -327,29 +303,18 @@ Function InitItemTemplates()
 			FreeTexture it\tex : it\tex = 0
 		EndIf
 	Next
-	
 End Function 
-
-
 
 Type Items
 	Field name$
 	Field collider%,model%
 	Field itemtemplate.ItemTemplates
 	Field DropSpeed#
-	
 	Field r%,g%,b%,a#
-	
-	Field level
-	
 	Field SoundChn%
-	
 	Field dist#, disttimer#
-	
 	Field state#, state2#
-	
 	Field Picked%,Dropped%
-	
 	Field invimg%
 	Field WontColl% = False
 	Field xspeed#,zspeed#
@@ -378,6 +343,7 @@ Function CreateItem.Items(name$, tempname$, x#, y#, z#, r%=0,g%=0,b%=0,a#=1.0,in
 				i\name = it\name
 				ShowEntity i\collider
 				ShowEntity i\model
+				Exit
 			EndIf
 		EndIf
 	Next 
@@ -410,8 +376,6 @@ Function CreateItem.Items(name$, tempname$, x#, y#, z#, r%=0,g%=0,b%=0,a#=1.0,in
 		Else
 			EntityAlpha liquid, Abs(a)
 		EndIf
-		
-		
 		EntityShininess liquid, 1.0
 	EndIf
 	
@@ -430,14 +394,18 @@ Function CreateItem.Items(name$, tempname$, x#, y#, z#, r%=0,g%=0,b%=0,a#=1.0,in
 	i\ID=LastItemID+1
 	LastItemID=i\ID
 	
-	CatchErrors("CreateItem")
 	Return i
+	
+	CatchErrors("CreateItem")
 End Function
 
 Function RemoveItem(i.Items)
 	CatchErrors("Uncaught (RemoveItem)")
+	
 	Local n
-	FreeEntity(i\model) : FreeEntity(i\collider) : i\collider = 0
+	
+	FreeEntity(i\model) : i\model = 0
+	FreeEntity(i\collider) : i\collider = 0
 	
 	For n% = 0 To MaxItemAmount - 1
 		If Inventory(n) = i
@@ -476,14 +444,13 @@ Function RemoveItem(i.Items)
 	CatchErrors("RemoveItem")
 End Function
 
-
 Function UpdateItems()
 	CatchErrors("Uncaught (UpdateItems)")
+	
 	Local n, i.Items, i2.Items
 	Local xtemp#, ytemp#, ztemp#
 	Local temp%, np.NPCs
 	Local pick%
-	
 	Local HideDist = HideDistance*0.5
 	Local deletedItem% = False
 	
@@ -500,7 +467,6 @@ Function UpdateItems()
 			
 			If i\dist < HideDist Then
 				ShowEntity i\collider
-				
 				If i\dist < 1.2 Then
 					If ClosestItem = Null Then
 						If EntityInView(i\model, Camera) Then
@@ -543,7 +509,6 @@ Function UpdateItems()
 				If i\dist<HideDist*0.2 Then
 					For i2.Items = Each Items
 						If i<>i2 And (Not i2\Picked) And i2\dist<HideDist*0.2 Then
-							
 							xtemp# = (EntityX(i2\collider,True)-EntityX(i\collider,True))
 							ytemp# = (EntityY(i2\collider,True)-EntityY(i\collider,True))
 							ztemp# = (EntityZ(i2\collider,True)-EntityZ(i\collider,True))
@@ -567,7 +532,6 @@ Function UpdateItems()
 						EndIf
 					Next
 				EndIf
-				
 				If EntityY(i\collider) < - 35.0 Then DebugLog "remove: " + i\itemtemplate\name:RemoveItem(i):deletedItem=True
 			Else
 				HideEntity i\collider
@@ -585,11 +549,8 @@ Function UpdateItems()
 	Next
 	
 	If ClosestItem <> Null Then
-		;DrawHandIcon = True
-		
 		If MouseHit1 Then PickItem(ClosestItem)
 	EndIf
-	
 End Function
 
 Function PickItem(item.Items)
@@ -618,7 +579,6 @@ Function PickItem(item.Items)
 					Case "1123"
 						If Not (Wearing714 = 1) Then
 							If PlayerRoom\RoomTemplate\Name <> "room1123" Then
-								ShowEntity Light
 								LightFlash = 7
 								PlaySound_Strict(LoadTempSound("SFX\SCP\1123\Touch.ogg"))		
 								DeathMSG = "Subject D-9341 was shot dead after attempting to attack a member of Nine-Tailed Fox. Surveillance tapes show that the subject had been "
@@ -627,15 +587,14 @@ Function PickItem(item.Items)
 								DeathMSG = DeathMSG + "exactly SCP-1123 was removed from its containment chamber is still unknown."
 								Kill()
 							EndIf
+							
 							For e.Events = Each Events
 								If e\eventname = "room1123" Then 
 									If e\eventstate = 0 Then
-										ShowEntity Light
 										LightFlash = 3
 										PlaySound_Strict(LoadTempSound("SFX\SCP\1123\Touch.ogg"))
 									EndIf
 									e\eventstate = Max(1, e\eventstate)
-									
 									Exit
 								EndIf
 							Next
@@ -643,7 +602,6 @@ Function PickItem(item.Items)
 						
 						Return
 					Case "killbat"
-						ShowEntity Light
 						LightFlash = 1.0
 						PlaySound_Strict(IntroSFX(11))
 						DeathMSG = "Subject D-9341 found dead inside SCP-914's output booth next to what appears to be an ordinary nine-volt battery. The subject is covered in severe "
@@ -688,7 +646,6 @@ Function PickItem(item.Items)
 							MsgTimer = 70 * 5
 							Return
 						Else
-							;TakeOffStuff(1+16)
 							SelectedItem = item
 						EndIf
 					Case "vest","finevest"
@@ -714,7 +671,6 @@ Function PickItem(item.Items)
 							MsgTimer = 70 * 5
 							Return
 						Else
-							;TakeOffStuff(2)
 							SelectedItem = item
 						EndIf
 				End Select
@@ -735,6 +691,7 @@ Function PickItem(item.Items)
 		Msg = "You cannot carry any more items."
 		MsgTimer = 70 * 5
 	EndIf
+	
 	CatchErrors("PickItem")
 End Function
 
@@ -757,7 +714,6 @@ Function DropItem(item.Items,playdropsound%=True)
 	RotateEntity(item\collider, EntityPitch(Camera), EntityYaw(Camera)+Rnd(-20,20), 0)
 	MoveEntity(item\collider, 0, -0.1, 0.1)
 	RotateEntity(item\collider, 0, EntityYaw(Camera)+Rnd(-110,110), 0)
-	
 	ResetEntity (item\collider)
 	
 	item\Picked = False
@@ -786,7 +742,6 @@ Function DropItem(item.Items,playdropsound%=True)
 	End Select
 	
 	CatchErrors("DropItem")
-	
 End Function
 
 ;Update any ailments inflicted by SCP-294 drinks.
@@ -806,8 +761,6 @@ Function Update294()
 			If BlurTimer = 0 Then BlurTimer = Rnd(10, 20)*70
 			CameraShake = Rnd(0, 2)
 		EndIf
-		
-;		If (MilliSecs2() Mod 1000) < Rand(1200) Then 
 		
 		If Rand(50) = 50 And (MilliSecs2() Mod 4000) < 200 Then PlaySound_Strict(CoughSFX(Rand(0,2)))
 		
@@ -856,8 +809,6 @@ Function Update294()
 			Vomit = True
 		EndIf
 		
-		UpdateDecals()
-		
 		mouse_y_speed_1 = mouse_y_speed_1 + Max((1.0 + VomitTimer / 10), 0.0)
 		
 		If VomitTimer < -15 Then
@@ -875,13 +826,5 @@ Function Update294()
 	CatchErrors("Update294")
 End Function
 
-
-
-
-
-
-
-
 ;~IDEal Editor Parameters:
-;~F#B#1E
 ;~C#Blitz3D

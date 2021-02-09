@@ -5,11 +5,9 @@ Type Difficulty
 	Field aggressiveNPCs
 	Field saveType%
 	Field otherFactors%
-	
 	Field r%
 	Field g%
 	Field b%
-	
 	Field customizable%
 End Type
 
@@ -70,6 +68,6 @@ difficulties(CUSTOM)\g = 255
 difficulties(CUSTOM)\b = 255
 
 SelectedDifficulty = difficulties(SAFE)
+
 ;~IDEal Editor Parameters:
-;~F#0
 ;~C#Blitz3D

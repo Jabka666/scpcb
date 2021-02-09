@@ -1,6 +1,6 @@
 Global AATextEnable% = GetINIInt(OptionFile, "options", "antialiased text")
 Global AASelectedFont%
-Global AATextCam%,AATextSprite%[150]
+Global AATextCam%,AATextSprite%[256]
 Global AACharW%,AACharH%
 Global AATextEnable_Prev% = AATextEnable
 
@@ -9,18 +9,14 @@ Global AACamViewW%,AACamViewH%
 Type AAFont
 	Field texture%
 	Field backup% ;images don't get erased by clearworld
-	
 	Field x%[256]
 	Field y%[256]
 	Field w%[256]
 	Field h%[256]
-	
 	Field lowResFont% ;for use on other buffers
-	
 	Field mW%
 	Field mH%
 	Field texH%
-	
 	Field isAA%
 End Type
 
@@ -28,8 +24,7 @@ Function InitAAFont()
 	If AATextEnable Then
 		;Create Camera
 		Local cam% = CreateCamera()
-		CameraViewport cam,0,0,10,10;GraphicWidth,GraphicHeight
-		;CameraProjMode cam, 2
+		CameraViewport cam,0,0,10,10
 		CameraZoom cam, 0.1
 		CameraClsMode cam, 0, 0
 		CameraRange cam, 0.1, 1.5
@@ -37,13 +32,13 @@ Function InitAAFont()
 		AATextCam = cam
 		CameraProjMode cam,0
 	
-	    ;Create sprite
+		;Create sprite
 		Local spr% = CreateMesh(cam)
 		Local sf% = CreateSurface(spr)
-		AddVertex sf, -1, 1, 0, 0, 0 ;vertex 0; uv:0,0
-		AddVertex sf, 1, 1, 0, 1, 0  ;vertex 1; uv:1,0
-		AddVertex sf, -1, -1, 0, 0, 1;vertex 2; uv:0,1
-		AddVertex sf, 1, -1, 0, 1, 1 ;vertex 3; uv:1,1
+		AddVertex sf, -1, 1, 0, 0, 0
+		AddVertex sf, 1, 1, 0, 1, 0
+		AddVertex sf, -1, -1, 0, 0, 1
+		AddVertex sf, 1, -1, 0, 1, 1
 		AddTriangle sf, 0, 1, 2
 		AddTriangle sf, 3, 2, 1
 		EntityFX spr, 17+32
@@ -51,7 +46,7 @@ Function InitAAFont()
 		EntityOrder spr, -100001
 		EntityBlend spr, 1
 		AATextSprite[0] = spr : HideEntity AATextSprite[0]
-		For i%=1 To 149
+		For i%=1 To 255
 			spr = CopyMesh(AATextSprite[0],cam)
 			EntityFX spr, 17+32
 			PositionEntity spr, 0, 0, 1.0001
@@ -104,7 +99,7 @@ Function AASetFont(fnt%)
 	AASelectedFont = fnt
 	Local font.AAFont = Object.AAFont(AASelectedFont)
 	If AATextEnable And font\isAA Then
-		For i%=0 To 149
+		For i%=0 To 255
 			EntityTexture AATextSprite[i],font\texture
 		Next
 	EndIf
@@ -116,6 +111,7 @@ Function AAStringWidth%(txt$)
 		Local retVal%=0
 		For i=1 To Len(txt)
 			Local char% = Asc(Mid(txt,i,1))
+			
 			If char>=0 And char<=127 Then
 				retVal=retVal+font\w[char]-2
 			EndIf

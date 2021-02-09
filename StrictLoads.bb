@@ -6,9 +6,6 @@
 
 ;safe loads for mav trapping media issues
 
-
-
-
 ;basic wrapper functions that check to make sure that the file exists before attempting to load it, raises an RTE if it doesn't
 ;more informative alternative to MAVs outside of debug mode, makes it immiediately obvious whether or not someone is loading resources
 ;likely to cause more crashes than 'clean' CB, as this prevents anyone from loading any assets that don't exist, regardless if they are ever used
@@ -23,7 +20,6 @@ Function LoadImage_Strict(file$)
 	Return tmp2
 End Function
 
-
 Type Sound
 	Field internalHandle%
 	Field name$
@@ -33,8 +29,10 @@ End Type
 
 Function AutoReleaseSounds()
 	Local snd.Sound
+	
 	For snd.Sound = Each Sound
 		Local tryRelease% = True
+		
 		For i = 0 To 31
 			If snd\channels[i] <> 0 Then
 				If ChannelPlaying(snd\channels[i]) Then
@@ -57,6 +55,7 @@ End Function
 
 Function PlaySound_Strict%(sndHandle%)
 	Local snd.Sound = Object.Sound(sndHandle)
+	
 	If snd <> Null Then
 		Local shouldPlay% = True
 		For i = 0 To 31
@@ -122,6 +121,7 @@ End Function
 
 Function LoadSound_Strict(file$)
 	Local snd.Sound = New Sound
+	
 	snd\name = file
 	snd\internalHandle = 0
 	snd\releaseTime = 0
@@ -130,12 +130,12 @@ Function LoadSound_Strict(file$)
 			snd\internalHandle = LoadSound(snd\name)
 		EndIf
 	EndIf
-	
 	Return Handle(snd)
 End Function
 
 Function FreeSound_Strict(sndHandle%)
 	Local snd.Sound = Object.Sound(sndHandle)
+	
 	If snd <> Null Then
 		If snd\internalHandle <> 0 Then
 			FreeSound snd\internalHandle
@@ -206,7 +206,6 @@ Function SetStreamVolume_Strict(streamHandle%,volume#)
 		Return
 	EndIf
 	ChannelVolume(st\chn, volume * 1.0)
-	
 End Function
 
 Function SetStreamPaused_Strict(streamHandle%,paused%)
@@ -226,7 +225,6 @@ Function SetStreamPaused_Strict(streamHandle%,paused%)
 	Else
 		ResumeChannel(st\chn)
 	EndIf
-	
 End Function
 
 Function IsStreamPlaying_Strict(streamHandle%)
@@ -241,7 +239,6 @@ Function IsStreamPlaying_Strict(streamHandle%)
 		Return
 	EndIf
 	Return(ChannelPlaying(st\chn))
-	
 End Function
 
 Function SetStreamPan_Strict(streamHandle%,pan#)
@@ -256,11 +253,9 @@ Function SetStreamPan_Strict(streamHandle%,pan#)
 		Return
 	EndIf
 	ChannelPan(st\chn, pan)
-	
 End Function
 
 Function UpdateStreamSoundOrigin(streamHandle%,cam%,entity%,range#=10,volume#=1.0)
-	;Local st.Stream = Object.Stream(streamHandle)
 	range# = Max(range,1.0)
 	
 	If volume>0 Then
@@ -319,16 +314,5 @@ Function LoadFont_Strict(file$="Tahoma", height=13, IgnoreScaling% = False)
 	Return tmp
 End Function
 
-
-
-
-
-
-
-
-
-
-
 ;~IDEal Editor Parameters:
-;~F#F
 ;~C#Blitz3D

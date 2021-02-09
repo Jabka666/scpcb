@@ -1,6 +1,7 @@
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
 Global Menu173% = LoadImage_Strict("GFX\menu\173back.jpg")
+
 MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")
 MaskImage MenuBlack, 255,255,0
@@ -35,7 +36,6 @@ Global SelectedInputBox%
 Global SavePath$ = "Saves\"
 Global SaveMSG$
 
-;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
 Global CurrSave$
 
 Global SaveGameAmount%
@@ -71,7 +71,7 @@ Function UpdateMainMenu()
 	If Rand(300) = 1 Then
 		MenuBlinkTimer(0) = Rand(4000, 8000)
 		MenuBlinkDuration(0) = Rand(200, 500)
-	End If
+	EndIf
 	
 	AASetFont Font1
 	
@@ -142,6 +142,7 @@ Function UpdateMainMenu()
 			temp = (MouseHit1 And MouseOn(x, y, width, height))
 			
 			Local txt$
+			
 			Select i
 				Case 0
 					txt = "NEW GAME"
@@ -186,8 +187,6 @@ Function UpdateMainMenu()
 								EndIf
 							Next							
 						EndIf
-						
-						;RandomSeed = MilliSecs()
 						MainMenuTab = 1
 					EndIf
 				Case 1
@@ -208,14 +207,8 @@ Function UpdateMainMenu()
 			End Select
 			
 			DrawButton(x, y, width, height, txt)
-			
-			;rect(x + 4, y + 4, width - 8, height - 8)
-			;color 255, 255, 255	
-			;text(x + width / 2, y + height / 2, Str, True, True)
 		Next	
-		
 	Else
-		
 		x = 159 * MenuScale
 		y = 286 * MenuScale
 		
@@ -252,7 +245,6 @@ Function UpdateMainMenu()
 		Select MainMenuTab
 			Case 1 ; New game
 				;[Block]
-				
 				x = 159 * MenuScale
 				y = 286 * MenuScale
 				
@@ -312,7 +304,6 @@ Function UpdateMainMenu()
 				AAText(x + 20 * MenuScale, y + 110 * MenuScale, "Enable intro sequence:")
 				IntroEnabled = DrawTick(x + 280 * MenuScale, y + 110 * MenuScale, IntroEnabled)	
 				
-				;Local modeName$, modeDescription$, selectedDescription$
 				AAText (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
 				For i = SAFE To CUSTOM
 					If DrawTick(x + 20 * MenuScale, y + (180+30*i) * MenuScale, (SelectedDifficulty = difficulties(i))) Then SelectedDifficulty = difficulties(i)
@@ -396,16 +387,12 @@ Function UpdateMainMenu()
 					FlushMouse()
 					
 					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-					
 				EndIf
-				
 				;[End Block]
 			Case 2 ;load game
 				;[Block]
-				
 				y = y + height + 20 * MenuScale
 				width = 580 * MenuScale
-				;height = 300 * MenuScale
 				height = 510 * MenuScale
 				
 				DrawFrame(x, y, width, height)
@@ -424,8 +411,6 @@ Function UpdateMainMenu()
 				y = y + height + 20 * MenuScale
 				width = 580 * MenuScale
 				height = 296 * MenuScale
-				
-				;AASetFont Font1	
 				
 				AASetFont Font2
 				
@@ -475,7 +460,7 @@ Function UpdateMainMenu()
 							EndIf
 							
 							AAText(x + 20 * MenuScale, y + 10 * MenuScale, SaveGames(i - 1))
-							AAText(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1)) ;y + (10+23) * MenuScale
+							AAText(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1))
 							AAText(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(i - 1))
 							AAText(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1))
 							
@@ -513,7 +498,6 @@ Function UpdateMainMenu()
 								Color(100, 100, 100)
 								AAText(x + 450 * MenuScale, y + 34 * MenuScale, "Delete", True, True)
 							EndIf
-							
 							y = y + 80 * MenuScale
 						Else
 							Exit
@@ -525,7 +509,6 @@ Function UpdateMainMenu()
 						y = 376 * MenuScale
 						DrawFrame(x, y, 420 * MenuScale, 200 * MenuScale)
 						RowText("Are you sure you want to delete this save?", x + 20 * MenuScale, y + 15 * MenuScale, 400 * MenuScale, 200 * MenuScale)
-						;AAText(x + 20 * MenuScale, y + 15 * MenuScale, "Are you sure you want to delete this save?")
 						If DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", False) Then
 							DeleteFile(CurrentDir() + SavePath + SaveMSG + "\save.txt")
 							DeleteDir(CurrentDir() + SavePath + SaveMSG)
@@ -537,13 +520,9 @@ Function UpdateMainMenu()
 						EndIf
 					EndIf
 				EndIf
-				
-				
-				
 				;[End Block]
 			Case 3,5,6,7 ;options
 				;[Block]
-				
 				x = 159 * MenuScale
 				y = 286 * MenuScale
 				
@@ -590,11 +569,8 @@ Function UpdateMainMenu()
 				Local tw# = 400*MenuScale
 				Local th# = 150*MenuScale
 				
-				;DrawOptionsTooltip(tx,ty,tw,th,"")
-				
 				If MainMenuTab = 3 ;Graphics
 					;[Block]
-					;height = 380 * MenuScale
 					height = 330 * MenuScale
 					DrawFrame(x, y, width, height)
 					
@@ -604,7 +580,6 @@ Function UpdateMainMenu()
 					AAText(x + 20 * MenuScale, y, "Enable bump mapping:")	
 					BumpEnabled = DrawTick(x + 310 * MenuScale, y + MenuScale, BumpEnabled)
 					If MouseOn(x + 310 * MenuScale, y + MenuScale, 20*MenuScale,20*MenuScale) And OnSliderID=0
-						;DrawTooltip("Not available in this version")
 						DrawOptionsTooltip(tx,ty,tw,th,"bump")
 					EndIf
 					
@@ -622,12 +597,11 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Anti-aliasing:")
 					Opt_AntiAlias = DrawTick(x + 310 * MenuScale, y + MenuScale, Opt_AntiAlias%)
-					;AAText(x + 20 * MenuScale, y + 15 * MenuScale, "(fullscreen mode only)")
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale) And OnSliderID=0
 						DrawOptionsTooltip(tx,ty,tw,th,"antialias")
 					EndIf
 					
-					y=y+30*MenuScale ;40
+					y=y+30*MenuScale
 					
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Enable room lights:")
@@ -638,7 +612,6 @@ Function UpdateMainMenu()
 					
 					y=y+30*MenuScale
 					
-					;Local prevGamma# = ScreenGamma
 					ScreenGamma = (SlideBar(x + 310*MenuScale, y+6*MenuScale, 150*MenuScale, ScreenGamma*50.0)/50.0)
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Screen gamma")
@@ -703,7 +676,6 @@ Function UpdateMainMenu()
 					
 					y = y + 40*MenuScale
 					
-					;SFXVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, SFXVolume*100.0)/100.0)
 					PrevSFXVolume = (SlideBar(x + 310*MenuScale, y-4*MenuScale, 150*MenuScale, SFXVolume*100.0)/100.0)
 					SFXVolume = PrevSFXVolume
 					Color 255,255,255
@@ -711,15 +683,6 @@ Function UpdateMainMenu()
 					If MouseOn(x+310*MenuScale,y-4*MenuScale,150*MenuScale+14,20)
 						DrawOptionsTooltip(tx,ty,tw,th,"soundvol",PrevSFXVolume)
 					EndIf
-					;If MouseDown1 Then
-					;	If MouseX() >= x And MouseX() <= x + width + 14 And MouseY() >= y And MouseY() <= y + 20 Then
-					;		PlayTestSound(True)
-					;	Else
-					;		PlayTestSound(False)
-					;	EndIf
-					;Else
-					;	PlayTestSound(False)
-					;EndIf
 					
 					y = y + 30*MenuScale
 					
@@ -956,9 +919,6 @@ Function UpdateMainMenu()
 					AAText(x + 20 * MenuScale, y, "Framelimit:")
 					Color 255,255,255
 					If DrawTick(x + 310 * MenuScale, y, CurrFrameLimit > 0.0) Then
-						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0)/50.0)
-						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
-						;Framelimit% = CurrFrameLimit#*100.0
 						CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*99.0)/99.0)
 						CurrFrameLimit# = Max(CurrFrameLimit, 0.01)
 						Framelimit% = 19+(CurrFrameLimit*100.0)
@@ -991,9 +951,6 @@ Function UpdateMainMenu()
 						Next
 						If (Not AATextEnable) Then
 							FreeEntity AATextCam
-							;For i%=0 To 149
-							;	FreeEntity AATextSprite[i]
-							;Next
 						EndIf
 						InitAAFont()
 						Font1% = AALoadFont("GFX\font\cour\Courier New.ttf", 16)
@@ -1002,7 +959,6 @@ Function UpdateMainMenu()
 						Font4% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", 60)
 						Font5% = AALoadFont("GFX\font\Journal\Journal.ttf", 58)
 						ConsoleFont% = AALoadFont("GFX\font\Andale\Andale Mono.ttf", 16)
-						;ReloadAAFont()
 						AATextEnable_Prev% = AATextEnable
 					EndIf
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
@@ -1091,7 +1047,6 @@ Function UpdateMainMenu()
 							If MouseOn(x + 400 * MenuScale, y + 20 * MenuScale, 100*MenuScale,30*MenuScale)
 								DrawMapCreatorTooltip(tx,ty,tw,th,SavedMaps(i-1))
 							EndIf
-							
 							y = y + 80 * MenuScale
 						Else
 							Exit
@@ -1101,26 +1056,25 @@ Function UpdateMainMenu()
 				;[End Block]
 		End Select
 		
-	End If
+	EndIf
 	
 	Color 255,255,255
 	AASetFont ConsoleFont
 	AAText 20,GraphicHeight-30,"v"+VersionNumber
-	
-	;DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
 	
 	AASetFont Font1
 End Function
 
+Const LauncherWidth% = 640
+Const LauncherHeight% = 480
+
 Function UpdateLauncher()
 	MenuScale = 1
 	
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
 
-	;InitExt
-	
 	SetBuffer BackBuffer()
 	
 	RealGraphicWidth = GraphicWidth
@@ -1151,7 +1105,7 @@ Function UpdateLauncher()
 			GfxModeWidths(GFXModes) = GfxModeWidth(i)
 			GfxModeHeights(GFXModes) = GfxModeHeight(i)
 			GFXModes=GFXModes+1 
-		End If
+		EndIf
 	Next
 	
 	BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
@@ -1159,8 +1113,6 @@ Function UpdateLauncher()
 	AppTitle "SCP - Containment Breach Launcher"
 	
 	Repeat
-		
-		;Cls
 		Color 0,0,0
 		Rect 0,0,LauncherWidth,LauncherHeight,True
 		
@@ -1173,6 +1125,7 @@ Function UpdateLauncher()
 		
 		Local x% = 40
 		Local y% = 270 - 65
+		
 		For i = 0 To (GFXModes - 1)
 			Color 0, 0, 0
 			If SelectedGFXMode = i Then Rect(x - 1, y - 5, 100, 20, False)
@@ -1188,7 +1141,6 @@ Function UpdateLauncher()
 			If y >= 250 - 65 + (LauncherHeight - 80 - 260) Then y = 270 - 65 : x=x+100
 		Next
 		
-		;-----------------------------------------------------------------
 		Color 255, 255, 255
 		x = 30
 		y = 369
@@ -1199,14 +1151,12 @@ Function UpdateLauncher()
 		For i = 1 To CountGfxDrivers()
 			Color 0, 0, 0
 			If SelectedGFXDriver = i Then Rect(x - 1, y - 5, 290, 20, False)
-			;text(x, y, bbGfxDriverName(i))
 			LimitText(GfxDriverName(i), x, y, 290, False)
 			If MouseOn(x - 1, y - 5, 290, 20) Then
 				Color 100, 100, 100
 				Rect(x - 1, y - 5, 290, 20, False)
 				If MouseHit1 Then SelectedGFXDriver = i
 			EndIf
-			
 			y=y+20
 		Next
 		
@@ -1219,10 +1169,10 @@ Function UpdateLauncher()
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
 
 		If BorderlessWindowed
- 		   Color 255, 0, 0
- 		   Fullscreen = False
+		   Color 255, 0, 0
+		   Fullscreen = False
 		Else
-  		  Color 255, 255, 255
+		  Color 255, 255, 255
 		EndIf
 
 		Text(40 + 430 + 15, 262 - 55 + 5 - 8, "Fullscreen")
@@ -1231,10 +1181,10 @@ Function UpdateLauncher()
 		Text(40 + 430 + 15, 262 - 55 + 35 + 12, "windowed mode",False,False)
 
 		If BorderlessWindowed Lor (Not Fullscreen)
- 		   Color 255, 0, 0
- 		   Bit16Mode = False
+		   Color 255, 0, 0
+		   Bit16Mode = False
 		Else
-		    Color 255, 255, 255
+			Color 255, 255, 255
 		EndIf
 
 		Text(40 + 430 + 15, 262 - 55 + 65 + 8, "16 Bit")
@@ -1278,13 +1228,11 @@ Function UpdateLauncher()
 		PutINIValue(OptionFile, "options", "16bit", "false")
 	EndIf
 	PutINIValue(OptionFile, "options", "gfx driver", SelectedGFXDriver)
-	
 End Function
 
-
 Function DrawTiledImageRect(img%, srcX%, srcY%, srcwidth#, srcheight#, x%, y%, width%, height%)
-	
 	Local x2% = x
+	
 	While x2 < x+width
 		Local y2% = y
 		While y2 < y+height
@@ -1295,10 +1243,7 @@ Function DrawTiledImageRect(img%, srcX%, srcY%, srcwidth#, srcheight#, x%, y%, w
 		Wend
 		x2 = x2 + srcwidth
 	Wend
-	
 End Function
-
-
 
 Type LoadingScreens
 	Field imgpath$
@@ -1313,7 +1258,6 @@ End Type
 Function InitLoadingScreens(file$)
 	Local TemporaryString$, i%
 	Local ls.LoadingScreens
-	
 	Local f = OpenFile(file)
 	
 	While Not Eof(f)
@@ -1352,17 +1296,13 @@ Function InitLoadingScreens(file$)
 				Case "bottom", "down"
 					ls\aligny = 1
 			End Select 			
-			
 		EndIf
 	Wend
 	
 	CloseFile f
 End Function
 
-
-
 Function DrawLoading(percent%, shortloading=False)
-	
 	Local x%, y%
 	
 	If percent = 0 Then
@@ -1380,14 +1320,8 @@ Function DrawLoading(percent%, shortloading=False)
 	
 	firstloop = True
 	Repeat 
-		
-		;Color 0,0,0
-		;Rect 0,0,GraphicWidth,GraphicHeight,True
-		;Color 255, 255, 255
 		ClsColor 0,0,0
 		Cls
-		
-		;Cls(True,False)
 		
 		If percent > 20 Then
 			UpdateMusic()
@@ -1431,7 +1365,6 @@ Function DrawLoading(percent%, shortloading=False)
 		Next
 		
 		If SelectedLoadingScreen\title = "CWM" Then
-			
 			If Not shortloading Then 
 				If firstloop Then 
 					If percent = 0 Then
@@ -1490,7 +1423,7 @@ Function DrawLoading(percent%, shortloading=False)
 			
 			strtemp$ = SelectedLoadingScreen\txt[0]
 			temp = Int(Len(SelectedLoadingScreen\txt[0])-Rand(5))
-			For i = 0 To Rand(10,15);temp
+			For i = 0 To Rand(10,15)
 				strtemp$ = Replace(SelectedLoadingScreen\txt[0],Mid(SelectedLoadingScreen\txt[0],Rand(1,Len(strtemp)-1),1),Chr(Rand(130,250)))
 			Next		
 			AASetFont Font1
@@ -1524,51 +1457,7 @@ Function DrawLoading(percent%, shortloading=False)
 			FlushMouse()
 		EndIf
 		
-		If BorderlessWindowed Then
-			If (RealGraphicWidth<>GraphicWidth) Lor (RealGraphicHeight<>GraphicHeight) Then
-				SetBuffer TextureBuffer(fresize_texture)
-				ClsColor 0,0,0 : Cls
-				CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-				SetBuffer BackBuffer()
-				ClsColor 0,0,0 : Cls
-				ScaleRender(0,0,2048.0 / Float(GraphicWidth) * AspectRatioRatio, 2048.0 / Float(GraphicWidth) * AspectRatioRatio)
-				;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
-				;everyone uses landscape so it's probably a non-issue
-			EndIf
-		EndIf
-		
-		;not by any means a perfect solution
-		;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-		If ScreenGamma>=1.0 Then
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,3
-			EntityAlpha fresize_image,ScreenGamma-1.0
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-		ElseIf ScreenGamma<1.0 Then ;todo: maybe optimize this if it's too slow, alternatively give players the option to disable gamma
-			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
-			EntityBlend fresize_image,1
-			ClsColor 0,0,0 : Cls
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			EntityFX fresize_image,1+32
-			EntityBlend fresize_image,2
-			EntityAlpha fresize_image,1.0
-			SetBuffer TextureBuffer(fresize_texture2)
-			ClsColor 255*ScreenGamma,255*ScreenGamma,255*ScreenGamma
-			Cls
-			SetBuffer BackBuffer()
-			ScaleRender(-1.0/Float(RealGraphicWidth),1.0/Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth),2048.0 / Float(RealGraphicWidth))
-			SetBuffer(TextureBuffer(fresize_texture2))
-			ClsColor 0,0,0
-			Cls
-			SetBuffer(BackBuffer())
-		EndIf
-		EntityFX fresize_image,1
-		EntityBlend fresize_image,1
-		EntityAlpha fresize_image,1.0
+		UpdateScreenGamma()
 		
 		Flip False
 		
@@ -1577,8 +1466,6 @@ Function DrawLoading(percent%, shortloading=False)
 		
 	Until (GetKey()<>0 Lor MouseHit(1))
 End Function
-
-
 
 Function rInput$(aString$)
 	Local value% = GetKey()
@@ -1596,14 +1483,12 @@ Function rInput$(aString$)
 	Else
 		aString$ = aString$ + Chr(value)
 		Return aString$
-	End If
+	EndIf
 End Function
 
 Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
-	;TextBox(x,y,width,height,Txt$)
 	Color (255, 255, 255)
 	DrawTiledImageRect(MenuWhite, (x Mod 256), (y Mod 256), 512, 512, x, y, width, height)
-	;Rect(x, y, width, height)
 	Color (0, 0, 0)
 	
 	Local MouseOnBox% = False
@@ -1662,32 +1547,11 @@ Function DrawButton%(x%, y%, width%, height%, txt$, bigfont% = True, waitForMous
 	Return clicked
 End Function
 
-Function DrawButton2%(x%, y%, width%, height%, txt$, bigfont% = True)
-	Local clicked% = False
-	
-	DrawFrame (x, y, width, height)
-	Local hit% = MouseHit(1)
-	If MouseOn(x, y, width, height) Then
-		Color(30, 30, 30)
-		If hit Then clicked = True : PlaySound_Strict(ButtonSFX)
-		Rect(x + 4, y + 4, width - 8, height - 8)	
-	Else
-		Color(0, 0, 0)
-	EndIf
-	
-	Color (255, 255, 255)
-	If bigfont Then SetFont Font2 Else SetFont Font1
-	Text(x + width / 2, y + height / 2, txt, True, True)
-	
-	Return clicked
-End Function
-
 Function DrawTick%(x%, y%, selected%, locked% = False)
 	Local width% = 20 * MenuScale, height% = 20 * MenuScale
 	
 	Color (255, 255, 255)
 	DrawTiledImageRect(MenuWhite, (x Mod 256), (y Mod 256), 512, 512, x, y, width, height)
-	;Rect(x, y, width, height)
 	
 	Local Highlight% = MouseOn(x, y, width, height) And (Not locked)
 	
@@ -1696,7 +1560,7 @@ Function DrawTick%(x%, y%, selected%, locked% = False)
 		If MouseHit1 Then selected = (Not selected) : PlaySound_Strict (ButtonSFX)
 	Else
 		Color(0, 0, 0)		
-	End If
+	EndIf
 	
 	Rect(x + 2, y + 2, width - 4, height - 4)
 	
@@ -1707,7 +1571,6 @@ Function DrawTick%(x%, y%, selected%, locked% = False)
 			Color 200,200,200
 		EndIf
 		DrawTiledImageRect(MenuWhite, (x Mod 256), (y Mod 256), 512, 512, x + 4, y + 4, width - 8, height - 8)
-		;Rect(x + 4, y + 4, width - 8, height - 8)
 	EndIf
 	
 	Color 255, 255, 255
@@ -1733,11 +1596,7 @@ Function SlideBar#(x%, y%, width%, value#)
 	AAText (x + width + 38 * MenuScale, y+4*MenuScale, "HIGH")	
 	
 	Return value
-	
 End Function
-
-
-
 
 Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 	;Display A$ starting at X,Y - no wider than W And no taller than H (all in pixels).
@@ -1755,6 +1614,7 @@ Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 		Local temp$ = Left(A$, space)
 		Local trimmed$ = Trim(temp) ;we might ignore a final space 
 		Local extra = 0 ;we haven't ignored it yet
+		
 		;ignore final space If doing so would make a word fit at End of Line:
 		If (AAStringWidth (b$ + temp$) > W) And (AAStringWidth (b$ + trimmed$) <= W) Then
 			temp = trimmed
@@ -1767,14 +1627,12 @@ Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 			Else
 				AAText(X, LinesShown * Height + Y, b)
 			EndIf			
-			
 			LinesShown = LinesShown + 1
 			b$=""
 		Else ;append it To b$ (which will eventually be printed) And remove it from A$
 			b$ = b$ + temp$
 			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
 		EndIf
-		
 		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
 	Wend
 	
@@ -1783,55 +1641,6 @@ Function RowText(A$, X, Y, W, H, align% = 0, Leading#=1)
 			AAText(X + W / 2 - (AAStringWidth(b) / 2), LinesShown * Height + Y, b) ;Print any remaining Text If it'll fit vertically
 		Else
 			AAText(X, LinesShown * Height + Y, b) ;Print any remaining Text If it'll fit vertically
-		EndIf
-	EndIf
-	
-End Function
-
-Function RowText2(A$, X, Y, W, H, align% = 0, Leading#=1)
-	;Display A$ starting at X,Y - no wider than W And no taller than H (all in pixels).
-	;Leading is optional extra vertical spacing in pixels
-	
-	If H<1 Then H=2048
-	
-	Local LinesShown = 0
-	Local Height = StringHeight(A$) + Leading
-	Local b$
-	
-	While Len(A) > 0
-		Local space = Instr(A$, " ")
-		If space = 0 Then space = Len(A$)
-		Local temp$ = Left(A$, space)
-		Local trimmed$ = Trim(temp) ;we might ignore a final space 
-		Local extra = 0 ;we haven't ignored it yet
-		;ignore final space If doing so would make a word fit at End of Line:
-		If (StringWidth (b$ + temp$) > W) And (StringWidth (b$ + trimmed$) <= W) Then
-			temp = trimmed
-			extra = 1
-		EndIf
-		
-		If StringWidth (b$ + temp$) > W Then ;too big, so Print what will fit
-			If align Then
-				Text(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b)
-			Else
-				Text(X, LinesShown * Height + Y, b)
-			EndIf
-			
-			LinesShown = LinesShown + 1
-			b$=""
-		Else ;append it To b$ (which will eventually be printed) And remove it from A$
-			b$ = b$ + temp$
-			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
-		EndIf
-		
-		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
-	Wend
-	
-	If (b$ <> "") And((LinesShown + 1) <= H) Then
-		If align Then
-			Text(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b) ;Print any remaining Text If it'll fit vertically
-		Else
-			Text(X, LinesShown * Height + Y, b) ;Print any remaining Text If it'll fit vertically
 		EndIf
 	EndIf
 	
@@ -1853,6 +1662,7 @@ Function GetLineAmount(A$, W, H, Leading#=1)
 		Local temp$ = Left(A$, space)
 		Local trimmed$ = Trim(temp) ;we might ignore a final space 
 		Local extra = 0 ;we haven't ignored it yet
+		
 		;ignore final space If doing so would make a word fit at End of Line:
 		If (AAStringWidth (b$ + temp$) > W) And (AAStringWidth (b$ + trimmed$) <= W) Then
 			temp = trimmed
@@ -1860,52 +1670,12 @@ Function GetLineAmount(A$, W, H, Leading#=1)
 		EndIf
 		
 		If AAStringWidth (b$ + temp$) > W Then ;too big, so Print what will fit
-			
 			LinesShown = LinesShown + 1
 			b$=""
 		Else ;append it To b$ (which will eventually be printed) And remove it from A$
 			b$ = b$ + temp$
 			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
 		EndIf
-		
-		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
-	Wend
-	
-	Return LinesShown+1
-	
-End Function
-
-Function GetLineAmount2(A$, W, H, Leading#=1)
-	;Display A$ starting at X,Y - no wider than W And no taller than H (all in pixels).
-	;Leading is optional extra vertical spacing in pixels
-	
-	If H<1 Then H=2048
-	
-	Local LinesShown = 0
-	Local Height = StringHeight(A$) + Leading
-	Local b$
-	
-	While Len(A) > 0
-		Local space = Instr(A$, " ")
-		If space = 0 Then space = Len(A$)
-		Local temp$ = Left(A$, space)
-		Local trimmed$ = Trim(temp) ;we might ignore a final space 
-		Local extra = 0 ;we haven't ignored it yet
-		;ignore final space If doing so would make a word fit at End of Line:
-		If (StringWidth (b$ + temp$) > W) And (StringWidth (b$ + trimmed$) <= W) Then
-			temp = trimmed
-			extra = 1
-		EndIf
-		
-		If StringWidth (b$ + temp$) > W Then ;too big, so Print what will fit
-			
-			LinesShown = LinesShown + 1
-			b$=""
-		Else ;append it To b$ (which will eventually be printed) And remove it from A$
-			b$ = b$ + temp$
-			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
-		EndIf
-		
 		If ((LinesShown + 1) * Height) > H Then Exit ;the Next Line would be too tall, so leave
 	Wend
 	
@@ -1917,42 +1687,30 @@ Function LimitText%(txt$, x%, y%, width%, usingAA%=True)
 	Local TextLength%
 	Local UnFitting%
 	Local LetterWidth%
+	
 	If usingAA Then
 		If txt = "" Lor width = 0 Then Return 0
 		TextLength = AAStringWidth(txt)
 		UnFitting = TextLength - width
-		If UnFitting <= 0 Then ;mahtuu
+		If UnFitting <= 0 Then
 			AAText(x, y, txt)
-		Else ;ei mahdu
+		Else
 			LetterWidth = TextLength / Len(txt)
 			
 			AAText(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
+		EndIf
 	Else
 		If txt = "" Lor width = 0 Then Return 0
 		TextLength = StringWidth(txt)
 		UnFitting = TextLength - width
-		If UnFitting <= 0 Then ;mahtuu
+		If UnFitting <= 0 Then
 			Text(x, y, txt)
-		Else ;ei mahdu
+		Else
 			LetterWidth = TextLength / Len(txt)
 			
 			Text(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
+		EndIf
 	EndIf
-End Function
-
-Function DrawTooltip(message$)
-	Local scale# = GraphicHeight/768.0
-	
-	Local width = (AAStringWidth(message$))+20*MenuScale
-	
-	Color 25,25,25
-	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,True)
-	Color 150,150,150
-	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,False)
-	AASetFont Font1
-	AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(12*MenuScale), message$, True, True)
 End Function
 
 Global QuickLoadPercent% = -1
@@ -2137,7 +1895,6 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			DrawImage Menu_TestIMG,x+(width/2),y+100*MenuScale+(((AAStringHeight(txt)*lines)+(10+lines)*MenuScale)+(AAStringHeight(txt2)*lines2)+(10+lines2)*MenuScale)
 		EndIf
 	EndIf
-	
 End Function
 
 Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
@@ -2151,6 +1908,7 @@ Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
 	Color 255,255,255
 	
 	Local txt$[6]
+	
 	If Right(mapname,6)="cbmap2" Then
 		txt[0] = Left(mapname$,Len(mapname$)-7)
 		Local f% = OpenFile("Map Creator\Maps\"+mapname$)
@@ -2208,31 +1966,11 @@ Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
 	AAText(fx,fy+((AAStringHeight(txt[0])*2)+AAStringHeight(txt[2])*lines+5*MenuScale),txt[3])
 	AAText(fx,fy+((AAStringHeight(txt[0])*3)+AAStringHeight(txt[2])*lines+5*MenuScale),txt[4])
 	AAText(fx,fy+((AAStringHeight(txt[0])*4)+AAStringHeight(txt[2])*lines+5*MenuScale),txt[5])
-	
-End Function
-
-Function ChangeMenu_TestIMG(change$)
-	
-	If Menu_TestIMG <> 0 Then FreeImage Menu_TestIMG
-	AmbientLightRoomTex% = CreateTexture(2,2,257)
-	TextureBlend AmbientLightRoomTex,5
-	SetBuffer(TextureBuffer(AmbientLightRoomTex))
-	ClsColor 0,0,0
-	Cls
-	SetBuffer BackBuffer()
-	Menu_TestIMG = Create3DIcon(200,200,"GFX\map\room3z3_opt.rmesh",0,-0.75,1,0,0,0,menuroomscale#,menuroomscale#,menuroomscale#,True)
-	ScaleImage Menu_TestIMG,MenuScale,MenuScale
-	MaskImage Menu_TestIMG,255,0,255
-	FreeTexture AmbientLightRoomTex : AmbientLightRoomTex = 0
-	
-	CurrMenu_TestIMG = change$
-	
 End Function
 
 Global OnSliderID% = 0
 
 Function Slider3(x%,y%,width%,value%,ID%,val1$,val2$,val3$)
-	
 	If MouseDown1 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
@@ -2280,70 +2018,9 @@ Function Slider3(x%,y%,width%,value%,ID%,val1$,val2$,val3$)
 	EndIf
 	
 	Return value
-	
-End Function
-
-Function Slider4(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$)
-	
-	If MouseDown1 Then
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
-			OnSliderID = ID
-		EndIf
-	EndIf
-	
-	Color 200,200,200
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) ;1
-	Rect(x+(width*(1.0/3.0))+(10.0/3.0),y-8,4,14,True) ;2
-	Rect(x+(width*(2.0/3.0))+(20.0/3.0),y-8,4,14,True) ;3
-	Rect(x+width+10,y-8,4,14,True) ;4
-	
-	If ID = OnSliderID
-		If (ScaledMouseX() <= x+8)
-			value = 0
-		ElseIf (ScaledMouseX() >= x+width*(1.0/3.0)) And (ScaledMouseX() <= x+width*(1.0/3.0)+8)
-			value = 1
-		ElseIf (ScaledMouseX() >= x+width*(2.0/3.0)) And (ScaledMouseX() <= x+width*(2.0/3.0)+8)
-			value = 2
-		ElseIf (ScaledMouseX() >= x+width)
-			value = 3
-		EndIf
-		Color 0,255,0
-		Rect(x,y,width+14,10,True)
-	Else
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
-			Color 0,200,0
-			Rect(x,y,width+14,10,False)
-		EndIf
-	EndIf
-	
-	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
-	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+width*(1.0/3.0)+2,y-8)
-	ElseIf value = 2
-		DrawImage(BlinkMeterIMG,x+width*(2.0/3.0)+4,y-8)
-	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
-	EndIf
-	
-	Color 170,170,170
-	If value = 0
-		AAText(x+2,y+10+MenuScale,val1,True)
-	ElseIf value = 1
-		AAText(x+width*(1.0/3.0)+2+(10.0/3.0),y+10+MenuScale,val2,True)
-	ElseIf value = 2
-		AAText(x+width*(2.0/3.0)+2+((10.0/3.0)*2),y+10+MenuScale,val3,True)
-	Else
-		AAText(x+width+12,y+10+MenuScale,val4,True)
-	EndIf
-	
-	Return value
-	
 End Function
 
 Function Slider5(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$)
-	
 	If MouseDown1 Then
 		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
 			OnSliderID = ID
@@ -2352,11 +2029,11 @@ Function Slider5(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$)
 	
 	Color 200,200,200
 	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) ;1
-	Rect(x+(width/4)+2.5,y-8,4,14,True) ;2
-	Rect(x+(width/2)+5,y-8,4,14,True) ;3
-	Rect(x+(width*0.75)+7.5,y-8,4,14,True) ;4
-	Rect(x+width+10,y-8,4,14,True) ;5
+	Rect(x,y-8,4,14,True)
+	Rect(x+(width/4)+2.5,y-8,4,14,True)
+	Rect(x+(width/2)+5,y-8,4,14,True)
+	Rect(x+(width*0.75)+7.5,y-8,4,14,True)
+	Rect(x+width+10,y-8,4,14,True)
 	
 	If ID = OnSliderID
 		If (ScaledMouseX() <= x+8)
@@ -2405,197 +2082,7 @@ Function Slider5(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$)
 	EndIf
 	
 	Return value
-	
 End Function
-
-Function Slider7(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$,val5$,val6$,val7$)
-	
-	If MouseDown1 Then
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
-			OnSliderID = ID
-		EndIf
-	EndIf
-	
-	Color 200,200,200
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) ;1
-	Rect(x+(width*(1.0/6.0))+(10.0/6.0),y-8,4,14,True) ;2
-	Rect(x+(width*(2.0/6.0))+(20.0/6.0),y-8,4,14,True) ;3
-	Rect(x+(width*(3.0/6.0))+(30.0/6.0),y-8,4,14,True) ;4
-	Rect(x+(width*(4.0/6.0))+(40.0/6.0),y-8,4,14,True) ;5
-	Rect(x+(width*(5.0/6.0))+(50.0/6.0),y-8,4,14,True) ;6
-	Rect(x+width+10,y-8,4,14,True) ;7
-	
-	If ID = OnSliderID
-		If (ScaledMouseX() <= x+8)
-			value = 0
-		ElseIf (ScaledMouseX() >= x+(width*(1.0/6.0))) And (ScaledMouseX() <= x+(width*(1.0/6.0))+8)
-			value = 1
-		ElseIf (ScaledMouseX() >= x+(width*(2.0/6.0))) And (ScaledMouseX() <= x+(width*(2.0/6.0))+8)
-			value = 2
-		ElseIf (ScaledMouseX() >= x+(width*(3.0/6.0))) And (ScaledMouseX() <= x+(width*(3.0/6.0))+8)
-			value = 3
-		ElseIf (ScaledMouseX() >= x+(width*(4.0/6.0))) And (ScaledMouseX() <= x+(width*(4.0/6.0))+8)
-			value = 4
-		ElseIf (ScaledMouseX() >= x+(width*(5.0/6.0))) And (ScaledMouseX() <= x+(width*(5.0/6.0))+8)
-			value = 5
-		ElseIf (ScaledMouseX() >= x+width)
-			value = 6
-		EndIf
-		Color 0,255,0
-		Rect(x,y,width+14,10,True)
-	Else
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
-			Color 0,200,0
-			Rect(x,y,width+14,10,False)
-		EndIf
-	EndIf
-	
-	If value = 0
-		DrawImage(BlinkMeterIMG,x,y-8)
-	ElseIf value = 1
-		DrawImage(BlinkMeterIMG,x+(width*(1.0/6.0))+1,y-8)
-	ElseIf value = 2
-		DrawImage(BlinkMeterIMG,x+(width*(2.0/6.0))+2,y-8)
-	ElseIf value = 3
-		DrawImage(BlinkMeterIMG,x+(width*(3.0/6.0))+3,y-8)
-	ElseIf value = 4
-		DrawImage(BlinkMeterIMG,x+(width*(4.0/6.0))+4,y-8)
-	ElseIf value = 5
-		DrawImage(BlinkMeterIMG,x+(width*(5.0/6.0))+5,y-8)
-	Else
-		DrawImage(BlinkMeterIMG,x+width+6,y-8)
-	EndIf
-	
-	Color 170,170,170
-	If value = 0
-		AAText(x+2,y+10+MenuScale,val1,True)
-	ElseIf value = 1
-		AAText(x+(width*(1.0/6.0))+2+(10.0/6.0),y+10+MenuScale,val2,True)
-	ElseIf value = 2
-		AAText(x+(width*(2.0/6.0))+2+((10.0/6.0)*2),y+10+MenuScale,val3,True)
-	ElseIf value = 3
-		AAText(x+(width*(3.0/6.0))+2+((10.0/6.0)*3),y+10+MenuScale,val4,True)
-	ElseIf value = 4
-		AAText(x+(width*(4.0/6.0))+2+((10.0/6.0)*4),y+10+MenuScale,val5,True)
-	ElseIf value = 5
-		AAText(x+(width*(5.0/6.0))+2+((10.0/6.0)*5),y+10+MenuScale,val6,True)
-	Else
-		AAText(x+width+12,y+10+MenuScale,val7,True)
-	EndIf
-	
-	Return value
-	
-End Function
-
-Global OnBar%
-Global ScrollBarY# = 0.0
-Global ScrollMenuHeight# = 0.0
-
-Function DrawScrollBar#(x, y, width, height, barx, bary, barwidth, barheight, bar#, dir = 0)
-	;0 = vaakasuuntainen, 1 = pystysuuntainen
-	
-	Local MouseSpeedX = MouseXSpeed()
-	Local MouseSpeedY = MouseYSpeed()
-	
-	Color(0, 0, 0)
-	;Rect(x, y, width, height)
-	Button(barx, bary, barwidth, barheight, "")
-	
-	If dir = 0 Then ;vaakasuunnassa
-		If height > 10 Then
-			Color 250,250,250
-			Rect(barx + barwidth / 2, bary + 5*MenuScale, 2*MenuScale, barheight - 10)
-			Rect(barx + barwidth / 2 - 3*MenuScale, bary + 5*MenuScale, 2*MenuScale, barheight - 10)
-			Rect(barx + barwidth / 2 + 3*MenuScale, bary + 5*MenuScale, 2*MenuScale, barheight - 10)
-		EndIf
-	Else ;pystysuunnassa
-		If width > 10 Then
-			Color 250,250,250
-			Rect(barx + 4*MenuScale, bary + barheight / 2, barwidth - 10*MenuScale, 2*MenuScale)
-			Rect(barx + 4*MenuScale, bary + barheight / 2 - 3*MenuScale, barwidth - 10*MenuScale, 2*MenuScale)
-			Rect(barx + 4*MenuScale, bary + barheight / 2 + 3*MenuScale, barwidth - 10*MenuScale, 2*MenuScale)
-		EndIf
-	EndIf
-	
-	If MouseX()>barx And MouseX()<barx+barwidth
-		If MouseY()>bary And MouseY()<bary+barheight
-			OnBar = True
-		Else
-			If (Not MouseDown1)
-				OnBar = False
-			EndIf
-		EndIf
-	Else
-		If (Not MouseDown1)
-			OnBar = False
-		EndIf
-	EndIf
-	
-	If MouseDown1
-		If OnBar
-			If dir = 0
-				Return Min(Max(bar + MouseSpeedX / Float(width - barwidth), 0), 1)
-			Else
-				Return Min(Max(bar + MouseSpeedY / Float(height - barheight), 0), 1)
-			EndIf
-		EndIf
-	EndIf
-	
-	Return bar
-	
-End Function
-
-Function Button%(x,y,width,height,txt$, disabled%=False)
-	Local Pushed = False
-	
-	Color 50, 50, 50
-	If Not disabled Then 
-		If MouseX() > x And MouseX() < x+width Then
-			If MouseY() > y And MouseY() < y+height Then
-				If MouseDown1 Then
-					Pushed = True
-					Color 50*0.6, 50*0.6, 50*0.6
-				Else
-					Color Min(50*1.2,255),Min(50*1.2,255),Min(50*1.2,255)
-				EndIf
-			EndIf
-		EndIf
-	EndIf
-	
-	If Pushed Then 
-		Rect x,y,width,height
-		Color 133,130,125
-		Rect x+1*MenuScale,y+1*MenuScale,width-1*MenuScale,height-1*MenuScale,False	
-		Color 10,10,10
-		Rect x,y,width,height,False
-		Color 250,250,250
-		Line x,y+height-1*MenuScale,x+width-1*MenuScale,y+height-1*MenuScale
-		Line x+width-1*MenuScale,y,x+width-1*MenuScale,y+height-1*MenuScale
-	Else
-		Rect x,y,width,height
-		Color 133,130,125
-		Rect x,y,width-1*MenuScale,height-1*MenuScale,False	
-		Color 250,250,250
-		Rect x,y,width,height,False
-		Color 10,10,10
-		Line x,y+height-1,x+width-1,y+height-1
-		Line x+width-1,y,x+width-1,y+height-1		
-	EndIf
-	
-	Color 255,255,255
-	If disabled Then Color 70,70,70
-	Text x+width/2, y+height/2-1*MenuScale, txt, True, True
-	
-	Color 0,0,0
-	
-	If Pushed And MouseHit1 Then PlaySound_Strict ButtonSFX : Return True
-End Function
-
-
-
-
-
 
 ;~IDEal Editor Parameters:
 ;~C#Blitz3D
