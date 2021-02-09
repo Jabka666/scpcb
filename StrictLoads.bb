@@ -146,9 +146,11 @@ Function FreeSound_Strict(sndHandle%)
 End Function
 
 Type Stream
-	Field sfx%
 	Field chn%
 End Type
+
+Const Mode% = 2
+Const TwoD% = 8192
 
 Function StreamSound_Strict(file$,volume#=1.0,custommode=Mode)
 	If FileType(file$)<>1
@@ -160,17 +162,8 @@ Function StreamSound_Strict(file$,volume#=1.0,custommode=Mode)
 	EndIf
 	
 	Local st.Stream = New Stream
-	st\sfx = FSOUND_Stream_Open(file$,custommode,0)
 	
-	If st\sfx = 0
-		CreateConsoleMsg("Failed to stream Sound (returned 0): " + Chr(34) + file$ + Chr(34))
-		If ConsoleOpening
-			ConsoleOpen = True
-		EndIf
-		Return 0
-	EndIf
-	
-	st\chn = FSOUND_Stream_Play(FreeChannel,st\sfx)
+	st\chn = PlayMusic(file, custommode + TwoD)
 	
 	If st\chn = -1
 		CreateConsoleMsg("Failed to stream Sound (returned -1): " + Chr(34) + file$ + Chr(34))
@@ -179,9 +172,7 @@ Function StreamSound_Strict(file$,volume#=1.0,custommode=Mode)
 		EndIf
 		Return -1
 	EndIf
-	
-	FSOUND_SetVolume(st\chn,volume*255)
-	FSOUND_SetPaused(st\chn,False)
+	ChannelVolume(st\chn, volume * 1.0)
 	
 	Return Handle(st)
 End Function
@@ -193,14 +184,12 @@ Function StopStream_Strict(streamHandle%)
 		CreateConsoleMsg("Failed to stop stream Sound: Unknown Stream")
 		Return
 	EndIf
-	If st\chn=0 Or st\chn=-1
+	If st\chn=0 Lor st\chn=-1
 		CreateConsoleMsg("Failed to stop stream Sound: Return value "+st\chn)
 		Return
 	EndIf
 	
-	FSOUND_StopSound(st\chn)
-	FSOUND_Stream_Stop(st\sfx)
-	FSOUND_Stream_Close(st\sfx)
+	StopChannel(st\chn)
 	Delete st
 	
 End Function
@@ -212,13 +201,11 @@ Function SetStreamVolume_Strict(streamHandle%,volume#)
 		CreateConsoleMsg("Failed to set stream Sound volume: Unknown Stream")
 		Return
 	EndIf
-	If st\chn=0 Or st\chn=-1
+	If st\chn=0 Lor st\chn=-1
 		CreateConsoleMsg("Failed to set stream Sound volume: Return value "+st\chn)
 		Return
 	EndIf
-	
-	FSOUND_SetVolume(st\chn,volume*255.0)
-	FSOUND_SetPaused(st\chn,False)
+	ChannelVolume(st\chn, volume * 1.0)
 	
 End Function
 
@@ -229,12 +216,16 @@ Function SetStreamPaused_Strict(streamHandle%,paused%)
 		CreateConsoleMsg("Failed to pause/unpause stream Sound: Unknown Stream")
 		Return
 	EndIf
-	If st\chn=0 Or st\chn=-1
+	If st\chn=0 Lor st\chn=-1
 		CreateConsoleMsg("Failed to pause/unpause stream Sound: Return value "+st\chn)
 		Return
 	EndIf
 	
-	FSOUND_SetPaused(st\chn,paused)
+	If paused Then
+		PauseChannel(st\chn)
+	Else
+		ResumeChannel(st\chn)
+	EndIf
 	
 End Function
 
@@ -245,12 +236,11 @@ Function IsStreamPlaying_Strict(streamHandle%)
 		CreateConsoleMsg("Failed to find stream Sound: Unknown Stream")
 		Return
 	EndIf
-	If st\chn=0 Or st\chn=-1
+	If st\chn=0 Lor st\chn=-1
 		CreateConsoleMsg("Failed to find stream Sound: Return value "+st\chn)
 		Return
 	EndIf
-	
-	Return FSOUND_IsPlaying(st\chn)
+	Return(ChannelPlaying(st\chn))
 	
 End Function
 
@@ -261,17 +251,11 @@ Function SetStreamPan_Strict(streamHandle%,pan#)
 		CreateConsoleMsg("Failed to find stream Sound: Unknown Stream")
 		Return
 	EndIf
-	If st\chn=0 Or st\chn=-1
+	If st\chn=0 Lor st\chn=-1
 		CreateConsoleMsg("Failed to find stream Sound: Return value "+st\chn)
 		Return
 	EndIf
-	
-	;-1 = Left = 0
-	;0 = Middle = 127.5 (127)
-	;1 = Right = 255
-	Local fmod_pan% = 0
-	fmod_pan% = Int((255.0/2.0)+((255.0/2.0)*pan#))
-	FSOUND_SetPan(st\chn,fmod_pan%)
+	ChannelPan(st\chn, pan)
 	
 End Function
 
@@ -328,9 +312,9 @@ Function LoadBrush_Strict(file$,flags,u#=1.0,v#=1.0)
 	Return tmp 
 End Function 
 
-Function LoadFont_Strict(file$="Tahoma", height=13, bold=0, italic=0, underline=0)
+Function LoadFont_Strict(file$="Tahoma", height=13, IgnoreScaling% = False)
 	If FileType(file$)<>1 Then RuntimeError "Font " + file$ + " not found."
-	tmp = LoadFont(file, height, bold, italic, underline)  
+	tmp = LoadFont(file, (Int(height * (GraphicHeight / 1024.0))) * (Not IgnoreScaling) + IgnoreScaling * height)
 	If tmp = 0 Then RuntimeError "Failed to load Font: " + file$ 
 	Return tmp
 End Function
@@ -346,5 +330,5 @@ End Function
 
 
 ;~IDEal Editor Parameters:
-;~F#F#34#3B
+;~F#F
 ;~C#Blitz3D

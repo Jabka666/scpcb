@@ -7,7 +7,7 @@
 
 
 Type Template
-	Field sub_template.Template[7]                                  ;Sub templates
+	Field sub_template.Template[8]                                  ;Sub templates
 	Field emitter_blend                                             ;blendmode of emitter entity
 	Field interval, particles_per_interval                          ;particle interval
 	Field max_particles                                             ;max particles
@@ -313,7 +313,7 @@ For e.Emitter = Each Emitter
 		e\cnt_loop = (e\cnt_loop + 1) Mod e\tmp\interval
 		If e\cnt_loop = 0 And e\del = False Then
 			For i = 1 To e\tmp\particles_per_interval
-				If (e\tmp\max_particles > -1 And cnt_particles < e\tmp\max_particles) Or e\tmp\max_particles = -1 Then
+				If (e\tmp\max_particles > -1 And cnt_particles < e\tmp\max_particles) Lor e\tmp\max_particles = -1 Then
 					p.Particle = New Particle
 					p\emitter = e
 					p\max_time = Rand(e\tmp\min_time, e\tmp\max_time)
@@ -417,6 +417,4 @@ End Function
 
 
 ;~IDEal Editor Parameters:
-;~F#2F#35#42#55#5E#63#68#6D#72#78#7D#83#8C#96#A0#A6#AC#B1#B9#BF
-;~F#C4#C9#D3#D8#DE#E4#EE#106#117#11D
 ;~C#Blitz3D

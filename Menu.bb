@@ -202,14 +202,7 @@ Function UpdateMainMenu()
 				Case 3
 					txt = "QUIT"
 					If temp Then
-						;DeInitExt
-						;alDestroy()
-						;FMOD_Pause(MusicCHN)
-						;FMOD_CloseStream(CurrMusicStream)
-						;FMOD_Close()
-						;FMOD_StopStream(CurrMusicStream)
-						FSOUND_Stream_Stop(CurrMusicStream)
-						;FSOUND_Close()
+						StopChannel(CurrMusicStream)
 						End
 					EndIf
 			End Select
@@ -658,7 +651,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Particle amount:")
 					ParticleAmount = Slider3(x+310*MenuScale,y+6*MenuScale,150*MenuScale,ParticleAmount,2,"MINIMAL","REDUCED","FULL")
-					If (MouseOn(x + 310 * MenuScale, y-6*MenuScale, 150*MenuScale+14, 20) And OnSliderID=0) Or OnSliderID=2
+					If (MouseOn(x + 310 * MenuScale, y-6*MenuScale, 150*MenuScale+14, 20) And OnSliderID=0) Lor OnSliderID=2
 						DrawOptionsTooltip(tx,ty,tw,th,"particleamount",ParticleAmount)
 					EndIf
 					
@@ -680,7 +673,7 @@ Function UpdateMainMenu()
 							TextureFloat# = -0.8
 					End Select
 					TextureLodBias TextureFloat
-					If (MouseOn(x+310*MenuScale,y-6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Or OnSliderID=3
+					If (MouseOn(x+310*MenuScale,y-6*MenuScale,150*MenuScale+14,20) And OnSliderID=0) Lor OnSliderID=3
 						DrawOptionsTooltip(tx,ty,tw,th+100*MenuScale,"texquality")
 					EndIf
 					
@@ -1003,12 +996,12 @@ Function UpdateMainMenu()
 							;Next
 						EndIf
 						InitAAFont()
-						Font1% = AALoadFont("GFX\font\cour\Courier New.ttf", Int(18 * (GraphicHeight / 1024.0)), 0,0,0)
-						Font2% = AALoadFont("GFX\font\courbd\Courier New.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
-						Font3% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * (GraphicHeight / 1024.0)), 0,0,0)
-						Font4% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(60 * (GraphicHeight / 1024.0)), 0,0,0)
-						Font5% = AALoadFont("GFX\font\Journal\Journal.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
-						ConsoleFont% = AALoadFont("Blitz", Int(22 * (GraphicHeight / 1024.0)), 0,0,0,1)
+						Font1% = AALoadFont("GFX\font\cour\Courier New.ttf", 16)
+						Font2% = AALoadFont("GFX\font\cour\Courier New.ttf", 52)
+						Font3% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", 20)
+						Font4% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", 60)
+						Font5% = AALoadFont("GFX\font\Journal\Journal.ttf", 58)
+						ConsoleFont% = AALoadFont("GFX\font\Andale\Andale Mono.ttf", 16)
 						;ReloadAAFont()
 						AATextEnable_Prev% = AATextEnable
 					EndIf
@@ -1133,7 +1126,7 @@ Function UpdateLauncher()
 	RealGraphicWidth = GraphicWidth
 	RealGraphicHeight = GraphicHeight
 	
-	Font1 = LoadFont_Strict("GFX\font\cour\Courier New.ttf", 18, 0,0,0)
+	Font1 = LoadFont_Strict("GFX\font\cour\Courier New.ttf", 16, True)
 	SetFont Font1
 	MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 	MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")	
@@ -1162,7 +1155,6 @@ Function UpdateLauncher()
 	Next
 	
 	BlinkMeterIMG% = LoadImage_Strict("GFX\blinkmeter.jpg")
-	CheckForUpdates()
 	
 	AppTitle "SCP - Containment Breach Launcher"
 	
@@ -1183,12 +1175,12 @@ Function UpdateLauncher()
 		Local y% = 270 - 65
 		For i = 0 To (GFXModes - 1)
 			Color 0, 0, 0
-			If SelectedGFXMode = i Then Rect(x - 1, y - 1, 100, 20, False)
+			If SelectedGFXMode = i Then Rect(x - 1, y - 5, 100, 20, False)
 			
 			Text(x, y, (GfxModeWidths(i) + "x" + GfxModeHeights(i)))
-			If MouseOn(x - 1, y - 1, 100, 20) Then
+			If MouseOn(x - 1, y - 5, 100, 20) Then
 				Color 100, 100, 100
-				Rect(x - 1, y - 1, 100, 20, False)
+				Rect(x - 1, y - 5, 100, 20, False)
 				If MouseHit1 Then SelectedGFXMode = i
 			EndIf
 			
@@ -1206,12 +1198,12 @@ Function UpdateLauncher()
 		y=y+10
 		For i = 1 To CountGfxDrivers()
 			Color 0, 0, 0
-			If SelectedGFXDriver = i Then Rect(x - 1, y - 1, 290, 20, False)
+			If SelectedGFXDriver = i Then Rect(x - 1, y - 5, 290, 20, False)
 			;text(x, y, bbGfxDriverName(i))
 			LimitText(GfxDriverName(i), x, y, 290, False)
-			If MouseOn(x - 1, y - 1, 290, 20) Then
+			If MouseOn(x - 1, y - 5, 290, 20) Then
 				Color 100, 100, 100
-				Rect(x - 1, y - 1, 290, 20, False)
+				Rect(x - 1, y - 5, 290, 20, False)
 				If MouseHit1 Then SelectedGFXDriver = i
 			EndIf
 			
@@ -1222,7 +1214,7 @@ Function UpdateLauncher()
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
 		lock% = False
 
-		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
+		If BorderlessWindowed Lor (Not Fullscreen) Then lock% = True
 		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
 
@@ -1238,7 +1230,7 @@ Function UpdateLauncher()
 		Text(40 + 430 + 15, 262 - 55 + 35 - 8, "Borderless",False,False)
 		Text(40 + 430 + 15, 262 - 55 + 35 + 12, "windowed mode",False,False)
 
-		If BorderlessWindowed Or (Not Fullscreen)
+		If BorderlessWindowed Lor (Not Fullscreen)
  		   Color 255, 0, 0
  		   Bit16Mode = False
 		Else
@@ -1249,28 +1241,7 @@ Function UpdateLauncher()
 		Color 255, 255, 255
 		Text(40 + 430 + 15, 262 - 55 + 95 + 8, "Use launcher")
 		
-		If (Not BorderlessWindowed)
-			If Fullscreen
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + "," + (16+(16*(Not Bit16Mode)))))
-			Else
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32"))
-			EndIf
-		Else
-			Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32")
-			If GfxModeWidths(SelectedGFXMode)<G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(upscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			ElseIf GfxModeWidths(SelectedGFXMode)>G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(downscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			EndIf
-		EndIf
-		
-		UpdateCheckEnabled = DrawTick(LauncherWidth - 275, LauncherHeight - 50, UpdateCheckEnabled)
-		Color 255,255,255
-		Text LauncherWidth-250,LauncherHeight-70,"Check for"
-		Text LauncherWidth-250,LauncherHeight-50,"updates on"
-		Text LauncherWidth-250,LauncherHeight-30,"launch"
+		Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + "," + (16+(16*(Not Bit16Mode)))))
 		
 		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False, False) Then
 			GraphicWidth = GfxModeWidths(SelectedGFXMode)
@@ -1307,11 +1278,6 @@ Function UpdateLauncher()
 		PutINIValue(OptionFile, "options", "16bit", "false")
 	EndIf
 	PutINIValue(OptionFile, "options", "gfx driver", SelectedGFXDriver)
-	If UpdateCheckEnabled Then
-		PutINIValue(OptionFile, "options", "check for updates", "true")
-	Else
-		PutINIValue(OptionFile, "options", "check for updates", "false")
-	EndIf
 	
 End Function
 
@@ -1559,13 +1525,13 @@ Function DrawLoading(percent%, shortloading=False)
 		EndIf
 		
 		If BorderlessWindowed Then
-			If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
+			If (RealGraphicWidth<>GraphicWidth) Lor (RealGraphicHeight<>GraphicHeight) Then
 				SetBuffer TextureBuffer(fresize_texture)
 				ClsColor 0,0,0 : Cls
 				CopyRect 0,0,GraphicWidth,GraphicHeight,1024-GraphicWidth/2,1024-GraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
 				SetBuffer BackBuffer()
 				ClsColor 0,0,0 : Cls
-				ScaleRender(0,0,2050.0 / Float(GraphicWidth) * AspectRatioRatio, 2050.0 / Float(GraphicWidth) * AspectRatioRatio)
+				ScaleRender(0,0,2048.0 / Float(GraphicWidth) * AspectRatioRatio, 2048.0 / Float(GraphicWidth) * AspectRatioRatio)
 				;might want to replace Float(GraphicWidth) with Max(GraphicWidth,GraphicHeight) if portrait sizes cause issues
 				;everyone uses landscape so it's probably a non-issue
 			EndIf
@@ -1573,7 +1539,7 @@ Function DrawLoading(percent%, shortloading=False)
 		
 		;not by any means a perfect solution
 		;Not even proper gamma correction but it's a nice looking alternative that works in windowed mode
-		If ScreenGamma>1.0 Then
+		If ScreenGamma>=1.0 Then
 			CopyRect 0,0,RealGraphicWidth,RealGraphicHeight,1024-RealGraphicWidth/2,1024-RealGraphicHeight/2,BackBuffer(),TextureBuffer(fresize_texture)
 			EntityBlend fresize_image,1
 			ClsColor 0,0,0 : Cls
@@ -1609,7 +1575,7 @@ Function DrawLoading(percent%, shortloading=False)
 		firstloop = False
 		If percent <> 100 Then Exit
 		
-	Until (GetKey()<>0 Or MouseHit(1))
+	Until (GetKey()<>0 Lor MouseHit(1))
 End Function
 
 
@@ -1623,9 +1589,9 @@ Function rInput$(aString$)
 		If length > 0 Then aString$ = Left(aString, length - 1)
 	EndIf
 	
-	If value = 13 Or value = 0 Then
+	If value = 13 Lor value = 0 Then
 		Return aString$
-	ElseIf value > 0 And value < 7 Or value > 26 And value < 32 Or value = 9
+	ElseIf value > 0 And value < 7 Lor value > 26 And value < 32 Lor value = 9
 		Return aString$
 	Else
 		aString$ = aString$ + Chr(value)
@@ -1675,7 +1641,7 @@ Function DrawButton%(x%, y%, width%, height%, txt$, bigfont% = True, waitForMous
 	DrawFrame (x, y, width, height)
 	If MouseOn(x, y, width, height) Then
 		Color(30, 30, 30)
-		If (MouseHit1 And (Not waitForMouseUp)) Or (MouseUp1 And waitForMouseUp) Then 
+		If (MouseHit1 And (Not waitForMouseUp)) Lor (MouseUp1 And waitForMouseUp) Then 
 			clicked = True
 			PlaySound_Strict(ButtonSFX)
 		EndIf
@@ -1952,7 +1918,7 @@ Function LimitText%(txt$, x%, y%, width%, usingAA%=True)
 	Local UnFitting%
 	Local LetterWidth%
 	If usingAA Then
-		If txt = "" Or width = 0 Then Return 0
+		If txt = "" Lor width = 0 Then Return 0
 		TextLength = AAStringWidth(txt)
 		UnFitting = TextLength - width
 		If UnFitting <= 0 Then ;mahtuu
@@ -1963,7 +1929,7 @@ Function LimitText%(txt$, x%, y%, width%, usingAA%=True)
 			AAText(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
 		End If
 	Else
-		If txt = "" Or width = 0 Then Return 0
+		If txt = "" Lor width = 0 Then Return 0
 		TextLength = StringWidth(txt)
 		UnFitting = TextLength - width
 		If UnFitting <= 0 Then ;mahtuu
@@ -2184,7 +2150,7 @@ Function DrawMapCreatorTooltip(x%,y%,width%,height%,mapname$)
 	AASetFont Font1
 	Color 255,255,255
 	
-	Local txt$[5]
+	Local txt$[6]
 	If Right(mapname,6)="cbmap2" Then
 		txt[0] = Left(mapname$,Len(mapname$)-7)
 		Local f% = OpenFile("Map Creator\Maps\"+mapname$)
@@ -2632,6 +2598,4 @@ End Function
 
 
 ;~IDEal Editor Parameters:
-;~F#33#499#4AB#4B5#4E8#5C3#5D6#5F3#5FA#615#629#64A#662#693#6C4#6EA#710#72D#73E#756
-;~F#764#787#79F#7A8#7D9#7ED#821#867#8A9
 ;~C#Blitz3D

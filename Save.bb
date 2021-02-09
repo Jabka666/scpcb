@@ -4,7 +4,7 @@ Function SaveGame(file$)
 	
 	If Not Playable Then Return ;don't save if the player can't move at all
 	
-	If DropSpeed#>0.02*FPSfactor Or DropSpeed#<-0.02*FPSfactor Then Return
+	If DropSpeed#>0.02*FPSfactor Lor DropSpeed#<-0.02*FPSfactor Then Return
 	
 	If KillTimer < 0 Then Return
 	
@@ -127,12 +127,11 @@ Function SaveGame(file$)
 	
 	WriteInt f, MapWidth
 	WriteInt f, MapHeight
-	For lvl = 0 To 0
-		For x = 0 To MapWidth
-			For y = 0 To MapHeight
-				WriteInt f, MapTemp(x, y)
-				WriteByte f, MapFound(x, y)
-			Next
+	
+	For x = 0 To MapWidth
+		For y = 0 To MapHeight
+			WriteInt f, MapTemp(x, y)
+			WriteByte f, MapFound(x, y)
 		Next
 	Next
 	
@@ -248,7 +247,7 @@ Function SaveGame(file$)
 			EndIf
 		Next
 		
-		For i=0 To 10
+		For i=0 To 9
 			If r\Levers[i]<>0 Then
 				If EntityPitch(r\Levers[i],True) > 0 Then ;p??????ll???
 					WriteByte(f,1)
@@ -755,7 +754,7 @@ Function LoadGame(file$)
 			EndIf
 		Next
 		
-		For x=0 To 11
+		For x=0 To 9
 			id = ReadByte(f)
 			If id=2 Then
 				Exit
@@ -780,7 +779,7 @@ Function LoadGame(file$)
 						EndIf
 					Next
 				Next
-				For x=0 To 5
+				For x=0 To 6
 					If r\grid\Meshes[x]<>0 Then
 						FreeEntity r\grid\Meshes[x]
 						r\grid\Meshes[x]=0
@@ -863,15 +862,15 @@ Function LoadGame(file$)
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2
-								If r\angle=90 Or r\angle=270
+								If r\angle=90 Lor r\angle=270
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2C
-								If r\angle=0 Or r\angle=90
+								If r\angle=0 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM3
-								If r\angle=0 Or r\angle=180 Or r\angle=90
+								If r\angle=0 Lor r\angle=180 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Default
@@ -893,15 +892,15 @@ Function LoadGame(file$)
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2
-								If r\angle=0 Or r\angle=180
+								If r\angle=0 Lor r\angle=180
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2C
-								If r\angle=180 Or r\angle=90
+								If r\angle=180 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM3
-								If r\angle=180 Or r\angle=90 Or r\angle=270
+								If r\angle=180 Lor r\angle=90 Lor r\angle=270
 									shouldSpawnDoor = True
 								EndIf
 							Default
@@ -1583,7 +1582,7 @@ Function LoadGameQuick(file$)
 			EndIf
 		Next
 		
-		For x=0 To 11
+		For x=0 To 9
 			id = ReadByte(f)
 			If id=2 Then
 				Exit
@@ -1614,7 +1613,7 @@ Function LoadGameQuick(file$)
 						EndIf
 					Next
 				Next
-				For x=0 To 5
+				For x=0 To 6
 					If r\grid\Meshes[x]<>0 Then
 						FreeEntity r\grid\Meshes[x]
 						r\grid\Meshes[x]=0
@@ -2077,7 +2076,7 @@ Function LoadSavedMaps()
 		DebugLog (CurrentDir()+"Map Creator\Maps\"+file$)
 		If FileType(CurrentDir()+"Map Creator\Maps\"+file$) = 1 Then 
 			If file <> "." And file <> ".." Then
-				If Right(file,6)="cbmap2" Or Right(file,5)="cbmap" Then
+				If Right(file,6)="cbmap2" Lor Right(file,5)="cbmap" Then
 					SavedMapsAmount = SavedMapsAmount + 1
 				EndIf
 			EndIf
@@ -2099,7 +2098,7 @@ Function LoadSavedMaps()
 		DebugLog (CurrentDir()+"Map Creator\Maps\"+file$)
 		If FileType(CurrentDir()+"Map Creator\Maps\"+file$) = 1 Then 
 			If file <> "." And file <> ".." Then
-				If Right(file,6)="cbmap2" Or Right(file,5)="cbmap" Then
+				If Right(file,6)="cbmap2" Lor Right(file,5)="cbmap" Then
 					SavedMaps(i) = file
 					If Right(file,6)="cbmap2" Then
 						Local f = ReadFile("Map Creator\Maps\"+file)
@@ -2291,7 +2290,7 @@ Function LoadMap(file$)
 			If angle<>1 And angle<>3 Then
 				angle = angle + 2
 			EndIf
-			If name = "maintenance tunnel corner" Or name = "maintenance tunnel t-shaped room" Then
+			If name = "maintenance tunnel corner" Lor name = "maintenance tunnel t-shaped room" Then
 				angle = angle + 3
 			EndIf
 			If angle > 3 Then
@@ -2303,19 +2302,19 @@ Function LoadMap(file$)
 			If MTRoom<>Null Then
 				Select name
 					Case "maintenance tunnel endroom"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM1
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM1 + 1
 					Case "maintenance tunnel corridor"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM2
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM2 + 1
 					Case "maintenance tunnel corner"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM2C
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM2C + 1
 					Case "maintenance tunnel t-shaped room"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM3
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM3 + 1
 					Case "maintenance tunnel 4-way room"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4 + 1
 					Case "maintenance tunnel elevator"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4+1
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4 + 2
 					Case "maintenance tunnel generator room"
-						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4+2
+						MTRoom\grid\grid[x+(y*gridsz)]=ROOM4 + 3
 				End Select
 				MTRoom\grid\angles[x+(y*gridsz)]=angle
 				DebugLog "created mtunnel piece "+Chr(34)+name+Chr(34)+" successfully"
@@ -2410,15 +2409,15 @@ Function LoadMap(file$)
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2
-								If r\angle=90 Or r\angle=270
+								If r\angle=90 Lor r\angle=270
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2C
-								If r\angle=0 Or r\angle=90
+								If r\angle=0 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM3
-								If r\angle=0 Or r\angle=180 Or r\angle=90
+								If r\angle=0 Lor r\angle=180 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Default
@@ -2440,15 +2439,15 @@ Function LoadMap(file$)
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2
-								If r\angle=0 Or r\angle=180
+								If r\angle=0 Lor r\angle=180
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM2C
-								If r\angle=180 Or r\angle=90
+								If r\angle=180 Lor r\angle=90
 									shouldSpawnDoor = True
 								EndIf
 							Case ROOM3
-								If r\angle=180 Or r\angle=90 Or r\angle=270
+								If r\angle=180 Lor r\angle=90 Lor r\angle=270
 									shouldSpawnDoor = True
 								EndIf
 							Default

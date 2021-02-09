@@ -508,7 +508,7 @@ Function UpdateItems()
 								ClosestItem = i
 							EndIf
 						EndIf
-					ElseIf ClosestItem = i Or i\dist < EntityDistance(Camera, ClosestItem\collider) Then 
+					ElseIf ClosestItem = i Lor i\dist < EntityDistance(Camera, ClosestItem\collider) Then 
 						If EntityInView(i\model, Camera) Then
 							If EntityVisible(i\collider,Camera) Then
 								ClosestItem = i
@@ -669,10 +669,10 @@ Function PickItem(item.Items)
 						canpickitem = True
 						For z% = 0 To MaxItemAmount - 1
 							If Inventory(z) <> Null Then
-								If Inventory(z)\itemtemplate\tempname="hazmatsuit" Or Inventory(z)\itemtemplate\tempname="hazmatsuit2" Or Inventory(z)\itemtemplate\tempname="hazmatsuit3" Then
+								If Inventory(z)\itemtemplate\tempname="hazmatsuit" Lor Inventory(z)\itemtemplate\tempname="hazmatsuit2" Lor Inventory(z)\itemtemplate\tempname="hazmatsuit3" Then
 									canpickitem% = False
 									Exit
-								ElseIf Inventory(z)\itemtemplate\tempname="vest" Or Inventory(z)\itemtemplate\tempname="finevest" Then
+								ElseIf Inventory(z)\itemtemplate\tempname="vest" Lor Inventory(z)\itemtemplate\tempname="finevest" Then
 									canpickitem% = 2
 									Exit
 								EndIf
@@ -695,10 +695,10 @@ Function PickItem(item.Items)
 						canpickitem = True
 						For z% = 0 To MaxItemAmount - 1
 							If Inventory(z) <> Null Then
-								If Inventory(z)\itemtemplate\tempname="vest" Or Inventory(z)\itemtemplate\tempname="finevest" Then
+								If Inventory(z)\itemtemplate\tempname="vest" Lor Inventory(z)\itemtemplate\tempname="finevest" Then
 									canpickitem% = False
 									Exit
-								ElseIf Inventory(z)\itemtemplate\tempname="hazmatsuit" Or Inventory(z)\itemtemplate\tempname="hazmatsuit2" Or Inventory(z)\itemtemplate\tempname="hazmatsuit3" Then
+								ElseIf Inventory(z)\itemtemplate\tempname="hazmatsuit" Lor Inventory(z)\itemtemplate\tempname="hazmatsuit2" Lor Inventory(z)\itemtemplate\tempname="hazmatsuit3" Then
 									canpickitem% = 2
 									Exit
 								EndIf

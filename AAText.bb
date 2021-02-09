@@ -10,10 +10,10 @@ Type AAFont
 	Field texture%
 	Field backup% ;images don't get erased by clearworld
 	
-	Field x%[128] ;not going to bother with unicode
-	Field y%[128]
-	Field w%[128]
-	Field h%[128]
+	Field x%[256]
+	Field y%[256]
+	Field w%[256]
+	Field h%[256]
 	
 	Field lowResFont% ;for use on other buffers
 	
@@ -141,7 +141,7 @@ Function AAText(x%,y%,txt$,cx%=False,cy%=False,a#=1.0)
 	If Len(txt)=0 Then Return
 	Local font.AAFont = Object.AAFont(AASelectedFont)
 	
-	If (GraphicsBuffer()<>BackBuffer()) Or (Not AATextEnable) Or (Not font\isAA) Then
+	If (GraphicsBuffer()<>BackBuffer()) Lor (Not AATextEnable) Lor (Not font\isAA) Then
 		SetFont font\lowResFont
 		Local oldr% = ColorRed() : Local oldg% = ColorGreen() : Local oldb% = ColorBlue()
 		Color oldr*a,oldg*a,oldb*a
@@ -216,17 +216,17 @@ Function AAText(x%,y%,txt$,cx%=False,cy%=False,a#=1.0)
 	If ark_blur_cam<>0 Then ShowEntity ark_blur_cam
 End Function
 
-Function AALoadFont%(file$="Tahoma", height=13, bold=0, italic=0, underline=0, AATextScaleFactor%=2)
+Function AALoadFont%(file$="Tahoma", height=13, AATextScaleFactor%=2)
 	Local newFont.AAFont = New AAFont
 	
-	newFont\lowResFont = LoadFont(file,height,bold,italic,underline)
+	newFont\lowResFont = LoadFont_Strict(file,height)
 	
 	SetFont newFont\lowResFont
 	newFont\mW = FontWidth()
 	newFont\mH = FontHeight()
 	
 	If AATextEnable And AATextScaleFactor>1 Then
-		Local hResFont% = LoadFont(file,height*AATextScaleFactor,bold,italic,underline)
+		Local hResFont% = LoadFont(file,height*AATextScaleFactor)
 		Local tImage% = CreateTexture(1024,1024,3)
 		Local tX% = 0 : Local tY% = 1
 		
@@ -333,5 +333,4 @@ Function AALoadFont%(file$="Tahoma", height=13, bold=0, italic=0, underline=0, A
 End Function
 
 ;~IDEal Editor Parameters:
-;~F#9#19#3F#4B#50#63#6D#7E#88#CB
 ;~C#Blitz3D
