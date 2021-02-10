@@ -1014,6 +1014,12 @@ Function LoadGame(file$)
 						EndIf
 					EndIf
 				Next
+				
+				Local du.Dummy1499_1
+				
+				For du.Dummy1499_1 = Each Dummy1499_1
+					Delete(du)
+				Next
 				DebugLog "Reset Eventstate in "+e\EventName
 			EndIf
 		;Reset the forest event to make it loading properly
