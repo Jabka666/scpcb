@@ -596,31 +596,31 @@ Function UpdateEvents()
 		Select e\EventName
 			Case "exit1"
 				;[Block]
-				If RemoteDoorOn=False Then
-					e\room\RoomDoors[4]\locked=True
-				ElseIf RemoteDoorOn And e\EventState3=0
-					e\room\RoomDoors[4]\locked=False
-					If e\room\RoomDoors[4]\open Then 
-						If e\room\RoomDoors[4]\openstate > 50 Lor EntityDistance(Collider, e\room\RoomDoors[4]\frameobj)<0.5 Then
-							e\room\RoomDoors[4]\openstate = Min(e\room\RoomDoors[4]\openstate,50)
-							e\room\RoomDoors[4]\open = False
-							PlaySound2 (LoadTempSound("SFX\Door\DoorError.ogg"), Camera, e\room\RoomDoors[4]\frameobj)
-						EndIf							
-					EndIf
-				Else
-					e\room\RoomDoors[4]\locked=False
-					
-					If Curr096 <> Null Then
-						If Curr096\State = 0 Lor Curr096\State = 5 Then
-							e\EventState2 = UpdateElevators(e\EventState2, e\room\RoomDoors[0], e\room\RoomDoors[1], e\room\Objects[8], e\room\Objects[9], e)
-						Else
-							e\EventState2 = Update096ElevatorEvent(e,e\EventState2,e\room\RoomDoors[0],e\room\Objects[8])
+				If PlayerRoom = e\room Then
+					If RemoteDoorOn=False Then
+						e\room\RoomDoors[4]\locked=True
+					ElseIf RemoteDoorOn And e\EventState3=0
+						e\room\RoomDoors[4]\locked=False
+						If e\room\RoomDoors[4]\open Then 
+							If e\room\RoomDoors[4]\openstate > 50 Lor EntityDistance(Collider, e\room\RoomDoors[4]\frameobj)<0.5 Then
+								e\room\RoomDoors[4]\openstate = Min(e\room\RoomDoors[4]\openstate,50)
+								e\room\RoomDoors[4]\open = False
+								PlaySound2 (LoadTempSound("SFX\Door\DoorError.ogg"), Camera, e\room\RoomDoors[4]\frameobj)
+							EndIf							
 						EndIf
 					Else
-						e\EventState2 = UpdateElevators(e\EventState2, e\room\RoomDoors[0], e\room\RoomDoors[1], e\room\Objects[8], e\room\Objects[9], e)
+						e\room\RoomDoors[4]\locked=False
+						
+						If Curr096 <> Null Then
+							If Curr096\State = 0 Lor Curr096\State = 5 Then
+								e\EventState2 = UpdateElevators(e\EventState2, e\room\RoomDoors[0], e\room\RoomDoors[1], e\room\Objects[8], e\room\Objects[9], e)
+							Else
+								e\EventState2 = Update096ElevatorEvent(e,e\EventState2,e\room\RoomDoors[0],e\room\Objects[8])
+							EndIf
+						Else
+							e\EventState2 = UpdateElevators(e\EventState2, e\room\RoomDoors[0], e\room\RoomDoors[1], e\room\Objects[8], e\room\Objects[9], e)
+						EndIf
 					EndIf
-					
-					EntityAlpha Fog, 1.0						
 				EndIf
 				;[End Block]
 			Case "alarm" ;the alarm in the starting room
