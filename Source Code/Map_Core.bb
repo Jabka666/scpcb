@@ -4883,7 +4883,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 				ScaleSprite(room\LightSprites[i], 0.13 , 0.13)
 				EntityTexture(room\LightSprites[i], LightSpriteTex[0])
 				EntityBlend (room\LightSprites[i], 3)
-				
+				EntityColor(room\LightSprites[i], r%, g%, b%)
 				EntityParent(room\LightSprites[i], room\obj)
 				
 				room\LightSpritesPivot[i] = CreatePivot()
@@ -4929,6 +4929,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 		ScaleSprite(sprite, 0.13 , 0.13)
 		EntityTexture(sprite, LightSpriteTex[0])
 		EntityBlend (sprite, 3)
+		EntityColor(sprite,r,g,b)
 		Return light
 	EndIf
 End Function
