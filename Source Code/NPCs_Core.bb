@@ -23,7 +23,7 @@ Type NPCs
 	Field PrevX#, PrevY#, PrevZ#
 	Field Target.NPCs, TargetID%
 	Field EnemyX#, EnemyY#, EnemyZ#
-	Field Path.WayPoints[20], PathStatus%, PathTimer#, PathLocation%
+	Field Path.WayPoints[21], PathStatus%, PathTimer#, PathLocation%
 	Field NVX#,NVY#,NVZ#,NVName$
 	Field GravityMult# = 1.0
 	Field MaxGravity# = 0.2
@@ -6350,6 +6350,174 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 			EndIf
 			FreeEntity pvt
 		EndIf
+	EndIf
+End Function
+
+; ~ TODO: Path.Waypoints[20]
+Function FindPath(n.NPCs, x#, y#, z#)
+	DebugLog "findpath: "+n\NPCtype
+	
+	Local temp%, dist#, dist2#
+	Local xtemp#, ytemp#, ztemp#
+	Local w.WayPoints, StartPoint.WayPoints, EndPoint.WayPoints   
+	Local StartX% = Floor(EntityX(n\Collider,True) / 8.0 + 0.5), StartZ% = Floor(EntityZ(n\Collider,True) / 8.0 + 0.5)
+	Local EndX% = Floor(x / 8.0 + 0.5), EndZ% = Floor(z / 8.0 + 0.5)
+	Local CurrX, CurrZ
+	
+   ;pathstatus = 0, route hasn't been searched for yet
+   ;pathstatus = 1, route found
+   ;pathstatus = 2, route not found (target unreachable)
+	
+	For w.WayPoints = Each WayPoints
+		w\state = 0
+		w\Fcost = 0
+		w\Gcost = 0
+		w\Hcost = 0
+	Next
+	
+	n\PathStatus = 0
+	n\PathLocation = 0
+	For i = 0 To 20
+		n\Path[i] = Null
+	Next
+	
+	Local pvt = CreatePivot()
+	PositionEntity(pvt, x,y,z, True)   
+	
+	temp = CreatePivot()
+	PositionEntity(temp, EntityX(n\Collider,True), EntityY(n\Collider,True)+0.15, EntityZ(n\Collider,True))
+	
+	dist = 350.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(w\obj,True)-EntityX(temp,True)
+		ztemp = EntityZ(w\obj,True)-EntityZ(temp,True)
+		ytemp = EntityY(w\obj,True)-EntityY(temp,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		If dist2 < dist Then 
+			If Not EntityVisible(w\obj, temp) Then dist2 = dist2*3
+			If dist2 < dist Then 
+				dist = dist2
+				StartPoint = w
+			EndIf
+		EndIf
+	Next
+	DebugLog "DIST: "+dist
+	
+	FreeEntity temp
+	
+	If StartPoint = Null Then Return 2
+	StartPoint\state = 1      
+	
+	EndPoint = Null
+	dist# = 400.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(pvt,True)-EntityX(w\obj,True)
+		ztemp = EntityZ(pvt,True)-EntityZ(w\obj,True)
+		ytemp = EntityY(pvt,True)-EntityY(w\obj,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		
+		If dist2 < dist Then
+			dist = dist2
+			EndPoint = w
+		EndIf            
+	Next
+	FreeEntity pvt
+	
+	If EndPoint = StartPoint Then
+		If dist < 0.4 Then
+			Return 0
+		Else
+			n\Path[0]=EndPoint
+			Return 1               
+		EndIf
+	EndIf
+	If EndPoint = Null Then Return 2
+	
+	Repeat
+		temp% = False
+		smallest.WayPoints = Null
+		dist# = 10000.0
+		For w.WayPoints = Each WayPoints
+			If w\state = 1 Then
+				temp = True
+				If (w\Fcost) < dist Then
+					dist = w\Fcost
+					smallest = w
+				EndIf
+			EndIf
+		Next
+		
+		If smallest <> Null Then
+			w = smallest
+			w\state = 2
+			
+			For i = 0 To 4
+				If w\connected[i]<>Null Then
+					If w\connected[i]\state < 2 Then
+						If w\connected[i]\state=1 Then
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							If gtemp < w\connected[i]\Gcost Then
+								w\connected[i]\Gcost = gtemp
+								w\connected[i]\Fcost = w\connected[i]\Gcost + w\connected[i]\Hcost
+								w\connected[i]\parent = w
+							EndIf
+						Else
+							w\connected[i]\Hcost# = Abs(EntityX(w\connected[i]\obj,True)-EntityX(EndPoint\obj,True))+Abs(EntityZ(w\connected[i]\obj,True)-EntityZ(EndPoint\obj,True))
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							w\connected[i]\Gcost = gtemp
+							w\connected[i]\Fcost = w\Gcost+w\Hcost
+							w\connected[i]\parent = w
+							w\connected[i]\state=1
+						EndIf            
+					EndIf
+				EndIf
+			Next
+		Else
+			If EndPoint\state > 0 Then
+				StartPoint\parent = Null
+				EndPoint\state = 2
+				Exit
+			EndIf
+		EndIf
+		
+		If EndPoint\state > 0 Then
+			StartPoint\parent = Null
+			EndPoint\state = 2
+			Exit
+		EndIf
+		
+	Until temp = False
+	
+	If EndPoint\state > 0 Then
+		Local currpoint.WayPoints = EndPoint
+		Local twentiethpoint.WayPoints = EndPoint
+		Local length = 0
+		
+		Repeat
+			length = length +1
+			currpoint = currpoint\parent
+			If length>20 Then
+				twentiethpoint = twentiethpoint\parent
+			EndIf
+		Until currpoint = Null
+		
+		currpoint.WayPoints = EndPoint
+		While twentiethpoint<>Null
+			length=Min(length-1,19)
+			twentiethpoint = twentiethpoint\parent
+			n\Path[length] = twentiethpoint
+		Wend
+		
+		Return 1
+	Else
+		DebugLog "FUNCTION FindPath() - no route found"
+		Return 2 
 	EndIf
 End Function
 
