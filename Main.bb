@@ -2598,8 +2598,13 @@ End Type
 Global I_Zone.MapZones = New MapZones
 
 Function CatchErrors(Location$)
-	InitErrorMsgs(1)
-	SetErrorMsg(0, "Memory Access Violation" + VersionNumber)
+	InitErrorMsgs(6)
+	SetErrorMsg(0, "An error occured in SCP - Containment Breach Ultimate Edition v" + VersionNumber)
+	SetErrorMsg(1, "Map Seed: " + RandomSeed)
+	SetErrorMsg(2, "Date and time: " + CurrentDate() + " at " + CurrentTime() + Chr(10) + "OS: " + SystemProperty("os") + " " + (32 + (GetEnv("ProgramFiles(X86)") <> 0) * 32) + " bit (Build: " + SystemProperty("osbuild") + ")" + Chr(10))
+	SetErrorMsg(3, "Video memory: " + ((TotalVidMem() / 1024) - (AvailVidMem() / 1024)) + " MB/" + (TotalVidMem() / 1024) + " MB" + Chr(10))
+	SetErrorMsg(4, "Global memory status: " + ((TotalPhys() / 1024) - (AvailPhys() / 1024)) + " MB/" + (TotalPhys() / 1024) + " MB" + Chr(10))
+	SetErrorMsg(5, "Error located in: " + Location + Chr(10) + Chr(10) + "Please take a screenshot of this error and send it to us!") 
 End Function
 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
