@@ -1565,6 +1565,11 @@ Function UpdateEvents()
 						ElseIf e\EventState < 14000 ; player is inside the room
 							e\EventState = Min(e\EventState + FPSfactor, 13000)
 							
+							For i = 1 To 2
+								PointEntity(e\room\NPC[i]\OBJ, e\room\Objects[5])
+								RotateEntity(e\room\NPC[i]\Collider, 0.0, CurveValue(EntityYaw(e\room\NPC[i]\OBJ), EntityYaw(e\room\NPC[i]\Collider), 15.0), 0.0)
+							Next
+							
 							If e\EventState < 10300 Then
 								PositionEntity(Collider, Max(EntityX(Collider), EntityX(e\room\obj) + 352.0 * RoomScale), EntityY(Collider), EntityZ(Collider))
 							EndIf
@@ -1605,7 +1610,6 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\EventState > 10300 Then 
-								
 								If e\EventState > 10560 Then
 									If e\EventState < 10750 Then
 										e\room\NPC[1]\State = 1
@@ -1655,7 +1659,6 @@ Function UpdateEvents()
 										Curr173\SoundChn = LoopSound2(StoneDragSFX, Curr173\SoundChn, Camera, Curr173\Collider, 10.0, Curr173\State)
 										
 										Curr173\State = CurveValue(1.0, Curr173\State, 3)
-										
 									Else
 										Curr173\State = Max(0, Curr173\State - FPSfactor / 20)
 									EndIf
@@ -9937,5 +9940,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11C6#1D72
+;~B#11C9#1D75
 ;~C#Blitz3D
