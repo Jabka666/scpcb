@@ -8087,8 +8087,7 @@ Function UpdateEvents()
 								e\room\RoomDoors[0]\locked = True
 								e\room\RoomDoors[1]\locked = True
 								If e\room\NPC[0]\Reload = 0
-									PlaySound_Strict LoadTempSound("SFX\Door\DoorOpen079.ogg")
-									DebugLog "079 - OPEN DOORS IN ROOM2SL"
+									If (Not e\room\RoomDoors[0]\Open) Then PlaySound_Strict(LoadTempSound("SFX\Door\DoorOpen079.ogg"))
 									e\room\NPC[0]\Reload = 1
 								EndIf
 								If (Not e\room\RoomDoors[0]\open)
