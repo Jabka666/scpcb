@@ -1754,7 +1754,6 @@ Function UpdateEvents()
 									CameraShake = 3
 								ElseIf e\EventState < 20300 ;lights on, the guard starts shooting at 173
 									PointEntity(e\room\NPC[0]\Collider, Curr173\Collider)
-									MoveEntity(e\room\NPC[0]\Collider, 0, 0, -0.002)
 									e\room\NPC[0]\State = 2
 									UpdateSoundOrigin(e\room\NPC[0]\SoundChn,Camera,e\room\NPC[0]\Collider,20)
 									If e\EventState > 20260 And e\EventState - FPSfactor < 20260 Then PlaySound_Strict(IntroSFX[12])
@@ -9938,5 +9937,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11C7#1D73
+;~B#11C6#1D72
 ;~C#Blitz3D
