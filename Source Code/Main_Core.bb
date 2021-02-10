@@ -2794,6 +2794,7 @@ Repeat
 								e\EventState3 = 50
 							EndIf
 						EndIf
+						Exit
 					EndIf
 				Next
 			EndIf
@@ -2813,17 +2814,11 @@ Repeat
 				Color 0,0,0
 				AAText((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 				Color 255,255,255
-				If Left(Msg,14)="Blitz3D Error!" Then
-					Color 255,0,0
-				EndIf
 				AAText((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 			Else
 				Color 0,0,0
 				AAText((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 				Color 255,255,255
-				If Left(Msg,14)="Blitz3D Error!" Then
-					Color 255,0,0
-				EndIf
 				AAText((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 			EndIf
 			MsgTimer=MsgTimer-FPSfactor2 

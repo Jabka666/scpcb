@@ -1961,6 +1961,7 @@ Function UpdateEvents()
 									e\room\RoomDoors[1]\locked = True
 								EndIf
 							EndIf
+							Exit
 						EndIf
 					Next
 				Else
@@ -1979,6 +1980,7 @@ Function UpdateEvents()
 									e\room\RoomDoors[1]\locked = True
 								EndIf
 							EndIf
+							Exit
 						EndIf
 					Next
 				EndIf
@@ -8312,6 +8314,7 @@ Function UpdateEvents()
 						Else
 							EntityTexture e\room\Objects[21],e\room\Textures[1],6
 						EndIf
+						Exit
 					EndIf
 				Next
 				;[End Block]
@@ -9935,5 +9938,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11C5#1D71
+;~B#11C7#1D73
 ;~C#Blitz3D

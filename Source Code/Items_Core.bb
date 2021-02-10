@@ -297,6 +297,7 @@ Function InitItemTemplates()
 				For it2=Each ItemTemplates
 					If (it2<>it) And (it2\tex=it\tex) Then
 						it2\tex = 0
+						Exit
 					EndIf
 				Next
 			EndIf
@@ -618,7 +619,7 @@ Function PickItem(item.Items)
 					Case "veryfinevest"
 						Msg = "The vest is too heavy to pick up."
 						MsgTimer = 70*6
-						Exit
+						Return
 					Case "firstaid", "finefirstaid", "veryfinefirstaid", "firstaid2"
 						item\state = 0
 					Case "navigator", "nav"
