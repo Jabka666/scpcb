@@ -424,7 +424,7 @@ Function QuickLoadEvents()
 			;[End Block]
 		Case "room205"
 			;[Block]
-			If e\EventState=0 Lor e\room\Objects[0]=0 Then
+			If e\EventState=0 Lor e\EventStr <> "LoadDone" Then
 				If e\EventStr = "load0"
 					e\room\Objects[3] = LoadAnimMesh_Strict("GFX\npcs\205_demon1.b3d")
 					QuickLoadPercent = 10
@@ -6207,7 +6207,7 @@ Function UpdateEvents()
 			Case "room205"
 				;[Block]
 				If PlayerRoom = e\room Then
-					If e\EventState=0 Lor e\room\Objects[0]=0 Then
+					If e\EventState=0 Lor e\EventStr <> "LoadDone" Then
 						If e\EventStr = "" And QuickLoadPercent = -1
 							QuickLoadPercent = 0
 							QuickLoad_CurrEvent = e
