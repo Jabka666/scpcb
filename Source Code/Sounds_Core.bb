@@ -440,9 +440,9 @@ Function PlayMTFSound(sound%, n.NPCs)
 		If SelectedItem\state2 = 3 And SelectedItem\state > 0 Then 
 			Select SelectedItem\itemtemplate\tempname 
 				Case "radio","fineradio","18vradio"
-					If sound<>MTFSFX[0] Lor (Not ChannelPlaying(RadioCHN(3)))
-						If RadioCHN(3)<> 0 Then StopChannel RadioCHN(3)
-						RadioCHN(3) = PlaySound_Strict (sound)
+					If sound<>MTFSFX[0] Lor (Not ChannelPlaying(RadioCHN[3]))
+						If RadioCHN[3]<> 0 Then StopChannel RadioCHN[3]
+						RadioCHN[3] = PlaySound_Strict (sound)
 					EndIf
 			End Select
 		EndIf
@@ -523,18 +523,18 @@ Global FemurBreakerSFX%
 Global EndBreathCHN%
 Global EndBreathSFX%
 
-Dim DecaySFX%(5)
+Global DecaySFX%[5]
 
 Global BurstSFX 
 
 DrawLoading(20, True)
 
-Dim RustleSFX%(3)
+Global RustleSFX%[3]
 
 Global Use914SFX%
 Global Death914SFX% 
 
-Dim DripSFX%(4)
+Global DripSFX%[4]
 
 Global LeverSFX%, LightSFX% 
 Global ButtGhostSFX% 
@@ -547,32 +547,32 @@ Global RadioBuzz
 
 Global ElevatorBeepSFX, ElevatorMoveSFX  
 
-Dim PickSFX%(10)
+Global PickSFX%[4]
 
 Global AmbientSFXCHN%, CurrAmbientSFX%
-Dim AmbientSFXAmount(6)
+Global AmbientSFXAmount[6]
 ;0 = light containment, 1 = heavy containment, 2 = entrance
-AmbientSFXAmount(0)=8 : AmbientSFXAmount(1)=11 : AmbientSFXAmount(2)=12
+AmbientSFXAmount[0]=8 : AmbientSFXAmount[1]=11 : AmbientSFXAmount[2]=12
 ;3 = general, 4 = pre-breach
-AmbientSFXAmount(3)=15 : AmbientSFXAmount(4)=5
+AmbientSFXAmount[3]=15 : AmbientSFXAmount[4]=5
 ;5 = forest
-AmbientSFXAmount(5)=10
+AmbientSFXAmount[5]=10
 
 Dim AmbientSFX%(6, 15)
 
-Dim OldManSFX%(9)
+Global OldManSFX%[9]
 
-Dim Scp173SFX%(3)
+Global Scp173SFX%[3]
 
-Dim HorrorSFX%(20)
+Global HorrorSFX%[16]
 
 DrawLoading(25, True)
 
-Dim IntroSFX%(20)
+Global IntroSFX%[20]
 
-Dim AlarmSFX%(5)
+Global AlarmSFX%[5]
 
-Dim CommotionState%(25)
+Global CommotionState%[25]
 
 Global HeartBeatSFX 
 
@@ -581,13 +581,13 @@ Global VomitSFX%
 Dim BreathSFX(2,5)
 Global BreathCHN%
 
-Dim NeckSnapSFX(3)
+Global NeckSnapSFX[3]
 
-Dim DamageSFX%(9)
+Global DamageSFX%[9]
 
 Global MTFSFX%[2]
 
-Dim CoughSFX%(3)
+Global CoughSFX%[3]
 Global CoughCHN%, VomitCHN%
 
 Global MachineSFX% 
@@ -595,7 +595,7 @@ Global ApacheSFX
 Global CurrStepSFX
 Dim StepSFX%(5, 2, 8) ;(normal/metal, walk/run, id)
 
-Dim Step2SFX(6)
+Global Step2SFX[6]
 
 DrawLoading(30, True)
 
@@ -603,7 +603,7 @@ Global PlayCustomMusic% = False, CustomMusic% = 0
 
 Global UserTrackCheck% = 0, UserTrackCheck2% = 0
 Global UserTrackMusicAmount% = 0, CurrUserTrack%, UserTrackFlag% = False
-Dim UserTrackName$(256)
+Global UserTrackName$[256]
 
 Function LoadAllSounds()
 	For i = 0 To 2
@@ -645,20 +645,20 @@ Function LoadAllSounds()
 	MagnetDownSFX = LoadSound_Strict("SFX\Room\106Chamber\MagnetDown.ogg")
 	
 	For i = 0 To 3
-		DecaySFX(i) = LoadSound_Strict("SFX\SCP\106\Decay" + i + ".ogg")
+		DecaySFX[i] = LoadSound_Strict("SFX\SCP\106\Decay" + i + ".ogg")
 	Next
 	
 	BurstSFX = LoadSound_Strict("SFX\Room\TunnelBurst.ogg")
 	
 	For i = 0 To 2
-		RustleSFX(i) = LoadSound_Strict("SFX\SCP\372\Rustle" + i + ".ogg")
+		RustleSFX[i] = LoadSound_Strict("SFX\SCP\372\Rustle" + i + ".ogg")
 	Next
 	
 	Death914SFX% = LoadSound_Strict("SFX\SCP\914\PlayerDeath.ogg") 
 	Use914SFX% = LoadSound_Strict("SFX\SCP\914\PlayerUse.ogg")
 	
 	For i = 0 To 3
-		DripSFX(i) = LoadSound_Strict("SFX\Character\D9341\BloodDrip" + i + ".ogg")
+		DripSFX[i] = LoadSound_Strict("SFX\Character\D9341\BloodDrip" + i + ".ogg")
 	Next
 	
 	LeverSFX% = LoadSound_Strict("SFX\Interact\LeverFlip.ogg") 
@@ -679,51 +679,51 @@ Function LoadAllSounds()
 	ElevatorMoveSFX = LoadSound_Strict("SFX\General\Elevator\Moving.ogg") 
 	
 	For i = 0 To 3
-		PickSFX(i) = LoadSound_Strict("SFX\Interact\PickItem" + i + ".ogg")
+		PickSFX[i] = LoadSound_Strict("SFX\Interact\PickItem" + i + ".ogg")
 	Next
 	
 	;0 = light containment, 1 = heavy containment, 2 = entrance
-	AmbientSFXAmount(0)=11 : AmbientSFXAmount(1)=11 : AmbientSFXAmount(2)=12
+	AmbientSFXAmount[0]=11 : AmbientSFXAmount[1]=11 : AmbientSFXAmount[2]=12
 	;3 = general, 4 = pre-breach
-	AmbientSFXAmount(3)=15 : AmbientSFXAmount(4)=5
+	AmbientSFXAmount[3]=15 : AmbientSFXAmount[4]=5
 	;5 = forest
-	AmbientSFXAmount(5)=10
+	AmbientSFXAmount[5]=10
 	
 	For i = 0 To 2
-		OldManSFX(i) = LoadSound_Strict("SFX\SCP\106\Corrosion" + (i + 1) + ".ogg")
+		OldManSFX[i] = LoadSound_Strict("SFX\SCP\106\Corrosion" + (i + 1) + ".ogg")
 	Next
-	OldManSFX(3) = LoadSound_Strict("SFX\SCP\106\Laugh.ogg")
-	OldManSFX(4) = LoadSound_Strict("SFX\SCP\106\Breathing.ogg")
-	OldManSFX(5) = LoadSound_Strict("SFX\Room\PocketDimension\Enter.ogg")
+	OldManSFX[3] = LoadSound_Strict("SFX\SCP\106\Laugh.ogg")
+	OldManSFX[4] = LoadSound_Strict("SFX\SCP\106\Breathing.ogg")
+	OldManSFX[5] = LoadSound_Strict("SFX\Room\PocketDimension\Enter.ogg")
 	For i = 0 To 2
-		OldManSFX(6+i) = LoadSound_Strict("SFX\SCP\106\WallDecay"+(i+1)+".ogg")
+		OldManSFX[6+i] = LoadSound_Strict("SFX\SCP\106\WallDecay"+(i+1)+".ogg")
 	Next
 	
 	For i = 0 To 2
-		Scp173SFX(i) = LoadSound_Strict("SFX\SCP\173\Rattle" + (i + 1) + ".ogg")
+		Scp173SFX[i] = LoadSound_Strict("SFX\SCP\173\Rattle" + (i + 1) + ".ogg")
 	Next
 	
 	For i = 0 To 11
-		HorrorSFX(i) = LoadSound_Strict("SFX\Horror\Horror" + i + ".ogg")
+		HorrorSFX[i] = LoadSound_Strict("SFX\Horror\Horror" + i + ".ogg")
 	Next
 	For i = 14 To 15
-		HorrorSFX(i) = LoadSound_Strict("SFX\Horror\Horror" + i + ".ogg")
+		HorrorSFX[i] = LoadSound_Strict("SFX\Horror\Horror" + i + ".ogg")
 	Next
 	
 	For i = 7 To 9
-		IntroSFX(i) = LoadSound_Strict("SFX\Room\Intro\Bang" + (i - 6) + ".ogg")
+		IntroSFX[i] = LoadSound_Strict("SFX\Room\Intro\Bang" + (i - 6) + ".ogg")
 	Next
 	For i = 10 To 12
-		IntroSFX(i) = LoadSound_Strict("SFX\Room\Intro\Light" + (i - 9) + ".ogg")
+		IntroSFX[i] = LoadSound_Strict("SFX\Room\Intro\Light" + (i - 9) + ".ogg")
 	Next
-	IntroSFX(15) = LoadSound_Strict("SFX\Room\Intro\173Vent.ogg")
+	IntroSFX[15] = LoadSound_Strict("SFX\Room\Intro\173Vent.ogg")
 	
-	AlarmSFX(0) = LoadSound_Strict("SFX\Alarm\Alarm.ogg")
-	AlarmSFX(2) = LoadSound_Strict("SFX\Alarm\Alarm3.ogg")
+	AlarmSFX[0] = LoadSound_Strict("SFX\Alarm\Alarm.ogg")
+	AlarmSFX[2] = LoadSound_Strict("SFX\Alarm\Alarm3.ogg")
 	
 	;room_gw alarms
-	AlarmSFX(3) = LoadSound_Strict("SFX\Alarm\Alarm4.ogg")
-	AlarmSFX(4) = LoadSound_Strict("SFX\Alarm\Alarm5.ogg")
+	AlarmSFX[3] = LoadSound_Strict("SFX\Alarm\Alarm4.ogg")
+	AlarmSFX[4] = LoadSound_Strict("SFX\Alarm\Alarm5.ogg")
 	
 	HeartBeatSFX = LoadSound_Strict("SFX\Character\D9341\Heartbeat.ogg")
 	
@@ -733,15 +733,15 @@ Function LoadAllSounds()
 	Next
 	
 	For i = 0 To 2
-		NeckSnapSFX(i) =  LoadSound_Strict("SFX\SCP\173\NeckSnap"+(i+1)+".ogg")
+		NeckSnapSFX[i] = LoadSound_Strict("SFX\SCP\173\NeckSnap"+(i+1)+".ogg")
 	Next
 	
 	For i = 0 To 8
-		DamageSFX(i) = LoadSound_Strict("SFX\Character\D9341\Damage"+(i+1)+".ogg")
+		DamageSFX[i] = LoadSound_Strict("SFX\Character\D9341\Damage"+(i+1)+".ogg")
 	Next
 	
 	For i = 0 To 2
-		CoughSFX(i) = LoadSound_Strict("SFX\Character\D9341\Cough" + (i + 1) + ".ogg")
+		CoughSFX[i] = LoadSound_Strict("SFX\Character\D9341\Cough" + (i + 1) + ".ogg")
 	Next
 	
 	MachineSFX% = LoadSound_Strict("SFX\SCP\914\Refining.ogg")
@@ -763,8 +763,8 @@ Function LoadAllSounds()
 	Next
 	
 	For i = 0 To 2
-		Step2SFX(i) = LoadSound_Strict("SFX\Step\StepPD" + (i + 1) + ".ogg")
-		Step2SFX(i+3) = LoadSound_Strict("SFX\Step\StepForest" + (i + 1) + ".ogg")
+		Step2SFX[i] = LoadSound_Strict("SFX\Step\StepPD" + (i + 1) + ".ogg")
+		Step2SFX[i+3] = LoadSound_Strict("SFX\Step\StepForest" + (i + 1) + ".ogg")
 	Next 
 End Function
 

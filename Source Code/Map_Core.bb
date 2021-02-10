@@ -1289,7 +1289,7 @@ Function PlaceGrid_MapCreator(r.Rooms)
 	Local dr.Doors,it.Items
 	
 	For i=0 To 6
-		Meshes[i]=CopyEntity(OBJTunnel(i))
+		Meshes[i]=CopyEntity(OBJTunnel[i])
 		DebugLog i
 		HideEntity Meshes[i]
 	Next
@@ -1933,7 +1933,7 @@ Function FillRoom(r.Rooms)
 			ScaleSprite(r\Objects[1],0.18*0.5,0.145*0.5)
 			TurnEntity(r\Objects[1],0,13.0,0)
 			MoveEntity r\Objects[1], 0,0,-0.022
-			EntityTexture (r\Objects[1],OldAiPics(0))
+			EntityTexture (r\Objects[1],OldAiPics[0])
 			
 			HideEntity r\Objects[1]
 			
@@ -2423,7 +2423,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[5] = CreateSprite()
 			PositionEntity(r\Objects[5], r\x - 158 * RoomScale, 368 * RoomScale, r\z + 298.0 * RoomScale)
 			ScaleSprite(r\Objects[5], 0.02, 0.02)
-			EntityTexture(r\Objects[5], LightSpriteTex(1))
+			EntityTexture(r\Objects[5], LightSpriteTex[1])
 			EntityBlend (r\Objects[5], 3)
 			EntityParent(r\Objects[5], r\obj)
 			HideEntity r\Objects[5]
@@ -2915,7 +2915,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[3] = CreateSprite()
 			PositionEntity(r\Objects[3], r\x - 43.5 * RoomScale, - 574 * RoomScale, r\z - 362.0 * RoomScale)
 			ScaleSprite(r\Objects[3], 0.015, 0.015)
-			EntityTexture(r\Objects[3], LightSpriteTex(1))
+			EntityTexture(r\Objects[3], LightSpriteTex[1])
 			EntityBlend (r\Objects[3], 3)
 			EntityParent(r\Objects[3], r\obj)
 			HideEntity r\Objects[3]
@@ -3580,7 +3580,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[4] = CreateSprite()
 			PositionEntity(r\Objects[4], r\x - 32 * RoomScale, 568 * RoomScale, r\z)
 			ScaleSprite(r\Objects[4], 0.03, 0.03)
-			EntityTexture(r\Objects[4], LightSpriteTex(1))
+			EntityTexture(r\Objects[4], LightSpriteTex[1])
 			EntityBlend (r\Objects[4], 3)
 			EntityParent(r\Objects[4], r\obj)
 			HideEntity r\Objects[4]
@@ -4881,7 +4881,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 				room\LightSprites[i]= CreateSprite()
 				PositionEntity(room\LightSprites[i], x, y, z)
 				ScaleSprite(room\LightSprites[i], 0.13 , 0.13)
-				EntityTexture(room\LightSprites[i], LightSpriteTex(0))
+				EntityTexture(room\LightSprites[i], LightSpriteTex[0])
 				EntityBlend (room\LightSprites[i], 3)
 				
 				EntityParent(room\LightSprites[i], room\obj)
@@ -4894,7 +4894,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 				room\LightSprites2[i] = CreateSprite()
 				PositionEntity(room\LightSprites2[i], x, y, z)
 				ScaleSprite(room\LightSprites2[i], 0.6, 0.6)
-				EntityTexture(room\LightSprites2[i], LightSpriteTex(2))
+				EntityTexture(room\LightSprites2[i], LightSpriteTex[2])
 				EntityBlend(room\LightSprites2[i], 3)
 				EntityOrder(room\LightSprites2[i], -1)
 				EntityColor(room\LightSprites2[i], r%, g%, b%)
@@ -4927,7 +4927,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 		sprite=CreateSprite()
 		PositionEntity(sprite, x, y, z)
 		ScaleSprite(sprite, 0.13 , 0.13)
-		EntityTexture(sprite, LightSpriteTex(0))
+		EntityTexture(sprite, LightSpriteTex[0])
 		EntityBlend (sprite, 3)
 		Return light
 	EndIf
@@ -5359,7 +5359,7 @@ Dim MapName$(MapSize, MapSize)
 Dim MapRoomID%(ROOM4 + 1)
 Dim MapRoom$(ROOM4 + 1, 0)
 
-Dim GorePics%(6)
+Global GorePics%[6]
 
 Global SelectedMonitor.SecurityCams
 Global CoffinCam.SecurityCams
@@ -5599,13 +5599,13 @@ Function UpdateSecurityCams()
 								If Sanity < - 800 Then
 									If Rand(3) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
 									If Rand(6) < 5 Then
-										EntityTexture(sc\ScrOverlay, GorePics(Rand(0, 5)))
-										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX(1))
+										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
+										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX[1])
 										sc\PlayerState = 2
 										If sc\soundCHN = 0 Then
-											sc\soundCHN = PlaySound_Strict(HorrorSFX(4))
+											sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
 										Else
-											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX(4))
+											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
 										EndIf
 										If sc\CoffinEffect=3 And Rand(200)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
 									EndIf	
@@ -5616,8 +5616,8 @@ Function UpdateSecurityCams()
 								ElseIf Sanity < - 500
 									If Rand(7) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
 									If Rand(50) = 1 Then
-										EntityTexture(sc\ScrOverlay, GorePics(Rand(0, 5)))
-										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX(0))
+										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
+										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX[0])
 										sc\PlayerState = Max(sc\PlayerState, 1)
 										If sc\CoffinEffect=3 And Rand(100)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
 									EndIf
@@ -5640,7 +5640,7 @@ Function UpdateSecurityCams()
 						EndIf
 						
 						If Rand(500) = 1 Then
-							EntityTexture(sc\ScrOverlay, OldAiPics(0))
+							EntityTexture(sc\ScrOverlay, OldAiPics[0])
 						EndIf
 						
 						If (MilliSecs2() Mod sc\PlayerState) >= Rand(600) Then
@@ -5653,7 +5653,7 @@ Function UpdateSecurityCams()
 								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
 								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
 							EndIf
-							EntityTexture(sc\ScrOverlay, OldAiPics(0))
+							EntityTexture(sc\ScrOverlay, OldAiPics[0])
 						EndIf
 					EndIf
 				EndIf
@@ -5739,8 +5739,8 @@ Function UpdateLever(obj, locked=False)
 							DrawHandIcon = True 
 							RotateEntity(GrabbedEntity, Max(Min(EntityPitch(obj)+Max(Min(mouse_y_speed_1 * 8,30.0),-30), 80), -80), EntityYaw(obj), 0)
 							
-							DrawArrowIcon(0) = True
-							DrawArrowIcon(2) = True
+							DrawArrowIcon[0] = True
+							DrawArrowIcon[2] = True
 						EndIf
 					EndIf
 				EndIf 
@@ -6666,7 +6666,7 @@ Function UpdateRoomLights(cam%)
 								If r\LightFlicker%[i]>4 Then
 									If Rand(400)=1 Then
 										SetEmitter(r\LightSpritesPivot[i],ParticleEffect[0])
-										PlaySound2(IntroSFX(Rand(10,12)),cam,r\LightSpritesPivot[i])
+										PlaySound2(IntroSFX[Rand(10,12)],cam,r\LightSpritesPivot[i])
 										ShowEntity r\LightConeSpark[i]
 										r\LightConeSparkTimer[i] = FPSfactor
 									EndIf
@@ -6845,7 +6845,7 @@ Function AmbientLightRooms(value%=0)
 	SetBuffer oldbuffer
 End Function
 
-Dim CHUNKDATA(64,64)
+Global CHUNKDATA[64 ^ 2]
 
 Function SetChunkDataValues()
 	Local StrTemp$,i%,j%
@@ -6855,7 +6855,7 @@ Function SetChunkDataValues()
 	
 	For i = 0 To 63
 		For j = 0 To 63
-			CHUNKDATA(i,j)=Rand(0,GetINIInt("Data\1499chunks.INI","general","count"))
+			CHUNKDATA[(i * 64) + j]=Rand(0,GetINIInt("Data\1499chunks.INI","general","count"))
 		Next
 	Next
 	
@@ -6957,9 +6957,11 @@ Function CreateChunk.Chunk(obj%,x#,y#,z#,isSpawnChunk%=False)
 	Return ch
 End Function
 
+Const ChunkMaxDistance# = 120.0
+
 Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 	Local ch.Chunk,StrTemp$,i%,x#,z#,ch2.Chunk,y#,n.NPCs,j%
-	Local ChunkX#,ChunkZ#,ChunkMaxDistance#=3*40
+	Local ChunkX#,ChunkZ#
 	
 	ChunkX# = Int(EntityX(Collider)/40)
 	ChunkZ# = Int(EntityZ(Collider)/40)
@@ -6981,7 +6983,7 @@ Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 			EndIf
 		Next
 		If (Not chunkfound)
-			CurrChunkData = CHUNKDATA(Abs(((x+32)/40) Mod 64),Abs(((z+32)/40) Mod 64))
+			CurrChunkData = CHUNKDATA[Abs(((x + 32) / 40) Mod 64) * 64 + (Abs(((z + 32) / 40) Mod 64))]
 			ch2 = CreateChunk(CurrChunkData%,x#,y#,z#)
 			ch2\IsSpawnChunk = False
 		EndIf
@@ -7097,7 +7099,7 @@ Function AddLightCones(room.Rooms)
 			If room\LightFlicker%[i] > 4
 				room\LightConeSpark[i] = CreateSprite()
 				ScaleSprite room\LightConeSpark[i],1.0,1.0
-				EntityTexture room\LightConeSpark[i],ParticleTextures(8)
+				EntityTexture room\LightConeSpark[i],ParticleTextures[8]
 				SpriteViewMode room\LightConeSpark[i],2
 				EntityFX room\LightConeSpark[i],1
 				RotateEntity room\LightConeSpark[i],-90,0,0
