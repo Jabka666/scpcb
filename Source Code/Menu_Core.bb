@@ -10,17 +10,16 @@ ResizeImage(MenuText, ImageWidth(MenuText) * MenuScale, ImageHeight(MenuText) * 
 ResizeImage(Menu173, ImageWidth(Menu173) * MenuScale, ImageHeight(Menu173) * MenuScale)
 
 For i = 0 To 3
-	ArrowIMG[i] = LoadImage_Strict("GFX\menu\arrow.png")
-	RotateImage(ArrowIMG[i], 90 * i)
-	HandleImage(ArrowIMG[i], 0, 0)
+	ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
+	RotateImage(ArrowIMG(i), 90 * i)
+	HandleImage(ArrowIMG(i), 0, 0)
 Next
 
 Global RandomSeed$
 
-Global MenuBlinkTimer%[2]
-Global MenuBlinkDuration%[2]
-MenuBlinkTimer[0] = 1
-MenuBlinkTimer[1] = 1
+Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
+MenuBlinkTimer%(0) = 1
+MenuBlinkTimer%(1) = 1
 
 Global MenuStr$, MenuStrX%, MenuStrY%
 
@@ -62,24 +61,24 @@ Function UpdateMainMenu()
 	
 	DrawImage(MenuBack, 0, 0)
 	
-	If (MilliSecs2() Mod MenuBlinkTimer[0]) >= Rand(MenuBlinkDuration[0]) Then
+	If (MilliSecs2() Mod MenuBlinkTimer(0)) >= Rand(MenuBlinkDuration(0)) Then
 		DrawImage(Menu173, GraphicWidth - ImageWidth(Menu173), GraphicHeight - ImageHeight(Menu173))
 	EndIf
 	
 	If Rand(300) = 1 Then
-		MenuBlinkTimer[0] = Rand(4000, 8000)
-		MenuBlinkDuration[0] = Rand(200, 500)
+		MenuBlinkTimer(0) = Rand(4000, 8000)
+		MenuBlinkDuration(0) = Rand(200, 500)
 	EndIf
 	
 	AASetFont Font1
 	
-	MenuBlinkTimer[1]=MenuBlinkTimer[1]-FPSfactor
-	If MenuBlinkTimer[1] < MenuBlinkDuration[1] Then
+	MenuBlinkTimer(1)=MenuBlinkTimer(1)-FPSfactor
+	If MenuBlinkTimer(1) < MenuBlinkDuration(1) Then
 		Color(50, 50, 50)
 		AAText(MenuStrX + Rand(-5, 5), MenuStrY + Rand(-5, 5), MenuStr, True)
-		If MenuBlinkTimer[1] < 0 Then
-			MenuBlinkTimer[1] = Rand(700, 800)
-			MenuBlinkDuration[1] = Rand(10, 35)
+		If MenuBlinkTimer(1) < 0 Then
+			MenuBlinkTimer(1) = Rand(700, 800)
+			MenuBlinkDuration(1) = Rand(10, 35)
 			MenuStrX = Rand(700, 1000) * MenuScale
 			MenuStrY = Rand(100, 600) * MenuScale
 			
@@ -304,9 +303,9 @@ Function UpdateMainMenu()
 				
 				AAText (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
 				For i = SAFE To CUSTOM
-					If DrawTick(x + 20 * MenuScale, y + (180+30*i) * MenuScale, (SelectedDifficulty = difficulties[i])) Then SelectedDifficulty = difficulties[i]
-					Color(difficulties[i]\r,difficulties[i]\g,difficulties[i]\b)
-					AAText(x + 60 * MenuScale, y + (180+30*i) * MenuScale, difficulties[i]\name)
+					If DrawTick(x + 20 * MenuScale, y + (180+30*i) * MenuScale, (SelectedDifficulty = difficulties(i))) Then SelectedDifficulty = difficulties(i)
+					Color(difficulties(i)\r,difficulties(i)\g,difficulties(i)\b)
+					AAText(x + 60 * MenuScale, y + (180+30*i) * MenuScale, difficulties(i)\name)
 				Next
 				
 				Color(255, 255, 255)
@@ -329,9 +328,9 @@ Function UpdateMainMenu()
 					
 					;Other factor's difficulty
 					Color 255,255,255
-					DrawImage ArrowIMG[1],x + 155 * MenuScale, y+251*MenuScale
+					DrawImage ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale
 					If MouseHit1
-						If ImageRectOverlap(ArrowIMG[1],x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
+						If ImageRectOverlap(ArrowIMG(1),x + 155 * MenuScale, y+251*MenuScale, ScaledMouseX(),ScaledMouseY(),0,0)
 							If SelectedDifficulty\otherFactors < HARD
 								SelectedDifficulty\otherFactors = SelectedDifficulty\otherFactors + 1
 							Else
@@ -807,26 +806,26 @@ Function UpdateMainMenu()
 					y = y + 10*MenuScale
 					
 					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Move Forward")
-					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_UP,210)],5)		
+					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
 					AAText(x + 20 * MenuScale, y + 40 * MenuScale, "Strafe Left")
-					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_LEFT,210)],3)	
+					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3)	
 					AAText(x + 20 * MenuScale, y + 60 * MenuScale, "Move Backward")
-					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_DOWN,210)],6)				
+					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6)				
 					AAText(x + 20 * MenuScale, y + 80 * MenuScale, "Strafe Right")
-					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_RIGHT,210)],4)	
+					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)	
 					AAText(x + 20 * MenuScale, y + 100 * MenuScale, "Quick Save")
-					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SAVE,210)],11)
+					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)
 					
 					AAText(x + 280 * MenuScale, y + 20 * MenuScale, "Manual Blink")
-					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_BLINK,210)],7)				
+					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
 					AAText(x + 280 * MenuScale, y + 40 * MenuScale, "Sprint")
-					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SPRINT,210)],8)
+					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8)
 					AAText(x + 280 * MenuScale, y + 60 * MenuScale, "Open/Close Inventory")
-					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_INV,210)],9)
+					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9)
 					AAText(x + 280 * MenuScale, y + 80 * MenuScale, "Crouch")
-					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CROUCH,210)],10)	
+					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10)	
 					AAText(x + 280 * MenuScale, y + 100 * MenuScale, "Open/Close Console")
-					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CONSOLE,210)],12)
+					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
 					
 					If MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -1086,6 +1085,12 @@ Function UpdateLauncher()
 	LauncherIMG = LoadImage_Strict("GFX\menu\launcher.jpg")
 	ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 	Local i%	
+	
+	For i = 0 To 3
+		ArrowIMG(i) = LoadImage_Strict("GFX\menu\arrow.png")
+		RotateImage(ArrowIMG(i), 90 * i)
+		HandleImage(ArrowIMG(i), 0, 0)
+	Next
 	
 	For i% = 1 To TotalGFXModes
 		Local samefound% = False
@@ -1817,7 +1822,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 		Case "hud"
 			txt = "Display the blink and stamina meters."
 		Case "consoleenable"
-			txt = "Toggles the use of the developer console. Can be used in-game by pressing " + KeyName[KEY_CONSOLE] + "."
+			txt = "Toggles the use of the developer console. Can be used in-game by pressing " + KeyName(KEY_CONSOLE) + "."
 		Case "consoleerror"
 			txt = Chr(34)+"Open console on error"+Chr(34)+" is self-explanatory."
 		Case "achpopup"

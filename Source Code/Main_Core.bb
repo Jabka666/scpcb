@@ -25,7 +25,7 @@ Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
 
-Global ArrowIMG[4]
+Dim ArrowIMG(4)
 
 Global LauncherIMG%
 
@@ -219,18 +219,18 @@ Global MsgTimer#, Msg$, DeathMSG$
 Global AccessCode%, KeypadInput$, KeypadTimer#, KeypadMSG$
 
 Global DrawHandIcon%
-Global DrawArrowIcon%[4]
+Dim DrawArrowIcon%(4)
 
 Include "Source Code\Difficulty_Core.bb"
 
 Global MTFtimer#
 
-Global RadioState#[9]
-Global RadioState3%[9]
-Global RadioState4%[10]
-Global RadioCHN%[7]
+Dim RadioState#(9)
+Dim RadioState3%(9)
+Dim RadioState4%(10)
+Dim RadioCHN%(7)
 
-Global OldAiPics%[2]
+Dim OldAiPics%(2)
 
 Global PlayTime%
 Global ConsoleFlush%
@@ -1284,8 +1284,8 @@ Function UpdateConsole()
 					EndIf
 					
 					If Int(StrTemp)>=0 And Int(StrTemp)<MAXACHIEVEMENTS
-						Achievements[Int(StrTemp)]=True
-						CreateConsoleMsg("Achievemt "+AchievementStrings[Int(StrTemp)]+" unlocked.")
+						Achievements(Int(StrTemp))=True
+						CreateConsoleMsg("Achievemt "+AchievementStrings(Int(StrTemp))+" unlocked.")
 					Else
 						CreateConsoleMsg("Achievement with ID "+Int(StrTemp)+" doesn't exist.",255,150,0)
 					EndIf
@@ -1385,6 +1385,8 @@ Global Camera%, CameraShake#, CurrCameraZoom#
 
 Global StoredCameraFogFar# = CameraFogFar
 
+Dim LightSpriteTex(10)
+
 Include "Source Code\Sounds_Core.bb"
 
 Global Monitor2, Monitor3, MonitorTexture2, MonitorTexture3, MonitorTexture4, MonitorTextureOff
@@ -1417,6 +1419,8 @@ Global QuitMSG% = 0
 
 Global InFacility% = True
 
+Global PrevMusicVolume# = MusicVolume#
+Global PrevSFXVolume# = SFXVolume#
 Global DeafPlayer% = False
 Global DeafTimer# = 0.0
 
@@ -1426,12 +1430,12 @@ Global room2gw_brokendoor% = False
 Global room2gw_x# = 0.0
 Global room2gw_z# = 0.0
 
-Global NavImages[5]
+Dim NavImages(5)
 For i = 0 To 3
-	NavImages[i] = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
-	MaskImage NavImages[i],255,0,255
+	NavImages(i) = LoadImage_Strict("GFX\navigator\roomborder"+i+".png")
+	MaskImage NavImages(i),255,0,255
 Next
-NavImages[4] = LoadImage_Strict("GFX\navigator\batterymeter.png")
+NavImages(4) = LoadImage_Strict("GFX\navigator\batterymeter.png")
 
 Global NavBG = CreateImage(GraphicWidth,GraphicHeight)
 
@@ -1524,8 +1528,8 @@ Type Doors
 	Field MTFClose% = True
 End Type 
 
-Global BigDoorOBJ[2], HeavyDoorObj[2]
-Global OBJTunnel[7]
+Dim BigDoorOBJ(2), HeavyDoorObj(2)
+Dim OBJTunnel(7)
 
 Function CreateDoor.Doors(x#, y#, z#, angle#, room.Rooms, dopen% = False,  big% = False, keycard% = False, code$="", useCollisionMesh% = False)
 	Local d.Doors, parent, i%
@@ -1535,9 +1539,9 @@ Function CreateDoor.Doors(x#, y#, z#, angle#, room.Rooms, dopen% = False,  big% 
 	
 	d.Doors = New Doors
 	If big=1 Then
-		d\obj = CopyEntity(BigDoorOBJ[0])
+		d\obj = CopyEntity(BigDoorOBJ(0))
 		ScaleEntity(d\obj, 55 * RoomScale, 55 * RoomScale, 55 * RoomScale)
-		d\obj2 = CopyEntity(BigDoorOBJ[1])
+		d\obj2 = CopyEntity(BigDoorOBJ(1))
 		ScaleEntity(d\obj2, 55 * RoomScale, 55 * RoomScale, 55 * RoomScale)
 		
 		d\frameobj = CopyEntity(DoorColl)				
@@ -1545,9 +1549,9 @@ Function CreateDoor.Doors(x#, y#, z#, angle#, room.Rooms, dopen% = False,  big% 
 		EntityType d\frameobj, HIT_MAP
 		EntityAlpha d\frameobj, 0.0
 	ElseIf big=2 Then
-		d\obj = CopyEntity(HeavyDoorObj[0])
+		d\obj = CopyEntity(HeavyDoorObj(0))
 		ScaleEntity(d\obj, RoomScale, RoomScale, RoomScale)
-		d\obj2 = CopyEntity(HeavyDoorObj[1])
+		d\obj2 = CopyEntity(HeavyDoorObj(1))
 		ScaleEntity(d\obj2, RoomScale, RoomScale, RoomScale)
 		
 		d\frameobj = CopyEntity(DoorFrameOBJ)
@@ -1742,7 +1746,7 @@ Function UpdateDoors()
 					EndIf
 					If d\AutoClose And RemoteDoorOn = True Then
 						If EntityDistance(Camera, d\obj) < 2.1 Then
-							If (Not Wearing714) Then PlaySound_Strict HorrorSFX[7]
+							If (Not Wearing714) Then PlaySound_Strict HorrorSFX(7)
 							d\open = False : d\SoundCHN = PlaySound2(CloseDoorSFX(Min(d\dir,1), Rand(0, 2)), Camera, d\obj) : d\AutoClose = False
 						EndIf
 					EndIf				
@@ -2276,7 +2280,7 @@ Global NVTexture%, NVOverlay%
 Global TeslaTexture%
 
 Global LightTexture%, Light%
-Global LightSpriteTex%[3]
+Dim LightSpriteTex%(5)
 Global DoorOBJ%, DoorFrameOBJ%
 
 Global LeverOBJ%, LeverBaseOBJ%
@@ -2284,7 +2288,7 @@ Global LeverOBJ%, LeverBaseOBJ%
 Global DoorColl%
 Global ButtonOBJ%, ButtonKeyOBJ%, ButtonCodeOBJ%, ButtonScannerOBJ%
 
-Global DecalTextures%[21]
+Dim DecalTextures%(20)
 
 Global Monitor%, MonitorTexture%
 Global CamBaseOBJ%, CamOBJ%
@@ -2454,7 +2458,7 @@ Repeat
 					Next
 				EndIf
 				
-				CurrAmbientSFX = Rand(0,AmbientSFXAmount[PlayerZone]-1)
+				CurrAmbientSFX = Rand(0,AmbientSFXAmount(PlayerZone)-1)
 				
 				Select PlayerZone
 					Case 0,1,2
@@ -2748,7 +2752,7 @@ Repeat
 			EndIf
 		ElseIf SelectedDifficulty\saveType = SAVEONSCREENS And (SelectedScreen<>Null Lor SelectedMonitor<>Null)
 			If (Msg<>"Game progress saved." And Msg<>"You cannot save in this location."And Msg<>"You cannot save at this moment.") Lor MsgTimer<=0 Then
-				Msg = "Press "+KeyName[KEY_SAVE]+" to save."
+				Msg = "Press "+KeyName(KEY_SAVE)+" to save."
 				MsgTimer = 70*4
 			EndIf
 			
@@ -2790,7 +2794,6 @@ Repeat
 								e\EventState3 = 50
 							EndIf
 						EndIf
-						Exit
 					EndIf
 				Next
 			EndIf
@@ -2810,11 +2813,17 @@ Repeat
 				Color 0,0,0
 				AAText((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 				Color 255,255,255
+				If Left(Msg,14)="Blitz3D Error!" Then
+					Color 255,0,0
+				EndIf
 				AAText((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 			Else
 				Color 0,0,0
 				AAText((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 				Color 255,255,255
+				If Left(Msg,14)="Blitz3D Error!" Then
+					Color 255,0,0
+				EndIf
 				AAText((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
 			EndIf
 			MsgTimer=MsgTimer-FPSfactor2 
@@ -2848,7 +2857,7 @@ Function Kill()
 	
 	If KillTimer >= 0 Then
 		KillAnim = Rand(0,1)
-		PlaySound_Strict(DamageSFX[0])
+		PlaySound_Strict(DamageSFX(0))
 		If SelectedDifficulty\permaDeath Then
 			DeleteFile(CurrentDir() + SavePath + CurrSave+"\save.txt") 
 			DeleteDir(SavePath + CurrSave)
@@ -2966,13 +2975,13 @@ Function DrawEnding()
 					Local scpsEncountered=1
 					
 					For i = 0 To 24
-						scpsEncountered = scpsEncountered+Achievements[i]
+						scpsEncountered = scpsEncountered+Achievements(i)
 					Next
 					
 					Local achievementsUnlocked =0
 					
 					For i = 0 To MAXACHIEVEMENTS-1
-						achievementsUnlocked = achievementsUnlocked + Achievements[i]
+						achievementsUnlocked = achievementsUnlocked + Achievements(i)
 					Next
 					
 					AAText x, y, "SCPs encountered: " +scpsEncountered
@@ -3273,10 +3282,10 @@ Function MovePlayer()
 						ChannelVolume tempchn, (1.0-(Crouch*0.6))*SFXVolume#
 					EndIf
 				ElseIf CurrStepSFX=1
-					tempchn% = PlaySound_Strict(Step2SFX[Rand(0, 2)])
+					tempchn% = PlaySound_Strict(Step2SFX(Rand(0, 2)))
 					ChannelVolume tempchn, (1.0-(Crouch*0.4))*SFXVolume#
 				ElseIf CurrStepSFX=2
-					tempchn% = PlaySound_Strict(Step2SFX[Rand(3,5)])
+					tempchn% = PlaySound_Strict(Step2SFX(Rand(3,5)))
 					ChannelVolume tempchn, (1.0-(Crouch*0.4))*SFXVolume#
 				ElseIf CurrStepSFX=3
 					If Sprint = 1.0 Then
@@ -3372,9 +3381,9 @@ Function MovePlayer()
 				If CurrStepSFX=0 Then
 					PlaySound_Strict(StepSFX(GetStepSound(Collider), 0, Rand(0, 7)))
 				ElseIf CurrStepSFX=1
-					PlaySound_Strict(Step2SFX[Rand(0, 2)])
+					PlaySound_Strict(Step2SFX(Rand(0, 2)))
 				ElseIf CurrStepSFX=2
-					PlaySound_Strict(Step2SFX[Rand(3, 5)])
+					PlaySound_Strict(Step2SFX(Rand(3, 5)))
 				ElseIf CurrStepSFX=3
 					PlaySound_Strict(StepSFX(0, 0, Rand(0, 7)))
 				EndIf
@@ -3423,7 +3432,7 @@ Function MovePlayer()
 			EntityPick(pvt,0.3)
 			de.decals = CreateDecal(Rand(15,16), PickedX(), PickedY()+0.005, PickedZ(), 90, Rand(360), 0)
 			de\size = Rnd(0.03,0.08)*Min(Injuries,3.0) : EntityAlpha(de\obj, 1.0) : ScaleSprite de\obj, de\size, de\size
-			tempchn% = PlaySound_Strict (DripSFX[Rand(0,2)])
+			tempchn% = PlaySound_Strict (DripSFX(Rand(0,2)))
 			ChannelVolume tempchn, Rnd(0.0,0.8)*SFXVolume
 			ChannelPitch tempchn, Rand(20000,30000)
 			
@@ -3623,9 +3632,9 @@ Function MouseLook()
 					If FPSfactor>0 Then 
 						If Rand(1000)=1 Then
 							If CoughCHN = 0 Then
-								CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							Else
-								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							EndIf
 						EndIf
 					EndIf
@@ -3639,9 +3648,9 @@ Function MouseLook()
 					If FPSfactor>0 Then 
 						If Rand(800)=1 Then
 							If CoughCHN = 0 Then
-								CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							Else
-								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							EndIf
 						EndIf
 					EndIf
@@ -3661,9 +3670,9 @@ Function MouseLook()
 					If Stamina < 35 Then
 						If Rand(Int(140+Stamina*8))=1 Then
 							If CoughCHN = 0 Then
-								CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							Else
-								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX[Rand(0, 2)])
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
 							EndIf
 						EndIf
 						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
@@ -3713,7 +3722,7 @@ Function DrawGUI()
 						If BlinkTimer < -3 And BlinkTimer > -10 Then
 							If e\img = 0 Then
 								If BlinkTimer > -5 And Rand(30)=1 Then
-									PlaySound_Strict DripSFX[0]
+									PlaySound_Strict DripSFX(0)
 									If e\img = 0 Then e\img = LoadImage_Strict("GFX\npcs\106face.jpg")
 								EndIf
 							Else
@@ -3799,7 +3808,7 @@ Function DrawGUI()
 	
 	If DrawHandIcon Then DrawImage(HandIcon, GraphicWidth / 2 - 32, GraphicHeight / 2 - 32)
 	For i = 0 To 3
-		If DrawArrowIcon[i] Then
+		If DrawArrowIcon(i) Then
 			x = GraphicWidth / 2 - 32
 			y = GraphicHeight / 2 - 32		
 			Select i
@@ -3815,8 +3824,8 @@ Function DrawGUI()
 			DrawImage(HandIcon, x, y)
 			Color 0, 0, 0
 			Rect(x + 4, y + 4, 64 - 8, 64 - 8)
-			DrawImage(ArrowIMG[i], x + 21, y + 21)
-			DrawArrowIcon[i] = False
+			DrawImage(ArrowIMG(i), x + 21, y + 21)
+			DrawArrowIcon(i) = False
 		EndIf
 	Next
 	
@@ -4160,7 +4169,7 @@ Function DrawGUI()
 							MouseHit1 = False
 							
 							If DoubleClick Then
-								If OtherOpen\SecondInv[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[OtherOpen\SecondInv[n]\itemtemplate\sound])
+								If OtherOpen\SecondInv[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(OtherOpen\SecondInv[n]\itemtemplate\sound))
 								OtherOpen = Null
 								closedInv=True
 								InvOpen = False
@@ -4197,7 +4206,7 @@ Function DrawGUI()
 				EndIf
 			Else
 				If MouseSlot = 66 Then
-					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+					If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 					ShowEntity(SelectedItem\collider)
 					PositionEntity(SelectedItem\collider, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
 					RotateEntity(SelectedItem\collider, EntityPitch(Camera), EntityYaw(Camera), 0)
@@ -4370,7 +4379,7 @@ Function DrawGUI()
 									SelectedItem = Null
 									Return
 								EndIf
-								If Inventory[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[Inventory[n]\itemtemplate\sound])
+								If Inventory[n]\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(Inventory[n]\itemtemplate\sound))
 								InvOpen = False
 								DoubleClick = False
 							EndIf
@@ -4457,7 +4466,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory[ri] = SelectedItem Then
 															Inventory[ri] = Null
-															PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 														EndIf
 													Next
 													added = SelectedItem
@@ -4501,7 +4510,7 @@ Function DrawGUI()
 													For ri% = 0 To MaxItemAmount - 1
 														If Inventory[ri] = SelectedItem Then
 															Inventory[ri] = Null
-															PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+															PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 														EndIf
 													Next
 													added = SelectedItem
@@ -4531,7 +4540,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory[MouseSlot]\itemtemplate\name
 									Case "S-NAV Navigator", "S-NAV 300 Navigator", "S-NAV 310 Navigator"
-										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])	
+										If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 										RemoveItem (SelectedItem)
 										SelectedItem = Null
 										Inventory[MouseSlot]\state = 100.0
@@ -4549,7 +4558,7 @@ Function DrawGUI()
 												Msg = "The battery does not fit inside this radio."
 												MsgTimer = 70 * 5
 											Case "radio"
-												If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])	
+												If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 												RemoveItem (SelectedItem)
 												SelectedItem = Null
 												Inventory[MouseSlot]\state = 100.0
@@ -4559,7 +4568,7 @@ Function DrawGUI()
 									Case "Night Vision Goggles"
 										Local nvname$ = Inventory[MouseSlot]\itemtemplate\tempname
 										If nvname$="nvgoggles" Lor nvname$="supernv" Then
-											If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])	
+											If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 											RemoveItem (SelectedItem)
 											SelectedItem = Null
 											Inventory[MouseSlot]\state = 1000.0
@@ -4589,7 +4598,7 @@ Function DrawGUI()
 												Msg = "There seems to be no place for batteries in this radio."
 												MsgTimer = 70 * 5		
 											Case "18vradio"
-												If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])	
+												If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))	
 												RemoveItem (SelectedItem)
 												SelectedItem = Null
 												Inventory[MouseSlot]\state = 100.0
@@ -5103,15 +5112,15 @@ Function DrawGUI()
 						MaskImage(SelectedItem\itemtemplate\img, 255, 0, 255)
 					EndIf
 					
-					;RadioState[5] = has the "use the number keys" -message been shown yet (true/false)
-					;RadioState[6] = a timer for the "code channel"
-					;RadioState[7] = another timer for the "code channel"
+					;radiostate(5) = has the "use the number keys" -message been shown yet (true/false)
+					;radiostate(6) = a timer for the "code channel"
+					;RadioState(7) = another timer for the "code channel"
 					
-					If RadioState[5] = 0 Then 
+					If RadioState(5) = 0 Then 
 						Msg = "Use the numbered keys 1 through 5 to cycle between various channels."
 						MsgTimer = 70 * 5
-						RadioState[5] = 1
-						RadioState[0] = -1
+						RadioState(5) = 1
+						RadioState(0) = -1
 					EndIf
 					
 					strtemp$ = ""
@@ -5123,40 +5132,40 @@ Function DrawGUI()
 					
 					If SelectedItem\state > 0 Then
 						If PlayerRoom\RoomTemplate\Name = "pocketdimension" Lor CoffinDistance < 4.0 Then
-							ResumeChannel(RadioCHN[5])
-							If ChannelPlaying(RadioCHN[5]) = False Then RadioCHN[5] = PlaySound_Strict(RadioStatic)	
+							ResumeChannel(RadioCHN(5))
+							If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)	
 						Else
 							Select Int(SelectedItem\state2)
 								Case 0
-									ResumeChannel(RadioCHN[0])
+									ResumeChannel(RadioCHN(0))
 									strtemp = "        USER TRACK PLAYER - "
 									If (Not EnableUserTracks)
-										If ChannelPlaying(RadioCHN[0]) = False Then RadioCHN[0] = PlaySound_Strict(RadioStatic)
+										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
 										strtemp = strtemp + "NOT ENABLED     "
 									ElseIf UserTrackMusicAmount<1
-										If ChannelPlaying(RadioCHN[0]) = False Then RadioCHN[0] = PlaySound_Strict(RadioStatic)
+										If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
 										strtemp = strtemp + "NO TRACKS FOUND     "
 									Else
-										If (Not ChannelPlaying(RadioCHN[0]))
+										If (Not ChannelPlaying(RadioCHN(0)))
 											If (Not UserTrackFlag%)
 												If UserTrackMode
-													If RadioState[0]<(UserTrackMusicAmount-1)
-														RadioState[0] = RadioState[0] + 1
+													If RadioState(0)<(UserTrackMusicAmount-1)
+														RadioState(0) = RadioState(0) + 1
 													Else
-														RadioState[0] = 0
+														RadioState(0) = 0
 													EndIf
 													UserTrackFlag = True
 												Else
-													RadioState[0] = Rand(0,UserTrackMusicAmount-1)
+													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 												EndIf
 											EndIf
 											If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
-											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName[RadioState[0]])
-											RadioCHN[0] = PlaySound_Strict(CurrUserTrack%)
-											DebugLog "CurrTrack: "+RadioState[0]
-											DebugLog UserTrackName[RadioState[0]]
+											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
+											RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
+											DebugLog "CurrTrack: "+RadioState(0)
+											DebugLog UserTrackName$(RadioState(0))
 										Else
-											strtemp = strtemp + Upper(UserTrackName[RadioState[0]]) + "          "
+											strtemp = strtemp + Upper(UserTrackName$(RadioState(0))) + "          "
 											UserTrackFlag = False
 										EndIf
 										
@@ -5164,182 +5173,182 @@ Function DrawGUI()
 											PlaySound_Strict RadioSquelch
 											If (Not UserTrackFlag%)
 												If UserTrackMode
-													If RadioState[0]<(UserTrackMusicAmount-1)
-														RadioState[0] = RadioState[0] + 1
+													If RadioState(0)<(UserTrackMusicAmount-1)
+														RadioState(0) = RadioState(0) + 1
 													Else
-														RadioState[0] = 0
+														RadioState(0) = 0
 													EndIf
 													UserTrackFlag = True
 												Else
-													RadioState[0] = Rand(0,UserTrackMusicAmount-1)
+													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 												EndIf
 											EndIf
 											If CurrUserTrack%<>0 Then FreeSound_Strict(CurrUserTrack%) : CurrUserTrack% = 0
-											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName[RadioState[0]])
-											RadioCHN[0] = PlaySound_Strict(CurrUserTrack%)
-											DebugLog "CurrTrack: "+RadioState[0]
-											DebugLog UserTrackName[RadioState[0]]
+											CurrUserTrack% = LoadSound_Strict("SFX\Radio\UserTracks\"+UserTrackName$(RadioState(0)))
+											RadioCHN(0) = PlaySound_Strict(CurrUserTrack%)
+											DebugLog "CurrTrack: "+RadioState(0)
+											DebugLog UserTrackName$(RadioState(0))
 										EndIf
 									EndIf
 								Case 1
-									DebugLog RadioState[1] 
+									DebugLog RadioState(1) 
 									
-									ResumeChannel(RadioCHN[1])
+									ResumeChannel(RadioCHN(1))
 									strtemp = "        WARNING - CONTAINMENT BREACH          "
-									If ChannelPlaying(RadioCHN[1]) = False Then
-										If RadioState[1] => 5 Then
-											RadioCHN[1] = PlaySound_Strict(RadioSFX(1,1))	
-											RadioState[1] = 0
+									If ChannelPlaying(RadioCHN(1)) = False Then
+										If RadioState(1) => 5 Then
+											RadioCHN(1) = PlaySound_Strict(RadioSFX(1,1))	
+											RadioState(1) = 0
 										Else
-											RadioState[1]=RadioState[1]+1	
-											RadioCHN[1] = PlaySound_Strict(RadioSFX(1,0))	
+											RadioState(1)=RadioState(1)+1	
+											RadioCHN(1) = PlaySound_Strict(RadioSFX(1,0))	
 										EndIf
 									EndIf
 								Case 2 ;scp-radio
-									ResumeChannel(RadioCHN[2])
+									ResumeChannel(RadioCHN(2))
 									strtemp = "        SCP Foundation On-Site Radio          "
-									If ChannelPlaying(RadioCHN[2]) = False Then
-										RadioState[2]=RadioState[2]+1
-										If RadioState[2] = 17 Then RadioState[2] = 1
-										If Floor(RadioState[2]/2)=Ceil(RadioState[2]/2) Then
-											RadioCHN[2] = PlaySound_Strict(RadioSFX(2,Int(RadioState[2]/2)))	
+									If ChannelPlaying(RadioCHN(2)) = False Then
+										RadioState(2)=RadioState(2)+1
+										If RadioState(2) = 17 Then RadioState(2) = 1
+										If Floor(RadioState(2)/2)=Ceil(RadioState(2)/2) Then
+											RadioCHN(2) = PlaySound_Strict(RadioSFX(2,Int(RadioState(2)/2)))	
 										Else
-											RadioCHN[2] = PlaySound_Strict(RadioSFX(2,0))
+											RadioCHN(2) = PlaySound_Strict(RadioSFX(2,0))
 										EndIf
 									EndIf 
 								Case 3
-									ResumeChannel(RadioCHN[3])
+									ResumeChannel(RadioCHN(3))
 									strtemp = "             EMERGENCY CHANNEL - RESERVED FOR COMMUNICATION IN THE EVENT OF A CONTAINMENT BREACH         "
-									If ChannelPlaying(RadioCHN[3]) = False Then RadioCHN[3] = PlaySound_Strict(RadioStatic)
+									If ChannelPlaying(RadioCHN(3)) = False Then RadioCHN(3) = PlaySound_Strict(RadioStatic)
 									
 									If MTFtimer > 0 Then 
-										RadioState[3]=RadioState[3]+Max(Rand(-10,1),0)
-										Select RadioState[3]
+										RadioState(3)=RadioState(3)+Max(Rand(-10,1),0)
+										Select RadioState(3)
 											Case 40
-												If Not RadioState3[0] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random1.ogg"))
-													RadioState[3] = RadioState[3]+1	
-													RadioState3[0] = True	
+												If Not RadioState3(0) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random1.ogg"))
+													RadioState(3) = RadioState(3)+1	
+													RadioState3(0) = True	
 												EndIf											
 											Case 400
-												If Not RadioState3[1] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random2.ogg"))
-													RadioState[3] = RadioState[3]+1	
-													RadioState3[1] = True	
+												If Not RadioState3(1) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random2.ogg"))
+													RadioState(3) = RadioState(3)+1	
+													RadioState3(1) = True	
 												EndIf	
 											Case 800
-												If Not RadioState3[2] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random3.ogg"))
-													RadioState[3] = RadioState[3]+1	
-													RadioState3[2] = True
+												If Not RadioState3(2) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random3.ogg"))
+													RadioState(3) = RadioState(3)+1	
+													RadioState3(2) = True
 												EndIf													
 											Case 1200
-												If Not RadioState3[3] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random4.ogg"))	
-													RadioState[3] = RadioState[3]+1	
-													RadioState3[3] = True
+												If Not RadioState3(3) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random4.ogg"))	
+													RadioState(3) = RadioState(3)+1	
+													RadioState3(3) = True
 												EndIf
 											Case 1600
-												If Not RadioState3[4] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random5.ogg"))	
-													RadioState[3] = RadioState[3]+1
-													RadioState3[4] = True
+												If Not RadioState3(4) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random5.ogg"))	
+													RadioState(3) = RadioState(3)+1
+													RadioState3(4) = True
 												EndIf
 											Case 2000
-												If Not RadioState3[5] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random6.ogg"))	
-													RadioState[3] = RadioState[3]+1
-													RadioState3[5] = True
+												If Not RadioState3(5) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random6.ogg"))	
+													RadioState(3) = RadioState(3)+1
+													RadioState3(5) = True
 												EndIf
 											Case 2400
-												If Not RadioState3[6] Then
-													RadioCHN[3] = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random7.ogg"))	
-													RadioState[3] = RadioState[3]+1
-													RadioState3[6] = True
+												If Not RadioState3(6) Then
+													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX\Character\MTF\Random7.ogg"))	
+													RadioState(3) = RadioState(3)+1
+													RadioState3(6) = True
 												EndIf
 										End Select
 									EndIf
 								Case 4
-									ResumeChannel(RadioCHN[6])
-									If ChannelPlaying(RadioCHN[6]) = False Then RadioCHN[6] = PlaySound_Strict(RadioStatic)									
+									ResumeChannel(RadioCHN(6))
+									If ChannelPlaying(RadioCHN(6)) = False Then RadioCHN(6) = PlaySound_Strict(RadioStatic)									
 									
-									ResumeChannel(RadioCHN[4])
-									If ChannelPlaying(RadioCHN[4]) = False Then 
-										If RemoteDoorOn = False And RadioState[8] = False Then
-											RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
-											RadioState[8] = True
+									ResumeChannel(RadioCHN(4))
+									If ChannelPlaying(RadioCHN(4)) = False Then 
+										If RemoteDoorOn = False And RadioState(8) = False Then
+											RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter3.ogg"))	
+											RadioState(8) = True
 										Else
-											RadioState[4]=RadioState[4]+Max(Rand(-10,1),0)
+											RadioState(4)=RadioState(4)+Max(Rand(-10,1),0)
 											
-											Select RadioState[4]
+											Select RadioState(4)
 												Case 10
 													If (Not Contained106)
-														If Not RadioState4[0] Then
-															RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\OhGod.ogg"))
-															RadioState[4] = RadioState[4]+1
-															RadioState4[0] = True
+														If Not RadioState4(0) Then
+															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\OhGod.ogg"))
+															RadioState(4) = RadioState(4)+1
+															RadioState4(0) = True
 														EndIf
 													EndIf
 												Case 100
-													If Not RadioState4[1] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter2.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState4[1] = True
+													If Not RadioState4(1) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter2.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState4(1) = True
 													EndIf		
 												Case 158
-													If MTFtimer = 0 And (Not RadioState4[2]) Then 
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\franklin1.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState[2] = True
+													If MTFtimer = 0 And (Not RadioState4(2)) Then 
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin1.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState(2) = True
 													EndIf
 												Case 200
-													If Not RadioState4[3] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter4.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState4[3] = True
+													If Not RadioState4(3) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter4.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState4(3) = True
 													EndIf		
 												Case 260
-													If Not RadioState4[4] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp1.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState4[4] = True
+													If Not RadioState4(4) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp1.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState4(4) = True
 													EndIf		
 												Case 300
-													If Not RadioState4[5] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter1.ogg"))	
-														RadioState[4] = RadioState[4]+1	
-														RadioState4[5] = True
+													If Not RadioState4(5) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\Chatter1.ogg"))	
+														RadioState(4) = RadioState(4)+1	
+														RadioState4(5) = True
 													EndIf		
 												Case 350
-													If Not RadioState4[6] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\franklin2.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState4[6] = True
+													If Not RadioState4(6) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin2.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState4(6) = True
 													EndIf		
 												Case 400
-													If Not RadioState4[7] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp2.ogg"))
-														RadioState[4] = RadioState[4]+1
-														RadioState4[7] = True
+													If Not RadioState4(7) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\SCP\035\RadioHelp2.ogg"))
+														RadioState(4) = RadioState(4)+1
+														RadioState4(7) = True
 													EndIf		
 												Case 450
-													If Not RadioState4[8] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\franklin3.ogg"))	
-														RadioState[4] = RadioState[4]+1		
-														RadioState4[8] = True
+													If Not RadioState4(8) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin3.ogg"))	
+														RadioState(4) = RadioState(4)+1		
+														RadioState4(8) = True
 													EndIf		
 												Case 600
-													If Not RadioState4[9] Then
-														RadioCHN[4] = PlaySound_Strict(LoadTempSound("SFX\radio\franklin4.ogg"))	
-														RadioState[4] = RadioState[4]+1	
-														RadioState4[9] = True
+													If Not RadioState4(9) Then
+														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX\radio\franklin4.ogg"))	
+														RadioState(4) = RadioState(4)+1	
+														RadioState4(9) = True
 													EndIf		
 											End Select
 										EndIf
 									EndIf
 								Case 5
-									ResumeChannel(RadioCHN[5])
-									If ChannelPlaying(RadioCHN[5]) = False Then RadioCHN[5] = PlaySound_Strict(RadioStatic)
+									ResumeChannel(RadioCHN(5))
+									If ChannelPlaying(RadioCHN(5)) = False Then RadioCHN(5) = PlaySound_Strict(RadioStatic)
 							End Select 
 							
 							x=x+66
@@ -5357,18 +5366,18 @@ Function DrawGUI()
 							AAText(x+60, y, "CHN")						
 							
 							If SelectedItem\itemtemplate\tempname = "veryfineradio" Then
-								ResumeChannel(RadioCHN[0])
-								If ChannelPlaying(RadioCHN[0]) = False Then RadioCHN[0] = PlaySound_Strict(RadioStatic)
-								RadioState[6]=RadioState[6] + FPSfactor
-								temp = Mid(Str(AccessCode),RadioState[8]+1,1)
-								If RadioState[6]-FPSfactor =< RadioState[7]*50 And RadioState[6]>RadioState[7]*50 Then
+								ResumeChannel(RadioCHN(0))
+								If ChannelPlaying(RadioCHN(0)) = False Then RadioCHN(0) = PlaySound_Strict(RadioStatic)
+								RadioState(6)=RadioState(6) + FPSfactor
+								temp = Mid(Str(AccessCode),RadioState(8)+1,1)
+								If RadioState(6)-FPSfactor =< RadioState(7)*50 And RadioState(6)>RadioState(7)*50 Then
 									PlaySound_Strict(RadioBuzz)
-									RadioState[7]=RadioState[7]+1
-									If RadioState[7]=>temp Then
-										RadioState[7]=0
-										RadioState[6]=-100
-										RadioState[8]=RadioState[8]+1
-										If RadioState[8]=4 Then RadioState[8]=0 : RadioState[6]=-200
+									RadioState(7)=RadioState(7)+1
+									If RadioState(7)=>temp Then
+										RadioState(7)=0
+										RadioState(6)=-100
+										RadioState(8)=RadioState(8)+1
+										If RadioState(8)=4 Then RadioState(8)=0 : RadioState(6)=-200
 									EndIf
 								EndIf
 								
@@ -5384,10 +5393,10 @@ Function DrawGUI()
 									If KeyHit(i) Then
 										If SelectedItem\state2 <> i-2 Then
 											PlaySound_Strict RadioSquelch
-											If RadioCHN[Int(SelectedItem\state2)] <> 0 Then PauseChannel(RadioCHN[Int(SelectedItem\state2)])
+											If RadioCHN(Int(SelectedItem\state2)) <> 0 Then PauseChannel(RadioCHN(Int(SelectedItem\state2)))
 										EndIf
 										SelectedItem\state2 = i-2
-										If RadioCHN[SelectedItem\state2]<>0 Then ResumeChannel(RadioCHN[SelectedItem\state2])
+										If RadioCHN(SelectedItem\state2)<>0 Then ResumeChannel(RadioCHN(SelectedItem\state2))
 									EndIf
 								Next
 								AASetFont Font4
@@ -5506,7 +5515,7 @@ Function DrawGUI()
 								Else
 									WearingHazmat = 3
 								EndIf
-								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+								If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 								Msg = "You put on the hazmat suit."
 								If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 								WearingGasMask = 0
@@ -5548,7 +5557,7 @@ Function DrawGUI()
 								Msg = "You put on the vest and feel heavily encumbered."
 								WearingVest = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 						EndIf
 						SelectedItem\state=0
 						MsgTimer = 70 * 5
@@ -5648,31 +5657,31 @@ Function DrawGUI()
 											
 											If x2+1<=MapSize Then
 												If MapTemp(x2+1,z2)=False
-													DrawImage NavImages[3],drawx-12,drawy-12
+													DrawImage NavImages(3),drawx-12,drawy-12
 												EndIf
 											Else
-												DrawImage NavImages[3],drawx-12,drawy-12
+												DrawImage NavImages(3),drawx-12,drawy-12
 											EndIf
 											If x2-1>=0 Then
 												If MapTemp(x2-1,z2)=False
-													DrawImage NavImages[1],drawx-12,drawy-12
+													DrawImage NavImages(1),drawx-12,drawy-12
 												EndIf
 											Else
-												DrawImage NavImages[1],drawx-12,drawy-12
+												DrawImage NavImages(1),drawx-12,drawy-12
 											EndIf
 											If z2-1>=0 Then
 												If MapTemp(x2,z2-1)=False
-													DrawImage NavImages[0],drawx-12,drawy-12
+													DrawImage NavImages(0),drawx-12,drawy-12
 												EndIf
 											Else
-												DrawImage NavImages[0],drawx-12,drawy-12
+												DrawImage NavImages(0),drawx-12,drawy-12
 											EndIf
 											If z2+1<=MapSize Then
 												If MapTemp(x2,z2+1)=False
-													DrawImage NavImages[2],drawx-12,drawy-12
+													DrawImage NavImages(2),drawx-12,drawy-12
 												EndIf
 											Else
-												DrawImage NavImages[2],drawx-12,drawy-12
+												DrawImage NavImages(2),drawx-12,drawy-12
 											EndIf
 										EndIf
 									EndIf
@@ -5771,7 +5780,7 @@ Function DrawGUI()
 								Rect xtemp,ytemp,80,20,False
 								
 								For i = 1 To Ceil(SelectedItem\state / 10.0)
-									DrawImage NavImages[4],xtemp+i*8-6,ytemp+4
+									DrawImage NavImages(4),xtemp+i*8-6,ytemp+4
 								Next
 								AASetFont Font3
 							EndIf
@@ -5805,14 +5814,14 @@ Function DrawGUI()
 					If SelectedItem\state=100 Then
 						If Wearing1499>0 Then
 							Wearing1499 = False
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 						Else
 							If SelectedItem\itemtemplate\tempname="scp1499" Then
 								Wearing1499 = 1
 							Else
 								Wearing1499 = 2
 							EndIf
-							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+							If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 							GiveAchievement(Achv1499)
 							If WearingNightVision Then CameraFogFar = StoredCameraFogFar
 							WearingGasMask = 0
@@ -6024,7 +6033,7 @@ Function DrawGUI()
 					SelectedItem\state = 0
 				EndIf
 				
-				If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])
+				If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(SelectedItem\itemtemplate\sound))
 				SelectedItem = Null
 			EndIf
 		EndIf		
@@ -6032,8 +6041,8 @@ Function DrawGUI()
 	
 	If SelectedItem = Null Then
 		For i = 0 To 6
-			If RadioCHN[i] <> 0 Then 
-				If ChannelPlaying(RadioCHN[i]) Then PauseChannel(RadioCHN[i])
+			If RadioCHN(i) <> 0 Then 
+				If ChannelPlaying(RadioCHN(i)) Then PauseChannel(RadioCHN(i))
 			EndIf
 		Next
 	EndIf
@@ -6076,7 +6085,7 @@ Function DrawMenu()
 					StopHidingTimer = StopHidingTimer+FPSfactor
 					
 					If StopHidingTimer => 40 Then
-						PlaySound_Strict(HorrorSFX[15])
+						PlaySound_Strict(HorrorSFX(15))
 						Msg = "STOP HIDING"
 						MsgTimer = 6*70
 						MenuOpen = False
@@ -6350,26 +6359,26 @@ Function DrawMenu()
 					y = y + 10*MenuScale
 					
 					AAText(x, y + 20 * MenuScale, "Move Forward")
-					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_UP,210)],5)		
+					InputBox(x + 200 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
 					AAText(x, y + 40 * MenuScale, "Strafe Left")
-					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_LEFT,210)],3)	
+					InputBox(x + 200 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3)	
 					AAText(x, y + 60 * MenuScale, "Move Backward")
-					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_DOWN,210)],6)				
+					InputBox(x + 200 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6)				
 					AAText(x, y + 80 * MenuScale, "Strafe Right")
-					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_RIGHT,210)],4)
+					InputBox(x + 200 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)
 					
 					AAText(x, y + 100 * MenuScale, "Manual Blink")
-					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_BLINK,210)],7)				
+					InputBox(x + 200 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
 					AAText(x, y + 120 * MenuScale, "Sprint")
-					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SPRINT,210)],8)
+					InputBox(x + 200 * MenuScale, y + 120 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8)
 					AAText(x, y + 140 * MenuScale, "Open/Close Inventory")
-					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_INV,210)],9)
+					InputBox(x + 200 * MenuScale, y + 140 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9)
 					AAText(x, y + 160 * MenuScale, "Crouch")
-					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CROUCH,210)],10)
+					InputBox(x + 200 * MenuScale, y + 160 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10)
 					AAText(x, y + 180 * MenuScale, "Quick Save")
-					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SAVE,210)],11)	
+					InputBox(x + 200 * MenuScale, y + 180 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)	
 					AAText(x, y + 200 * MenuScale, "Open/Close Console")
-					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CONSOLE,210)],12)
+					InputBox(x + 200 * MenuScale, y + 200 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
 					
 					If MouseOn(x,y,300*MenuScale,220*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
@@ -6900,9 +6909,9 @@ Function LoadEntities()
 	ClerkOBJ = LoadAnimMesh_Strict("GFX\npcs\clerk.b3d")
 	HideEntity ClerkOBJ	
 	
-	LightSpriteTex[0] = LoadTexture_Strict("GFX\light1.jpg", 1)
-	LightSpriteTex[1] = LoadTexture_Strict("GFX\light2.jpg", 1)
-	LightSpriteTex[2] = LoadTexture_Strict("GFX\lightsprite.jpg",1)
+	LightSpriteTex(0) = LoadTexture_Strict("GFX\light1.jpg", 1)
+	LightSpriteTex(1) = LoadTexture_Strict("GFX\light2.jpg", 1)
+	LightSpriteTex(2) = LoadTexture_Strict("GFX\lightsprite.jpg",1)
 	
 	DrawLoading(10)
 	
@@ -6911,10 +6920,10 @@ Function LoadEntities()
 	DoorFrameOBJ = LoadMesh_Strict("GFX\map\doorframe.x")
 	HideEntity DoorFrameOBJ
 	
-	HeavyDoorObj[0] = LoadMesh_Strict("GFX\map\heavydoor1.x")
-	HideEntity HeavyDoorObj[0]
-	HeavyDoorObj[1] = LoadMesh_Strict("GFX\map\heavydoor2.x")
-	HideEntity HeavyDoorObj[1]
+	HeavyDoorObj(0) = LoadMesh_Strict("GFX\map\heavydoor1.x")
+	HideEntity HeavyDoorObj(0)
+	HeavyDoorObj(1) = LoadMesh_Strict("GFX\map\heavydoor2.x")
+	HideEntity HeavyDoorObj(1)
 	
 	DoorColl = LoadMesh_Strict("GFX\map\doorcoll.x")
 	HideEntity DoorColl
@@ -6928,10 +6937,10 @@ Function LoadEntities()
 	ButtonScannerOBJ = LoadMesh_Strict("GFX\map\ButtonScanner.x")
 	HideEntity ButtonScannerOBJ	
 	
-	BigDoorOBJ[0] = LoadMesh_Strict("GFX\map\ContDoorLeft.x")
-	HideEntity BigDoorOBJ[0]
-	BigDoorOBJ[1] = LoadMesh_Strict("GFX\map\ContDoorRight.x")
-	HideEntity BigDoorOBJ[1]
+	BigDoorOBJ(0) = LoadMesh_Strict("GFX\map\ContDoorLeft.x")
+	HideEntity BigDoorOBJ(0)
+	BigDoorOBJ(1) = LoadMesh_Strict("GFX\map\ContDoorRight.x")
+	HideEntity BigDoorOBJ(1)
 	
 	LeverBaseOBJ = LoadMesh_Strict("GFX\map\leverbase.x")
 	HideEntity LeverBaseOBJ
@@ -6941,31 +6950,31 @@ Function LoadEntities()
 	DrawLoading(15)
 	
 	For i = 0 To 5
-		GorePics[i] = LoadTexture_Strict("GFX\895pics\pic" + (i + 1) + ".jpg")
+		GorePics(i) = LoadTexture_Strict("GFX\895pics\pic" + (i + 1) + ".jpg")
 	Next
 	
-	OldAiPics[0] = LoadTexture_Strict("GFX\AIface.jpg")
-	OldAiPics[1] = LoadTexture_Strict("GFX\AIface2.jpg")	
+	OldAiPics(0) = LoadTexture_Strict("GFX\AIface.jpg")
+	OldAiPics(1) = LoadTexture_Strict("GFX\AIface2.jpg")	
 	
 	DrawLoading(20)
 	
 	For i = 0 To 6
-		DecalTextures[i] = LoadTexture_Strict("GFX\decal" + (i + 1) + ".png", 1 + 2)
+		DecalTextures(i) = LoadTexture_Strict("GFX\decal" + (i + 1) + ".png", 1 + 2)
 	Next
-	DecalTextures[7] = LoadTexture_Strict("GFX\items\INVpaperstrips.jpg", 1 + 2)
+	DecalTextures(7) = LoadTexture_Strict("GFX\items\INVpaperstrips.jpg", 1 + 2)
 	For i = 8 To 12
-		DecalTextures[i] = LoadTexture_Strict("GFX\decalpd"+(i-7)+".jpg", 1 + 2)	
+		DecalTextures(i) = LoadTexture_Strict("GFX\decalpd"+(i-7)+".jpg", 1 + 2)	
 	Next
 	For i = 13 To 14
-		DecalTextures[i] = LoadTexture_Strict("GFX\bullethole"+(i-12)+".jpg", 1 + 2)	
+		DecalTextures(i) = LoadTexture_Strict("GFX\bullethole"+(i-12)+".jpg", 1 + 2)	
 	Next	
 	For i = 15 To 16
-		DecalTextures[i] = LoadTexture_Strict("GFX\blooddrop"+(i-14)+".png", 1 + 2)	
+		DecalTextures(i) = LoadTexture_Strict("GFX\blooddrop"+(i-14)+".png", 1 + 2)	
 	Next
-	DecalTextures[17] = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
-	DecalTextures[18] = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
-	DecalTextures[19] = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
-	DecalTextures[20] = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
+	DecalTextures(17) = LoadTexture_Strict("GFX\decal8.png", 1 + 2)	
+	DecalTextures(18) = LoadTexture_Strict("GFX\decalpd6.dc", 1 + 2)	
+	DecalTextures(19) = LoadTexture_Strict("GFX\decal19.png", 1 + 2)
+	DecalTextures(20) = LoadTexture_Strict("GFX\decal427.png", 1 + 2)
 	
 	DrawLoading(25)
 	
@@ -7042,7 +7051,7 @@ Function LoadEntities()
 			If FileType("SFX\Radio\UserTracks\"+file$) = 1 Then
 				test = LoadSound("SFX\Radio\UserTracks\"+file$)
 				If test<>0
-					UserTrackName[UserTrackMusicAmount%] = file$
+					UserTrackName$(UserTrackMusicAmount%) = file$
 					UserTrackMusicAmount% = UserTrackMusicAmount% + 1
 				EndIf
 				FreeSound test
@@ -7054,15 +7063,15 @@ Function LoadEntities()
 	
 	InitItemTemplates()
 	
-	ParticleTextures[0] = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
-	ParticleTextures[1] = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
-	ParticleTextures[2] = LoadTexture_Strict("GFX\dust.jpg", 1 + 2)
-	ParticleTextures[3] = LoadTexture_Strict("GFX\npcs\hg.pt", 1 + 2)
-	ParticleTextures[4] = LoadTexture_Strict("GFX\map\sun.jpg", 1 + 2)
-	ParticleTextures[5] = LoadTexture_Strict("GFX\bloodsprite.png", 1 + 2)
-	ParticleTextures[6] = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
-	ParticleTextures[7] = LoadTexture_Strict("GFX\spark.jpg", 1 + 2)
-	ParticleTextures[8] = LoadTexture_Strict("GFX\particle.png", 1 + 2)
+	ParticleTextures(0) = LoadTexture_Strict("GFX\smoke.png", 1 + 2)
+	ParticleTextures(1) = LoadTexture_Strict("GFX\flash.jpg", 1 + 2)
+	ParticleTextures(2) = LoadTexture_Strict("GFX\dust.jpg", 1 + 2)
+	ParticleTextures(3) = LoadTexture_Strict("GFX\npcs\hg.pt", 1 + 2)
+	ParticleTextures(4) = LoadTexture_Strict("GFX\map\sun.jpg", 1 + 2)
+	ParticleTextures(5) = LoadTexture_Strict("GFX\bloodsprite.png", 1 + 2)
+	ParticleTextures(6) = LoadTexture_Strict("GFX\smoke2.png", 1 + 2)
+	ParticleTextures(7) = LoadTexture_Strict("GFX\spark.jpg", 1 + 2)
+	ParticleTextures(8) = LoadTexture_Strict("GFX\particle.png", 1 + 2)
 	
 	SetChunkDataValues()
 	
@@ -7106,20 +7115,20 @@ Function LoadEntities()
 	
 	LoadMaterials("DATA\materials.ini")
 	
-	OBJTunnel[0]=LoadRMesh("GFX\map\mt1.rmesh",Null)	
-	HideEntity OBJTunnel[0]				
-	OBJTunnel[1]=LoadRMesh("GFX\map\mt2.rmesh",Null)	
-	HideEntity OBJTunnel[1]
-	OBJTunnel[2]=LoadRMesh("GFX\map\mt2c.rmesh",Null)	
-	HideEntity OBJTunnel[2]				
-	OBJTunnel[3]=LoadRMesh("GFX\map\mt3.rmesh",Null)	
-	HideEntity OBJTunnel[3]	
-	OBJTunnel[4]=LoadRMesh("GFX\map\mt4.rmesh",Null)	
-	HideEntity OBJTunnel[4]				
-	OBJTunnel[5]=LoadRMesh("GFX\map\mt_elevator.rmesh",Null)
-	HideEntity OBJTunnel[5]
-	OBJTunnel[6]=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
-	HideEntity OBJTunnel[6]
+	OBJTunnel(0)=LoadRMesh("GFX\map\mt1.rmesh",Null)	
+	HideEntity OBJTunnel(0)				
+	OBJTunnel(1)=LoadRMesh("GFX\map\mt2.rmesh",Null)	
+	HideEntity OBJTunnel(1)
+	OBJTunnel(2)=LoadRMesh("GFX\map\mt2c.rmesh",Null)	
+	HideEntity OBJTunnel(2)				
+	OBJTunnel(3)=LoadRMesh("GFX\map\mt3.rmesh",Null)	
+	HideEntity OBJTunnel(3)	
+	OBJTunnel(4)=LoadRMesh("GFX\map\mt4.rmesh",Null)	
+	HideEntity OBJTunnel(4)				
+	OBJTunnel(5)=LoadRMesh("GFX\map\mt_elevator.rmesh",Null)
+	HideEntity OBJTunnel(5)
+	OBJTunnel(6)=LoadRMesh("GFX\map\mt_generator.rmesh",Null)
+	HideEntity OBJTunnel(6)
 	
 	TextureLodBias TextureFloat#
 	
@@ -7551,7 +7560,7 @@ Function NullGame(playbuttonsfx%=True)
 	Next
 	
 	For i = 0 To MAXACHIEVEMENTS-1
-		Achievements[i]=0
+		Achievements(i)=0
 	Next
 	RefinedItems = 0
 	
@@ -7669,8 +7678,8 @@ Function NullGame(playbuttonsfx%=True)
 	Next
 	
 	For i = 0 To 6
-		If RadioCHN[i] <> 0 Then
-			If ChannelPlaying(RadioCHN[i]) Then StopChannel(RadioCHN[i])
+		If RadioCHN(i) <> 0 Then
+			If ChannelPlaying(RadioCHN(i)) Then StopChannel(RadioCHN(i))
 		EndIf
 	Next
 	
@@ -7979,7 +7988,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 							Local CurrAchvAmount%=0
 							
 							For i = 0 To MAXACHIEVEMENTS-1
-								If Achievements[i]=True
+								If Achievements(i)=True
 									CurrAchvAmount=CurrAchvAmount+1
 								EndIf
 							Next
@@ -8010,7 +8019,7 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 				Case "very fine"
 					CurrAchvAmount%=0
 					For i = 0 To MAXACHIEVEMENTS-1
-						If Achievements[i]=True
+						If Achievements(i)=True
 							CurrAchvAmount=CurrAchvAmount+1
 						EndIf
 					Next
@@ -8570,7 +8579,7 @@ Function Use427()
 			EntityPick(pvt,0.3)
 			de.Decals = CreateDecal(20, PickedX(), PickedY()+0.005, PickedZ(), 90, Rand(360), 0)
 			de\Size = Rnd(0.03,0.08)*2.0 : EntityAlpha(de\obj, 1.0) : ScaleSprite de\obj, de\Size, de\Size
-			tempchn% = PlaySound_Strict (DripSFX[Rand(0,2)])
+			tempchn% = PlaySound_Strict (DripSFX(Rand(0,2)))
 			ChannelVolume tempchn, Rnd(0.0,0.8)*SFXVolume
 			ChannelPitch tempchn, Rand(20000,30000)
 			FreeEntity pvt
@@ -8854,7 +8863,7 @@ Function Update294()
 			CameraShake = Rnd(0, 2)
 		EndIf
 		
-		If Rand(50) = 50 And (MilliSecs2() Mod 4000) < 200 Then PlaySound_Strict(CoughSFX[Rand(0,2)])
+		If Rand(50) = 50 And (MilliSecs2() Mod 4000) < 200 Then PlaySound_Strict(CoughSFX(Rand(0,2)))
 		
 		;Regurgitate when timer is below 10 seconds. (ew)
 		If VomitTimer < 10 And Rnd(0, 500 * VomitTimer) < 2 Then
@@ -8985,7 +8994,7 @@ Function CreateDecal.Decals(id%, x#, y#, z#, pitch#, yaw#, roll#)
 	d\obj = CreateSprite()
 	d\blendmode = 1
 	
-	EntityTexture(d\obj, DecalTextures[id])
+	EntityTexture(d\obj, DecalTextures(id))
 	EntityFX(d\obj, 0)
 	SpriteViewMode(d\obj, 2)
 	PositionEntity(d\obj, x, y, z)
@@ -8993,7 +9002,7 @@ Function CreateDecal.Decals(id%, x#, y#, z#, pitch#, yaw#, roll#)
 	
 	d\ID = id
 	
-	If DecalTextures[id] = 0 Lor d\obj = 0 Then Return Null
+	If DecalTextures(id) = 0 Lor d\obj = 0 Then Return Null
 	
 	Return d
 End Function
@@ -9013,7 +9022,7 @@ Function UpdateDecals()
 						Local temp# = Rnd(d\Size)
 						Local d2.Decals = CreateDecal(1, EntityX(d\obj) + Cos(angle) * temp, EntityY(d\obj) - 0.0005, EntityZ(d\obj) + Sin(angle) * temp, EntityPitch(d\obj), Rnd(360), EntityRoll(d\obj))
 						d2\Size = Rnd(0.1, 0.5) : ScaleSprite(d2\obj, d2\Size, d2\Size)
-						PlaySound2(DecaySFX[Rand(1, 3)], Camera, d2\obj, 10.0, Rnd(0.1, 0.5))
+						PlaySound2(DecaySFX(Rand(1, 3)), Camera, d2\obj, 10.0, Rnd(0.1, 0.5))
 						d\Timer = Rand(50, 100)
 					Else
 						d\Timer= d\Timer-FPSfactor

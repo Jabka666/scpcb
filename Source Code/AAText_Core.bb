@@ -1,6 +1,7 @@
 Global AASelectedFont%
 Global AATextCam%,AATextSprite%[256]
 Global AACharW%,AACharH%
+Global AATextEnable_Prev% = AATextEnable
 
 Global AACamViewW%,AACamViewH%
 
@@ -22,7 +23,6 @@ Function InitAAFont()
 	If AATextEnable Then
 		;Create Camera
 		Local cam% = CreateCamera()
-		
 		CameraViewport cam,0,0,10,10
 		CameraZoom cam, 0.1
 		CameraClsMode cam, 0, 0
@@ -34,7 +34,6 @@ Function InitAAFont()
 		;Create sprite
 		Local spr% = CreateMesh(cam)
 		Local sf% = CreateSurface(spr)
-		
 		AddVertex sf, -1, 1, 0, 0, 0
 		AddVertex sf, 1, 1, 0, 1, 0
 		AddVertex sf, -1, -1, 0, 0, 1

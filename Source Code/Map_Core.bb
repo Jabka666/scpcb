@@ -1289,7 +1289,7 @@ Function PlaceGrid_MapCreator(r.Rooms)
 	Local dr.Doors,it.Items
 	
 	For i=0 To 6
-		Meshes[i]=CopyEntity(OBJTunnel[i])
+		Meshes[i]=CopyEntity(OBJTunnel(i))
 		DebugLog i
 		HideEntity Meshes[i]
 	Next
@@ -1933,7 +1933,7 @@ Function FillRoom(r.Rooms)
 			ScaleSprite(r\Objects[1],0.18*0.5,0.145*0.5)
 			TurnEntity(r\Objects[1],0,13.0,0)
 			MoveEntity r\Objects[1], 0,0,-0.022
-			EntityTexture (r\Objects[1],OldAiPics[0])
+			EntityTexture (r\Objects[1],OldAiPics(0))
 			
 			HideEntity r\Objects[1]
 			
@@ -2423,7 +2423,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[5] = CreateSprite()
 			PositionEntity(r\Objects[5], r\x - 158 * RoomScale, 368 * RoomScale, r\z + 298.0 * RoomScale)
 			ScaleSprite(r\Objects[5], 0.02, 0.02)
-			EntityTexture(r\Objects[5], LightSpriteTex[1])
+			EntityTexture(r\Objects[5], LightSpriteTex(1))
 			EntityBlend (r\Objects[5], 3)
 			EntityParent(r\Objects[5], r\obj)
 			HideEntity r\Objects[5]
@@ -2915,7 +2915,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[3] = CreateSprite()
 			PositionEntity(r\Objects[3], r\x - 43.5 * RoomScale, - 574 * RoomScale, r\z - 362.0 * RoomScale)
 			ScaleSprite(r\Objects[3], 0.015, 0.015)
-			EntityTexture(r\Objects[3], LightSpriteTex[1])
+			EntityTexture(r\Objects[3], LightSpriteTex(1))
 			EntityBlend (r\Objects[3], 3)
 			EntityParent(r\Objects[3], r\obj)
 			HideEntity r\Objects[3]
@@ -3580,7 +3580,7 @@ Function FillRoom(r.Rooms)
 			r\Objects[4] = CreateSprite()
 			PositionEntity(r\Objects[4], r\x - 32 * RoomScale, 568 * RoomScale, r\z)
 			ScaleSprite(r\Objects[4], 0.03, 0.03)
-			EntityTexture(r\Objects[4], LightSpriteTex[1])
+			EntityTexture(r\Objects[4], LightSpriteTex(1))
 			EntityBlend (r\Objects[4], 3)
 			EntityParent(r\Objects[4], r\obj)
 			HideEntity r\Objects[4]
@@ -4881,9 +4881,9 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 				room\LightSprites[i]= CreateSprite()
 				PositionEntity(room\LightSprites[i], x, y, z)
 				ScaleSprite(room\LightSprites[i], 0.13 , 0.13)
-				EntityTexture(room\LightSprites[i], LightSpriteTex[0])
+				EntityTexture(room\LightSprites[i], LightSpriteTex(0))
 				EntityBlend (room\LightSprites[i], 3)
-				EntityColor(room\LightSprites[i], r%, g%, b%)
+				
 				EntityParent(room\LightSprites[i], room\obj)
 				
 				room\LightSpritesPivot[i] = CreatePivot()
@@ -4894,7 +4894,7 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 				room\LightSprites2[i] = CreateSprite()
 				PositionEntity(room\LightSprites2[i], x, y, z)
 				ScaleSprite(room\LightSprites2[i], 0.6, 0.6)
-				EntityTexture(room\LightSprites2[i], LightSpriteTex[2])
+				EntityTexture(room\LightSprites2[i], LightSpriteTex(2))
 				EntityBlend(room\LightSprites2[i], 3)
 				EntityOrder(room\LightSprites2[i], -1)
 				EntityColor(room\LightSprites2[i], r%, g%, b%)
@@ -4927,9 +4927,8 @@ Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
 		sprite=CreateSprite()
 		PositionEntity(sprite, x, y, z)
 		ScaleSprite(sprite, 0.13 , 0.13)
-		EntityTexture(sprite, LightSpriteTex[0])
+		EntityTexture(sprite, LightSpriteTex(0))
 		EntityBlend (sprite, 3)
-		EntityColor(sprite,r,g,b)
 		Return light
 	EndIf
 End Function
@@ -5112,6 +5111,172 @@ Function RemoveWaypoint(w.WayPoints)
 	Delete w
 End Function
 
+Function FindPath(n.NPCs, x#, y#, z#)
+	DebugLog "findpath: "+n\NPCtype
+	
+	Local temp%, dist#, dist2#
+	Local xtemp#, ytemp#, ztemp#
+	Local w.WayPoints, StartPoint.WayPoints, EndPoint.WayPoints   
+	Local StartX% = Floor(EntityX(n\Collider,True) / 8.0 + 0.5), StartZ% = Floor(EntityZ(n\Collider,True) / 8.0 + 0.5)
+	Local EndX% = Floor(x / 8.0 + 0.5), EndZ% = Floor(z / 8.0 + 0.5)
+	Local CurrX, CurrZ
+
+   ;pathstatus = 0, route hasn't been searched for yet
+   ;pathstatus = 1, route found
+   ;pathstatus = 2, route not found (target unreachable)
+	
+	For w.WayPoints = Each WayPoints
+		w\state = 0
+		w\Fcost = 0
+		w\Gcost = 0
+		w\Hcost = 0
+	Next
+	
+	n\PathStatus = 0
+	n\PathLocation = 0
+	For i = 0 To 19
+		n\Path[i] = Null
+	Next
+	
+	Local pvt = CreatePivot()
+	PositionEntity(pvt, x,y,z, True)   
+	
+	temp = CreatePivot()
+	PositionEntity(temp, EntityX(n\Collider,True), EntityY(n\Collider,True)+0.15, EntityZ(n\Collider,True))
+	
+	dist = 350.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(w\obj,True)-EntityX(temp,True)
+		ztemp = EntityZ(w\obj,True)-EntityZ(temp,True)
+		ytemp = EntityY(w\obj,True)-EntityY(temp,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		If dist2 < dist Then 
+			If Not EntityVisible(w\obj, temp) Then dist2 = dist2*3
+			If dist2 < dist Then 
+				dist = dist2
+				StartPoint = w
+			EndIf
+		EndIf
+	Next
+	DebugLog "DIST: "+dist
+	
+	FreeEntity temp
+	
+	If StartPoint = Null Then Return 2
+	StartPoint\state = 1      
+	
+	EndPoint = Null
+	dist# = 400.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(pvt,True)-EntityX(w\obj,True)
+		ztemp = EntityZ(pvt,True)-EntityZ(w\obj,True)
+		ytemp = EntityY(pvt,True)-EntityY(w\obj,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		
+		If dist2 < dist Then
+			dist = dist2
+			EndPoint = w
+		EndIf            
+	Next
+	FreeEntity pvt
+	
+	If EndPoint = StartPoint Then
+		If dist < 0.4 Then
+			Return 0
+		Else
+			n\Path[0]=EndPoint
+			Return 1               
+		EndIf
+	EndIf
+	If EndPoint = Null Then Return 2
+	
+	Repeat
+		temp% = False
+		smallest.WayPoints = Null
+		dist# = 10000.0
+		For w.WayPoints = Each WayPoints
+			If w\state = 1 Then
+				temp = True
+				If (w\Fcost) < dist Then
+					dist = w\Fcost
+					smallest = w
+				EndIf
+			EndIf
+		Next
+		
+		If smallest <> Null Then
+			w = smallest
+			w\state = 2
+			
+			For i = 0 To 4
+				If w\connected[i]<>Null Then
+					If w\connected[i]\state < 2 Then
+						If w\connected[i]\state=1 Then
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							If gtemp < w\connected[i]\Gcost Then
+								w\connected[i]\Gcost = gtemp
+								w\connected[i]\Fcost = w\connected[i]\Gcost + w\connected[i]\Hcost
+								w\connected[i]\parent = w
+							EndIf
+						Else
+							w\connected[i]\Hcost# = Abs(EntityX(w\connected[i]\obj,True)-EntityX(EndPoint\obj,True))+Abs(EntityZ(w\connected[i]\obj,True)-EntityZ(EndPoint\obj,True))
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							w\connected[i]\Gcost = gtemp
+							w\connected[i]\Fcost = w\Gcost+w\Hcost
+							w\connected[i]\parent = w
+							w\connected[i]\state=1
+						EndIf            
+					EndIf
+				EndIf
+			Next
+		Else
+			If EndPoint\state > 0 Then
+				StartPoint\parent = Null
+				EndPoint\state = 2
+				Exit
+			EndIf
+		EndIf
+		
+		If EndPoint\state > 0 Then
+			StartPoint\parent = Null
+			EndPoint\state = 2
+			Exit
+		EndIf
+		
+	Until temp = False
+	
+	If EndPoint\state > 0 Then
+		Local currpoint.WayPoints = EndPoint
+		Local twentiethpoint.WayPoints = EndPoint
+		Local length = 0
+		
+		Repeat
+			length = length +1
+			currpoint = currpoint\parent
+			If length>20 Then
+				twentiethpoint = twentiethpoint\parent
+			EndIf
+		Until currpoint = Null
+		
+		currpoint.WayPoints = EndPoint
+		While twentiethpoint<>Null
+			length=Min(length-1,19)
+			twentiethpoint = twentiethpoint\parent
+			n\Path[length] = twentiethpoint
+		Wend
+		
+		Return 1
+	Else
+		DebugLog "FUNCTION FindPath() - no route found"
+		Return 2 
+	EndIf
+End Function
 Function CreateLine(x1#,y1#,z1#, x2#,y2#,z2#, mesh=0)
 	If mesh = 0 Then 
 		mesh=CreateMesh()
@@ -5194,7 +5359,7 @@ Dim MapName$(MapSize, MapSize)
 Dim MapRoomID%(ROOM4 + 1)
 Dim MapRoom$(ROOM4 + 1, 0)
 
-Global GorePics%[6]
+Dim GorePics%(6)
 
 Global SelectedMonitor.SecurityCams
 Global CoffinCam.SecurityCams
@@ -5434,13 +5599,13 @@ Function UpdateSecurityCams()
 								If Sanity < - 800 Then
 									If Rand(3) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
 									If Rand(6) < 5 Then
-										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
-										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX[1])
+										EntityTexture(sc\ScrOverlay, GorePics(Rand(0, 5)))
+										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX(1))
 										sc\PlayerState = 2
 										If sc\soundCHN = 0 Then
-											sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
+											sc\soundCHN = PlaySound_Strict(HorrorSFX(4))
 										Else
-											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
+											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX(4))
 										EndIf
 										If sc\CoffinEffect=3 And Rand(200)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
 									EndIf	
@@ -5451,8 +5616,8 @@ Function UpdateSecurityCams()
 								ElseIf Sanity < - 500
 									If Rand(7) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
 									If Rand(50) = 1 Then
-										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
-										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX[0])
+										EntityTexture(sc\ScrOverlay, GorePics(Rand(0, 5)))
+										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX(0))
 										sc\PlayerState = Max(sc\PlayerState, 1)
 										If sc\CoffinEffect=3 And Rand(100)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
 									EndIf
@@ -5475,7 +5640,7 @@ Function UpdateSecurityCams()
 						EndIf
 						
 						If Rand(500) = 1 Then
-							EntityTexture(sc\ScrOverlay, OldAiPics[0])
+							EntityTexture(sc\ScrOverlay, OldAiPics(0))
 						EndIf
 						
 						If (MilliSecs2() Mod sc\PlayerState) >= Rand(600) Then
@@ -5488,7 +5653,7 @@ Function UpdateSecurityCams()
 								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
 								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
 							EndIf
-							EntityTexture(sc\ScrOverlay, OldAiPics[0])
+							EntityTexture(sc\ScrOverlay, OldAiPics(0))
 						EndIf
 					EndIf
 				EndIf
@@ -5574,8 +5739,8 @@ Function UpdateLever(obj, locked=False)
 							DrawHandIcon = True 
 							RotateEntity(GrabbedEntity, Max(Min(EntityPitch(obj)+Max(Min(mouse_y_speed_1 * 8,30.0),-30), 80), -80), EntityYaw(obj), 0)
 							
-							DrawArrowIcon[0] = True
-							DrawArrowIcon[2] = True
+							DrawArrowIcon(0) = True
+							DrawArrowIcon(2) = True
 						EndIf
 					EndIf
 				EndIf 
@@ -6501,7 +6666,7 @@ Function UpdateRoomLights(cam%)
 								If r\LightFlicker%[i]>4 Then
 									If Rand(400)=1 Then
 										SetEmitter(r\LightSpritesPivot[i],ParticleEffect[0])
-										PlaySound2(IntroSFX[Rand(10,12)],cam,r\LightSpritesPivot[i])
+										PlaySound2(IntroSFX(Rand(10,12)),cam,r\LightSpritesPivot[i])
 										ShowEntity r\LightConeSpark[i]
 										r\LightConeSparkTimer[i] = FPSfactor
 									EndIf
@@ -6680,7 +6845,7 @@ Function AmbientLightRooms(value%=0)
 	SetBuffer oldbuffer
 End Function
 
-Global CHUNKDATA[64 ^ 2]
+Dim CHUNKDATA(64,64)
 
 Function SetChunkDataValues()
 	Local StrTemp$,i%,j%
@@ -6690,7 +6855,7 @@ Function SetChunkDataValues()
 	
 	For i = 0 To 63
 		For j = 0 To 63
-			CHUNKDATA[(i * 64) + j]=Rand(0,GetINIInt("Data\1499chunks.INI","general","count"))
+			CHUNKDATA(i,j)=Rand(0,GetINIInt("Data\1499chunks.INI","general","count"))
 		Next
 	Next
 	
@@ -6792,11 +6957,9 @@ Function CreateChunk.Chunk(obj%,x#,y#,z#,isSpawnChunk%=False)
 	Return ch
 End Function
 
-Const ChunkMaxDistance# = 120.0
-
 Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 	Local ch.Chunk,StrTemp$,i%,x#,z#,ch2.Chunk,y#,n.NPCs,j%
-	Local ChunkX#,ChunkZ#
+	Local ChunkX#,ChunkZ#,ChunkMaxDistance#=3*40
 	
 	ChunkX# = Int(EntityX(Collider)/40)
 	ChunkZ# = Int(EntityZ(Collider)/40)
@@ -6818,7 +6981,7 @@ Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 			EndIf
 		Next
 		If (Not chunkfound)
-			CurrChunkData = CHUNKDATA[Abs(((x + 32) / 40) Mod 64) * 64 + (Abs(((z + 32) / 40) Mod 64))]
+			CurrChunkData = CHUNKDATA(Abs(((x+32)/40) Mod 64),Abs(((z+32)/40) Mod 64))
 			ch2 = CreateChunk(CurrChunkData%,x#,y#,z#)
 			ch2\IsSpawnChunk = False
 		EndIf
@@ -6934,7 +7097,7 @@ Function AddLightCones(room.Rooms)
 			If room\LightFlicker%[i] > 4
 				room\LightConeSpark[i] = CreateSprite()
 				ScaleSprite room\LightConeSpark[i],1.0,1.0
-				EntityTexture room\LightConeSpark[i],ParticleTextures[8]
+				EntityTexture room\LightConeSpark[i],ParticleTextures(8)
 				SpriteViewMode room\LightConeSpark[i],2
 				EntityFX room\LightConeSpark[i],1
 				RotateEntity room\LightConeSpark[i],-90,0,0

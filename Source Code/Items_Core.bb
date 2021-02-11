@@ -297,7 +297,6 @@ Function InitItemTemplates()
 				For it2=Each ItemTemplates
 					If (it2<>it) And (it2\tex=it\tex) Then
 						it2\tex = 0
-						Exit
 					EndIf
 				Next
 			EndIf
@@ -604,7 +603,7 @@ Function PickItem(item.Items)
 						Return
 					Case "killbat"
 						LightFlash = 1.0
-						PlaySound_Strict(IntroSFX[11])
+						PlaySound_Strict(IntroSFX(11))
 						DeathMSG = "Subject D-9341 found dead inside SCP-914's output booth next to what appears to be an ordinary nine-volt battery. The subject is covered in severe "
 						DeathMSG = DeathMSG + "electrical burns, and assumed to be killed via an electrical shock caused by the battery. The battery has been stored for further study."
 						Kill()
@@ -619,7 +618,7 @@ Function PickItem(item.Items)
 					Case "veryfinevest"
 						Msg = "The vest is too heavy to pick up."
 						MsgTimer = 70*6
-						Return
+						Exit
 					Case "firstaid", "finefirstaid", "veryfinefirstaid", "firstaid2"
 						item\state = 0
 					Case "navigator", "nav"
@@ -676,7 +675,7 @@ Function PickItem(item.Items)
 						EndIf
 				End Select
 				
-				If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[item\itemtemplate\sound])
+				If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(item\itemtemplate\sound))
 				item\Picked = True
 				item\Dropped = -1
 				
@@ -705,7 +704,7 @@ Function DropItem(item.Items,playdropsound%=True)
 	
 	CatchErrors("Uncaught (DropItem)")
 	If playdropsound Then
-		If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[item\itemtemplate\sound])
+		If item\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX(item\itemtemplate\sound))
 	EndIf
 	
 	item\Dropped = 1
