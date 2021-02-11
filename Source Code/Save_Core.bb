@@ -108,7 +108,6 @@ Function SaveGame(file$)
 	
 	WriteByte f, SuperMan
 	WriteFloat f, SuperManTimer
-	WriteByte f, LightsOn
 	
 	WriteString f, RandomSeed
 	
@@ -558,7 +557,6 @@ Function LoadGame(file$)
 	
 	SuperMan = ReadByte(f)
 	SuperManTimer = ReadFloat(f)
-	LightsOn = ReadByte(f)
 	
 	RandomSeed = ReadString(f)
 	
@@ -1377,7 +1375,6 @@ Function LoadGameQuick(file$)
 	
 	SuperMan = ReadByte(f)
 	SuperManTimer = ReadFloat(f)
-	LightsOn = ReadByte(f)
 	
 	RandomSeed = ReadString(f)
 	

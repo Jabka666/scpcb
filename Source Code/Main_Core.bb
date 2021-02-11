@@ -205,8 +205,6 @@ Global Shake#
 
 Global ExplosionTimer#, ExplosionSFX%
 
-Global LightsOn% = True
-
 Global SoundTransmission%
 
 Global MainMenuOpen%, MenuOpen%, StopHidingTimer#, InvOpen%
@@ -228,7 +226,6 @@ Global MTFtimer#
 Global RadioState#[9]
 Global RadioState3%[9]
 Global RadioState4%[10]
-Global RadioCHN%[7]
 
 Global OldAiPics%[2]
 
@@ -1445,8 +1442,6 @@ Global DTextures[MaxDTextures]
 Global NPC049OBJ, NPC0492OBJ
 Global ClerkOBJ
 
-Global IntercomStreamCHN%
-
 Global ForestNPC,ForestNPCTex,ForestNPCData#[3]
 
 Global PauseMenuIMG%
@@ -2295,10 +2290,6 @@ Global ApacheObj%,ApacheRotorObj%
 Global UnableToMove% = False
 Global ShouldEntitiesFall% = True
 Global PlayerFallingPickDistance# = 10.0
-
-Global Save_MSG$ = ""
-Global Save_MSG_Timer# = 0.0
-Global Save_MSG_Y# = 0.0
 
 Global MTF_CameraCheckTimer# = 0.0
 Global MTF_CameraCheckDetected% = False

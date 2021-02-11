@@ -619,6 +619,10 @@ Dim StepSFX%(5, 2, 8) ;(normal/metal, walk/run, id)
 
 Global Step2SFX[6]
 
+Global RadioCHN%[7]
+
+Global IntercomStreamCHN%
+
 DrawLoading(30, True)
 
 Global PlayCustomMusic% = False, CustomMusic% = 0
