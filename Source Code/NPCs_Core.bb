@@ -23,7 +23,7 @@ Type NPCs
 	Field PrevX#, PrevY#, PrevZ#
 	Field Target.NPCs, TargetID%
 	Field EnemyX#, EnemyY#, EnemyZ#
-	Field Path.WayPoints[20], PathStatus%, PathTimer#, PathLocation%
+	Field Path.WayPoints[21], PathStatus%, PathTimer#, PathLocation%
 	Field NVX#,NVY#,NVZ#,NVName$
 	Field GravityMult# = 1.0
 	Field MaxGravity# = 0.2
@@ -227,7 +227,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			
 			n\Sound = LoadSound_Strict("SFX\Horror\Horror12.ogg")
 			
-			If HorrorSFX(13)=0 Then HorrorSFX(13)=LoadSound_Strict("SFX\Horror\Horror13.ogg")
+			If HorrorSFX[13]=0 Then HorrorSFX[13]=LoadSound_Strict("SFX\Horror\Horror13.ogg")
 			;[End Block]
 		Case NPCtypeZombie
 			;[Block]
@@ -288,7 +288,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 				
 				PositionEntity(lightsprite, 1.65*i, 1.17, 0, -0.25)
 				ScaleSprite(lightsprite, 0.13, 0.13)
-				EntityTexture(lightsprite, LightSpriteTex(0))
+				EntityTexture(lightsprite, LightSpriteTex[0])
 				EntityBlend (lightsprite, 3)
 				EntityFX lightsprite, 1+8				
 			Next
@@ -580,7 +580,6 @@ Function UpdateNPCs()
 		Select n\NPCtype
 			Case NPCtype173
 				;[Block]
-				
 				If Curr173\Idle <> 3 Then
 					dist# = EntityDistance(n\Collider, Collider)		
 					
@@ -630,12 +629,12 @@ Function UpdateNPCs()
 								CurrCameraZoom = Max(CurrCameraZoom, (Sin(Float(MilliSecs2())/20.0)+1.0)*15.0*Max((3.5-dist)/3.5,0.0))								
 								
 								If dist < 3.5 And MilliSecs2() - n\LastSeen > 60000 And temp Then
-									PlaySound_Strict(HorrorSFX(Rand(3,4)))
+									PlaySound_Strict(HorrorSFX[Rand(3,4)])
 									
 									n\LastSeen = MilliSecs2()
 								EndIf
 								
-								If dist < 1.5 And Rand(700) = 1 Then PlaySound2(Scp173SFX(Rand(0, 2)), Camera, n\obj)
+								If dist < 1.5 And Rand(700) = 1 Then PlaySound2(Scp173SFX[Rand(0, 2)], Camera, n\obj)
 								
 								If dist < 1.5 And n\LastDist > 2.0 And temp Then
 									CurrCameraZoom = 40.0
@@ -644,15 +643,15 @@ Function UpdateNPCs()
 									
 									Select Rand(5)
 										Case 1
-											PlaySound_Strict(HorrorSFX(1))
+											PlaySound_Strict(HorrorSFX[1])
 										Case 2
-											PlaySound_Strict(HorrorSFX(2))
+											PlaySound_Strict(HorrorSFX[2])
 										Case 3
-											PlaySound_Strict(HorrorSFX(9))
+											PlaySound_Strict(HorrorSFX[9])
 										Case 4
-											PlaySound_Strict(HorrorSFX(10))
+											PlaySound_Strict(HorrorSFX[10])
 										Case 5
-											PlaySound_Strict(HorrorSFX(14))
+											PlaySound_Strict(HorrorSFX[14])
 									End Select
 								EndIf									
 									
@@ -741,7 +740,7 @@ Function UpdateNPCs()
 												End Select
 												
 												If (Not GodMode) Then n\Idle = True
-												PlaySound_Strict(NeckSnapSFX(Rand(0,2)))
+												PlaySound_Strict(NeckSnapSFX[Rand(0,2)])
 												If Rand(2) = 1 Then 
 													TurnEntity(Camera, 0, Rand(80,100), 0)
 												Else
@@ -868,11 +867,11 @@ Function UpdateNPCs()
 									PositionEntity(n\Collider, EntityX(Collider), EntityY(Collider) - 15, EntityZ(Collider))
 								EndIf
 								
-								PlaySound_Strict(DecaySFX(0))
+								PlaySound_Strict(DecaySFX[0])
 							EndIf
 							
-							If Rand(500) = 1 Then PlaySound2(OldManSFX(Rand(0, 2)), Camera, n\Collider)
-							n\SoundChn = LoopSound2(OldManSFX(4), n\SoundChn, Camera, n\Collider, 8.0, 0.8)
+							If Rand(500) = 1 Then PlaySound2(OldManSFX[Rand(0, 2)], Camera, n\Collider)
+							n\SoundChn = LoopSound2(OldManSFX[4], n\SoundChn, Camera, n\Collider, 8.0, 0.8)
 							
 							If n\State > - 10 Then
 								ShouldPlay = 66
@@ -906,7 +905,7 @@ Function UpdateNPCs()
 										
 										If MilliSecs2() - n\LastSeen > 60000 Then 
 											CurrCameraZoom = 40
-											PlaySound_Strict(HorrorSFX(6))
+											PlaySound_Strict(HorrorSFX[6])
 											n\LastSeen = MilliSecs2()
 										EndIf
 									EndIf
@@ -930,9 +929,9 @@ Function UpdateNPCs()
 											AnimateNPC(n, 284, 333, n\CurrSpeed*43)
 											
 											If prevFrame =< 286 And n\Frame>286 Then
-												PlaySound2(Step2SFX(Rand(0,2)),Camera, n\Collider, 6.0, Rnd(0.8,1.0))	
+												PlaySound2(Step2SFX[Rand(0,2)],Camera, n\Collider, 6.0, Rnd(0.8,1.0))	
 											ElseIf prevFrame=<311 And n\Frame>311.0 
-												PlaySound2(Step2SFX(Rand(0,2)),Camera, n\Collider, 6.0, Rnd(0.8,1.0))
+												PlaySound2(Step2SFX[Rand(0,2)],Camera, n\Collider, 6.0, Rnd(0.8,1.0))
 											EndIf
 										Else 
 											n\CurrSpeed = 0
@@ -976,9 +975,9 @@ Function UpdateNPCs()
 													prevFrame# = AnimTime(n\obj)
 													AnimateNPC(n, 284, 333, n\CurrSpeed*43)
 													If prevFrame =< 286 And n\Frame>286 Then
-														PlaySound2(Step2SFX(Rand(0,2)),Camera, n\Collider, 6.0, Rnd(0.8,1.0))	
+														PlaySound2(Step2SFX[Rand(0,2)],Camera, n\Collider, 6.0, Rnd(0.8,1.0))	
 													ElseIf prevFrame=<311 And n\Frame>311.0 
-														PlaySound2(Step2SFX(Rand(0,2)),Camera, n\Collider, 6.0, Rnd(0.8,1.0))
+														PlaySound2(Step2SFX[Rand(0,2)],Camera, n\Collider, 6.0, Rnd(0.8,1.0))
 													EndIf
 													
 													If dist2 < 0.2 Then n\PathLocation = n\PathLocation + 1
@@ -1002,13 +1001,13 @@ Function UpdateNPCs()
 										RotateEntity n\Collider, 0, CurveAngle(EntityYaw(n\obj), EntityYaw(n\Collider), 10.0), 0										
 										
 										If Ceil(n\Frame) = 110 And (Not GodMode) Then
-											PlaySound_Strict(DamageSFX(1))
-											PlaySound_Strict(HorrorSFX(5))											
+											PlaySound_Strict(DamageSFX[1])
+											PlaySound_Strict(HorrorSFX[5])											
 											If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
 												DeathMSG = "Subject D-9341. Body partially decomposed by what is assumed to be SCP-106's "+Chr(34)+"corrosion"+Chr(34)+" effect. Body disposed of via incineration."
 												Kill()
 											Else
-												PlaySound_Strict(OldManSFX(3))
+												PlaySound_Strict(OldManSFX[3])
 												FallTimer = Min(-1, FallTimer)
 												PositionEntity(Head, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True), True)
 												ResetEntity (Head)
@@ -1044,8 +1043,8 @@ Function UpdateNPCs()
 											PointEntity(n\Collider,Collider)
 											RotateEntity(n\Collider,0,EntityYaw(n\Collider),0)
 											MoveEntity(n\Collider,0,0,-2)
-											PlaySound2(OldManSFX(3),Camera,n\Collider)
-											n\SoundChn2 = PlaySound2(OldManSFX(6+Rand(0,2)),Camera,n\Collider)
+											PlaySound2(OldManSFX[3],Camera,n\Collider)
+											n\SoundChn2 = PlaySound2(OldManSFX[6+Rand(0,2)],Camera,n\Collider)
 											n\PathTimer = 0
 											n\Reload = (70*10.0)/(SelectedDifficulty\otherFactors+1)
 											DebugLog "Teleported 106 (Distance: "+EntityDistance(n\Collider,Collider)+")"
@@ -1218,7 +1217,7 @@ Function UpdateNPCs()
 										
 										If n\Target=Null Then
 											If (Not GodMode) Then 
-												PlaySound_Strict DamageSFX(4)
+												PlaySound_Strict DamageSFX[4]
 												
 												pvt = CreatePivot()
 												CameraShake = 30
@@ -1578,7 +1577,7 @@ Function UpdateNPCs()
 													DeathMSG = "An active instance of SCP-049-2 was discovered in [REDACTED]. Terminated by Nine-Tailed Fox."
 													Kill()
 												EndIf
-												PlaySound_Strict HorrorSFX(13)
+												PlaySound_Strict HorrorSFX[13]
 												If n\Sound2 <> 0 Then FreeSound_Strict(n\Sound2)
 												n\Sound2 = LoadSound_Strict("SFX\SCP\049\Kidnap"+Rand(1,2)+".ogg")
 												n\SoundChn2 = LoopSound2(n\Sound2,n\SoundChn2,Camera,n\obj)
@@ -2049,7 +2048,7 @@ Function UpdateNPCs()
 									If prevFrame < 23 And n\Frame=>23 Then
 										If EntityDistance(n\Collider,Collider)<1.1
 											If (Abs(DeltaYaw(n\Collider,Collider))<=60.0)
-												PlaySound_Strict DamageSFX(Rand(5,8))
+												PlaySound_Strict DamageSFX[Rand(5,8)]
 												Injuries = Injuries+Rnd(0.4,1.0)
 												DeathMSG = "Subject D-9341. Cause of death: multiple lacerations and severe blunt force trauma caused by an instance of SCP-049-2."
 											EndIf
@@ -2062,7 +2061,7 @@ Function UpdateNPCs()
 									If prevFrame < 90 And n\Frame=>90 Then
 										If EntityDistance(n\Collider,Collider)<1.1
 											If (Abs(DeltaYaw(n\Collider,Collider))<=60.0)
-												PlaySound_Strict DamageSFX(Rand(5,8))
+												PlaySound_Strict DamageSFX[Rand(5,8)]
 												Injuries = Injuries+Rnd(0.4,1.0)
 												DeathMSG = "Subject D-9341. Cause of death: multiple lacerations and severe blunt force trauma caused by an instance of SCP-049-2."
 											EndIf
@@ -2743,7 +2742,7 @@ Function UpdateNPCs()
 							n\Idle = False
 							n\State = Rand(20, 60)
 							
-							If Rand(300)=1 Then PlaySound2(RustleSFX(Rand(0,2)),Camera, n\obj, 8, Rnd(0.0,0.2))
+							If Rand(300)=1 Then PlaySound2(RustleSFX[Rand(0,2)],Camera, n\obj, 8, Rnd(0.0,0.2))
 						EndIf
 					Else
 						PositionEntity(n\obj, EntityX(n\Collider) + Rnd(-0.005, 0.005), EntityY(n\Collider)+0.3+0.1*Sin(MilliSecs2()/2), EntityZ(n\Collider) + Rnd(-0.005, 0.005))
@@ -2757,7 +2756,7 @@ Function UpdateNPCs()
 							If Rand(30)=1 Then 
 								If (Not ChannelPlaying(n\SoundChn)) Then
 									If EntityVisible(Camera, n\obj) Then 
-										n\SoundChn = PlaySound2(RustleSFX(Rand(0,2)),Camera, n\obj, 8, 0.3)
+										n\SoundChn = PlaySound2(RustleSFX[Rand(0,2)],Camera, n\obj, 8, 0.3)
 									EndIf
 								EndIf
 							EndIf
@@ -2812,7 +2811,7 @@ Function UpdateNPCs()
 										If Rand(20)=1 Then 
 											If EntityVisible(Collider, n\Collider) Then
 												n\State = 2
-												PlaySound2(AlarmSFX(2), Camera, n\Collider, 50, 1.0)
+												PlaySound2(AlarmSFX[2], Camera, n\Collider, 50, 1.0)
 											EndIf
 										EndIf									
 									EndIf
@@ -2994,7 +2993,7 @@ Function UpdateNPCs()
 											Else
 												BlurTimer = 100
 												Injuries = Injuries+Rnd(1.0,1.5)
-												PlaySound_Strict DamageSFX(Rand(2,3))
+												PlaySound_Strict DamageSFX[Rand(2,3)]
 												
 												If Injuries > 3.0 Then
 													If PlayerRoom\RoomTemplate\Name = "room2offices" Then
@@ -3098,7 +3097,7 @@ Function UpdateNPCs()
 								Next
 								
 								If EntityY(n\Collider)> -100 Then
-									PlaySound2(Step2SFX(Rand(3,5)), Camera, n\Collider, 15.0, 0.5)
+									PlaySound2(Step2SFX[Rand(3,5)], Camera, n\Collider, 15.0, 0.5)
 									
 									If ForestNPCData[2]<>1 Then ForestNPCData[2]=0
 									
@@ -3180,12 +3179,12 @@ Function UpdateNPCs()
 								Else
 									If n\Frame<=199 Then
 										AnimateNPC(n, 2, 199, 0.5,False)
-										If n\Frame=199 Then n\Frame = 298 : PlaySound2(Step2SFX(Rand(3,5)), Camera, n\Collider, 15.0)
+										If n\Frame=199 Then n\Frame = 298 : PlaySound2(Step2SFX[Rand(3,5)], Camera, n\Collider, 15.0)
 									ElseIf n\Frame <= 297
 										PointEntity n\Collider, Collider
 										
 										AnimateNPC(n, 200, 297, 0.5, False)
-										If n\Frame=297 Then n\Frame=298 : PlaySound2(Step2SFX(Rand(3,5)), Camera, n\Collider, 15.0)
+										If n\Frame=297 Then n\Frame=298 : PlaySound2(Step2SFX[Rand(3,5)], Camera, n\Collider, 15.0)
 									Else
 										angle = CurveAngle(point_direction(EntityX(n\Collider),EntityZ(n\Collider),EntityX(Collider),EntityZ(Collider)),EntityYaw(n\Collider)+90,20.0)
 										
@@ -3290,7 +3289,7 @@ Function UpdateNPCs()
 							EndIf
 							
 							If (prevFrame < 533 And n\Frame=>533) Lor (prevFrame > 568 And n\Frame<2) Then
-								PlaySound2(Step2SFX(Rand(3,5)), Camera, n\Collider, 15.0, 0.6)
+								PlaySound2(Step2SFX[Rand(3,5)], Camera, n\Collider, 15.0, 0.6)
 							EndIf
 						Case 3 ;runs towards the player and attacks
 							ShowEntity n\obj
@@ -3325,7 +3324,7 @@ Function UpdateNPCs()
 								AnimateNPC(n, 298, 316, n\CurrSpeed*10)
 								
 								If (prevFrame < 307 And n\Frame=>307) Then
-									PlaySound2(Step2SFX(Rand(3,5)), Camera, n\Collider, 10.0)
+									PlaySound2(Step2SFX[Rand(3,5)], Camera, n\Collider, 10.0)
 								EndIf
 							EndIf
 							
@@ -4490,7 +4489,7 @@ Function UpdateNPCs()
 							If (n\Frame => 146 And prevFrame < 146)
 								If EntityDistance(n\Collider,Collider)<1.1
 									If (Abs(DeltaYaw(n\Collider,Collider))<=60.0)
-										PlaySound_Strict DamageSFX(Rand(5,8))
+										PlaySound_Strict DamageSFX[Rand(5,8)]
 										Injuries = Injuries+Rnd(0.4,1.0)
 										Infect = Infect + (1+(1*SelectedDifficulty\aggressiveNPCs))
 										DeathMSG = "Subject D-9341. Cause of death: multiple lacerations and severe blunt force trauma caused by [DATA EXPUNGED], who was infected with SCP-008. Said subject was located by Nine-Tailed Fox and terminated."
@@ -6086,7 +6085,7 @@ Function UpdateMTFUnit(n.NPCs)
 							Else
 								If (Not n\Target\IsDead)
 									If n\Sound <> 0 Then FreeSound_Strict n\Sound : n\Sound = 0
-									If n\NPCtype = NPCtypeZombie
+									If n\Target\NPCtype = NPCtypeZombie
 										n\Sound = LoadSound_Strict("SFX\Character\MTF\049\Player0492_2.ogg")
 										PlayMTFSound(n\Sound, n)
 									EndIf
@@ -6354,6 +6353,174 @@ Function Shoot(x#, y#, z#, hitProb# = 1.0, particles% = True, instaKill% = False
 	EndIf
 End Function
 
+; ~ TODO: Path.Waypoints[20]
+Function FindPath(n.NPCs, x#, y#, z#)
+	DebugLog "findpath: "+n\NPCtype
+	
+	Local temp%, dist#, dist2#
+	Local xtemp#, ytemp#, ztemp#
+	Local w.WayPoints, StartPoint.WayPoints, EndPoint.WayPoints   
+	Local StartX% = Floor(EntityX(n\Collider,True) / 8.0 + 0.5), StartZ% = Floor(EntityZ(n\Collider,True) / 8.0 + 0.5)
+	Local EndX% = Floor(x / 8.0 + 0.5), EndZ% = Floor(z / 8.0 + 0.5)
+	Local CurrX, CurrZ
+	
+   ;pathstatus = 0, route hasn't been searched for yet
+   ;pathstatus = 1, route found
+   ;pathstatus = 2, route not found (target unreachable)
+	
+	For w.WayPoints = Each WayPoints
+		w\state = 0
+		w\Fcost = 0
+		w\Gcost = 0
+		w\Hcost = 0
+	Next
+	
+	n\PathStatus = 0
+	n\PathLocation = 0
+	For i = 0 To 20
+		n\Path[i] = Null
+	Next
+	
+	Local pvt = CreatePivot()
+	PositionEntity(pvt, x,y,z, True)   
+	
+	temp = CreatePivot()
+	PositionEntity(temp, EntityX(n\Collider,True), EntityY(n\Collider,True)+0.15, EntityZ(n\Collider,True))
+	
+	dist = 350.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(w\obj,True)-EntityX(temp,True)
+		ztemp = EntityZ(w\obj,True)-EntityZ(temp,True)
+		ytemp = EntityY(w\obj,True)-EntityY(temp,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		If dist2 < dist Then 
+			If Not EntityVisible(w\obj, temp) Then dist2 = dist2*3
+			If dist2 < dist Then 
+				dist = dist2
+				StartPoint = w
+			EndIf
+		EndIf
+	Next
+	DebugLog "DIST: "+dist
+	
+	FreeEntity temp
+	
+	If StartPoint = Null Then Return 2
+	StartPoint\state = 1      
+	
+	EndPoint = Null
+	dist# = 400.0
+	For w.WayPoints = Each WayPoints
+		xtemp = EntityX(pvt,True)-EntityX(w\obj,True)
+		ztemp = EntityZ(pvt,True)-EntityZ(w\obj,True)
+		ytemp = EntityY(pvt,True)-EntityY(w\obj,True)
+		dist2# = (xtemp*xtemp)+(ytemp*ytemp)+(ztemp*ztemp)
+		
+		If dist2 < dist Then
+			dist = dist2
+			EndPoint = w
+		EndIf            
+	Next
+	FreeEntity pvt
+	
+	If EndPoint = StartPoint Then
+		If dist < 0.4 Then
+			Return 0
+		Else
+			n\Path[0]=EndPoint
+			Return 1               
+		EndIf
+	EndIf
+	If EndPoint = Null Then Return 2
+	
+	Repeat
+		temp% = False
+		smallest.WayPoints = Null
+		dist# = 10000.0
+		For w.WayPoints = Each WayPoints
+			If w\state = 1 Then
+				temp = True
+				If (w\Fcost) < dist Then
+					dist = w\Fcost
+					smallest = w
+				EndIf
+			EndIf
+		Next
+		
+		If smallest <> Null Then
+			w = smallest
+			w\state = 2
+			
+			For i = 0 To 4
+				If w\connected[i]<>Null Then
+					If w\connected[i]\state < 2 Then
+						If w\connected[i]\state=1 Then
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							If gtemp < w\connected[i]\Gcost Then
+								w\connected[i]\Gcost = gtemp
+								w\connected[i]\Fcost = w\connected[i]\Gcost + w\connected[i]\Hcost
+								w\connected[i]\parent = w
+							EndIf
+						Else
+							w\connected[i]\Hcost# = Abs(EntityX(w\connected[i]\obj,True)-EntityX(EndPoint\obj,True))+Abs(EntityZ(w\connected[i]\obj,True)-EntityZ(EndPoint\obj,True))
+							gtemp# = w\Gcost+w\dist[i]
+							If n\NPCtype = NPCtypeMTF Then
+								If w\connected[i]\door = Null Then gtemp = gtemp + 0.5
+							EndIf
+							w\connected[i]\Gcost = gtemp
+							w\connected[i]\Fcost = w\Gcost+w\Hcost
+							w\connected[i]\parent = w
+							w\connected[i]\state=1
+						EndIf            
+					EndIf
+				EndIf
+			Next
+		Else
+			If EndPoint\state > 0 Then
+				StartPoint\parent = Null
+				EndPoint\state = 2
+				Exit
+			EndIf
+		EndIf
+		
+		If EndPoint\state > 0 Then
+			StartPoint\parent = Null
+			EndPoint\state = 2
+			Exit
+		EndIf
+		
+	Until temp = False
+	
+	If EndPoint\state > 0 Then
+		Local currpoint.WayPoints = EndPoint
+		Local twentiethpoint.WayPoints = EndPoint
+		Local length = 0
+		
+		Repeat
+			length = length +1
+			currpoint = currpoint\parent
+			If length>20 Then
+				twentiethpoint = twentiethpoint\parent
+			EndIf
+		Until currpoint = Null
+		
+		currpoint.WayPoints = EndPoint
+		While twentiethpoint<>Null
+			length=Min(length-1,19)
+			twentiethpoint = twentiethpoint\parent
+			n\Path[length] = twentiethpoint
+		Wend
+		
+		Return 1
+	Else
+		DebugLog "FUNCTION FindPath() - no route found"
+		Return 2 
+	EndIf
+End Function
+
 Function AnimateNPC(n.NPCs, start#, quit#, speed#, loop=True)
 	Local newTime#
 	
@@ -6447,7 +6614,7 @@ Function MoveToPocketDimension()
 			UpdateRooms()
 			ShowEntity Collider
 			PlaySound_Strict(Use914SFX)
-			PlaySound_Strict(OldManSFX(5))
+			PlaySound_Strict(OldManSFX[5])
 			PositionEntity(Collider, EntityX(r\obj),0.8,EntityZ(r\obj))
 			DropSpeed = 0
 			ResetEntity Collider
