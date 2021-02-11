@@ -403,6 +403,7 @@ Select TextureDetails%
 End Select
 Global ConsoleOpening% = GetINIInt(OptionFile, "console", "auto opening")
 Global SFXVolume# = GetINIFloat(OptionFile, "audio", "sound volume")
+Global PrevSFXVolume# = SFXVolume#
 
 Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
 
@@ -448,8 +449,12 @@ Global UserTrackMode% = GetINIInt(OptionFile, "audio", "user track setting")
 Global ParticleAmount% = GetINIInt(OptionFile,"options","particle amount")
 
 Global MusicVolume# = GetINIFloat(OptionFile, "audio", "music volume")
+Global PrevMusicVolume# = MusicVolume#
 
 Global AATextEnable% = GetINIInt(OptionFile, "options", "antialiased text")
+Global AATextEnable_Prev% = AATextEnable
+
+Global AchvMSGenabled% = GetINIInt("options.ini", "options", "achievement popup enabled")
 
 ; ~ Save options to .ini
 Function SaveOptionsINI()
