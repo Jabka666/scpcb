@@ -1605,7 +1605,7 @@ Function CreateDoor.Doors(x#, y#, z#, angle#, room.Rooms, dopen% = False,  big% 
 	For i% = 0 To 1
 		If code <> "" Then 
 			d\buttons[i]= CopyEntity(ButtonCodeOBJ)
-			EntityFX(d\buttons[i], 1)
+			EntityFX(d\buttons[i], 0.5)
 		Else
 			If keycard>0 Then
 				d\buttons[i]= CopyEntity(ButtonKeyOBJ)
