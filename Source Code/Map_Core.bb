@@ -1696,7 +1696,7 @@ Function FillRoom(r.Rooms)
 			d2\AutoClose = False : d2\open = False : d2\locked = True
 			
 			d2 = CreateDoor(r\x-1440*RoomScale, r\y-480.0*RoomScale, r\z + 2328.0 * RoomScale, 0, r, False, False, 2)
-			If SelectedEnding = "A2" Then 
+			If SelectedEnding = Ending_A2 Then 
 				d2\AutoClose = False : d2\open = True : d2\locked = True	
 			Else
 				d2\AutoClose = False : d2\open = False : d2\locked = False	
@@ -1706,7 +1706,7 @@ Function FillRoom(r.Rooms)
 			RotateEntity d2\buttons[1], 0, 90, 0, True
 			
 			d2 = CreateDoor(r\x-1440*RoomScale, r\y-480.0*RoomScale, r\z + 4352.0 * RoomScale, 0, r, False, False, 2)
-			If SelectedEnding = "A2" Then 
+			If SelectedEnding = Ending_A2 Then 
 				d2\AutoClose = False : d2\open = True : d2\locked = True	
 			Else
 				d2\AutoClose = False : d2\open = False : d2\locked = False

@@ -7340,28 +7340,28 @@ Function UpdateEvents()
 						GrabbedEntity = 0
 					EndIf
 					
-					Local setting$ = ""
+					Local setting%
 					
 					If GrabbedEntity <> e\room\Objects[1] Then
 						angle# = WrapAngle(EntityRoll(e\room\Objects[1]))
 						If angle < 22.5 Then
 							angle = 0
-							setting = "1:1"
+							setting = ONE_TO_ONE
 						ElseIf angle < 67.5
 							angle = 40
-							setting = "coarse"
+							setting = COARSE
 						ElseIf angle < 180
 							angle = 90
-							setting = "rough"
+							setting = ROUGH
 						ElseIf angle > 337.5
 							angle = 359 - 360
-							setting = "1:1"
+							setting = ONE_TO_ONE
 						ElseIf angle > 292.5
 							angle = 320 - 360
-							setting = "fine"
+							setting = FINE
 						Else
 							angle = 270 - 360
-							setting = "very fine"
+							setting = VERY_FINE
 						EndIf
 						RotateEntity(e\room\Objects[1], 0, 0, CurveValue(angle, EntityRoll(e\room\Objects[1]), 20))
 					EndIf
@@ -7388,26 +7388,26 @@ Function UpdateEvents()
 						EndIf
 						
 						If Distance(EntityX(Collider), EntityX(e\room\Objects[2], True),EntityZ(Collider), EntityZ(e\room\Objects[2], True)) < (170.0 * RoomScale) Then
-							If setting = "rough" Lor setting = "coarse" Then
+							If setting = ROUGH Lor setting = COARSE Then
 								If e\EventState > 70 * 2.6 And e\EventState - FPSfactor2 < 70 * 2.6 Then PlaySound_Strict Death914SFX
 							EndIf
 							
 							If e\EventState > 70 * 3 Then
 								Select setting
-									Case "rough"
+									Case ROUGH
 										KillTimer = Min(-1, KillTimer)
 										BlinkTimer = -10
 										If e\SoundCHN <> 0 Then StopChannel e\SoundCHN
 										DeathMSG = Chr(34)+"A heavily mutilated corpse found inside the output booth of SCP-914. DNA testing identified the corpse as Class D Subject D-9341. "
 										DeathMSG = DeathMSG + "The subject had obviously been "+Chr(34)+"refined"+Chr(34)+" by SCP-914 on the "+Chr(34)+"Rough"+Chr(34)+" setting, but we are still confused as to how he "
 										DeathMSG = DeathMSG + "ended up inside the intake booth and who or what wound the key."+Chr(34)
-									Case "coarse"
+									Case COARSE
 										BlinkTimer = -10
 										If e\EventState - FPSfactor2 < 70 * 3 Then PlaySound_Strict Use914SFX
-									Case "1:1"
+									Case ONE_TO_ONE
 										BlinkTimer = -10
 										If e\EventState - FPSfactor2 < 70 * 3 Then PlaySound_Strict Use914SFX
-									Case "fine", "very fine"
+									Case FINE, VERY_FINE
 										BlinkTimer = -10
 										If e\EventState - FPSfactor2 < 70 * 3 Then PlaySound_Strict Use914SFX	
 								End Select
@@ -7431,13 +7431,13 @@ Function UpdateEvents()
 							
 							If Distance(EntityX(Collider), EntityX(e\room\Objects[2], True),EntityZ(Collider), EntityZ(e\room\Objects[2], True)) < (160.0 * RoomScale) Then
 								Select setting
-									Case "coarse"
+									Case COARSE
 										Injuries = 4.0
 										Msg = "You notice countless small incisions all around your body. They are bleeding heavily."
 										MsgTimer = 70*8
-									Case "1:1"
+									Case ONE_TO_ONE
 										InvertMouse = (Not InvertMouse)
-									Case "fine", "very fine"
+									Case FINE, VERY_FINE
 										SuperMan = True
 								End Select
 								BlurTimer = 1000
@@ -9059,7 +9059,7 @@ Function UpdateEndings()
 						Else
 							UpdateSky()
 							
-							If e\EventState < 2.0 And SelectedEnding = "" Then 
+							If e\EventState < 2.0 And SelectedEnding = -1 Then 
 								If e\room\NPC[0]\State = 2 Then
 									ShouldPlay = 6
 								Else
@@ -9157,7 +9157,7 @@ Function UpdateEndings()
 										e\SoundCHN2_isStream = True
 									EndIf
 								Else
-									If SelectedEnding = "" Then
+									If SelectedEnding = -1 Then
 										ShouldPlay = 66
 										
 										StopStream_Strict(e\SoundCHN)
@@ -9173,8 +9173,10 @@ Function UpdateEndings()
 										
 										If temp = 1 Then ;remote detonation on -> explode
 											ExplosionTimer = Max(ExplosionTimer, 0.1)
-											SelectedEnding = "B2"
+											SelectedEnding = Ending_B2
 										Else
+											SelectedEnding = Ending_B1
+											
 											PlayAnnouncement("SFX\Ending\GateB\AlphaWarheadsFail.ogg")
 											
 											For i = 0 To 1
@@ -9197,11 +9199,9 @@ Function UpdateEndings()
 											DebugLog "MTF Units spawned!"
 											
 											e\EventState = 85.0*70
-											
-											SelectedEnding = "B3"
 										EndIf
 									Else
-										If SelectedEnding = "B3" Then
+										If SelectedEnding = Ending_B1 Then
 											e\room\NPC[0]\EnemyX = EntityX(e\room\Objects[11],True)+Sin(MilliSecs2()/25.0)*3
 											e\room\NPC[0]\EnemyY = EntityY(e\room\Objects[11],True)+Cos(MilliSecs()/85.0)+9.0
 											e\room\NPC[0]\EnemyZ = EntityZ(e\room\Objects[11],True)+Cos(MilliSecs()/25.0)*3
@@ -9278,7 +9278,6 @@ Function UpdateEndings()
 												NoClip = 0
 												KillTimer = -0.1
 												DeathMSG = ""
-												Kill()
 												BlinkTimer = -10
 												
 												For n.NPCs = Each NPCs
@@ -9773,7 +9772,9 @@ Function UpdateEndings()
 											e\SoundCHN = PlaySound_Strict(LoadTempSound("SFX\Ending\GateA\CI.ogg"))
 										EndIf
 										
-										If ChannelPlaying(e\SoundCHN)=False And SelectedEnding="" Then
+										If ChannelPlaying(e\SoundCHN)=False And SelectedEnding=-1 Then
+											SelectedEnding = Ending_A1
+											
 											PlaySound_Strict LoadTempSound("SFX\Ending\GateA\Bell2.ogg")
 											
 											p.Particles = CreateParticle(EntityX(e\room\Objects[11],True),EntityY(Camera,True), EntityZ(e\room\Objects[11],True), 4, 8.0, 0, 50)
@@ -9783,15 +9784,15 @@ Function UpdateEndings()
 											p\speed = 0.25
 											p\A = 0.5
 											
-											SelectedEnding = "A1"
 											GodMode = 0
 											NoClip = 0
 											KillTimer = -0.1
 											DeathMSG = ""
-											Kill()
+											RemoveEvent(e)
+											Exit
 										EndIf
 										
-										If SelectedEnding <> "" Then
+										If SelectedEnding <> -1 Then
 											CameraShake=CurveValue(2.0,CameraShake,10.0)
 											LightFlash = CurveValue(2.0,LightFlash,8.0)
 										EndIf
@@ -9825,15 +9826,15 @@ Function UpdateEndings()
 									If e\EventState2=<1 Then
 										For i = 5 To 8
 											If e\room\NPC[i]\State = 5 Then
-												For temp = 5 To 8
-													e\room\NPC[temp]\State = 5
-													e\room\NPC[temp]\EnemyX = EntityX(Collider)
-													e\room\NPC[temp]\EnemyY = EntityY(Collider)
-													e\room\NPC[temp]\EnemyZ = EntityZ(Collider)
-													e\room\NPC[temp]\PathTimer = 70*Rand(7,10)
-													e\room\NPC[temp]\Reload = 2000
-													UnableToMove% = True
-												Next
+												e\room\NPC[i]\State = 5
+												e\room\NPC[i]\EnemyX = EntityX(Collider)
+												e\room\NPC[i]\EnemyY = EntityY(Collider)
+												e\room\NPC[i]\EnemyZ = EntityZ(Collider)
+												e\room\NPC[i]\PathTimer = 70*Rand(7,10)
+												e\room\NPC[i]\Reload = 2000
+												
+												SelectedEnding = Ending_A2
+												UnableToMove% = True
 												
 												If e\EventState2=1 Then
 													e\SoundCHN = PlaySound_Strict (LoadTempSound("SFX\Ending\GateA\STOPRIGHTTHERE.ogg"))
@@ -9850,12 +9851,10 @@ Function UpdateEndings()
 										CurrSpeed = 0
 										If ChannelPlaying(e\SoundCHN)=False Then
 											PlaySound_Strict IntroSFX[9]
-											SelectedEnding = "A2"
 											GodMode = 0
 											NoClip = 0
 											KillTimer = -0.1
 											DeathMSG = ""
-											Kill()
 											BlinkTimer = -10
 											RemoveEvent(e)
 											Exit
