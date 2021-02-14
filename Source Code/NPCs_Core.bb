@@ -4,7 +4,7 @@ Const NPCtype173% = 1, NPCtypeOldMan% = 2, NPCtypeGuard% = 3, NPCtypeD% = 4
 Const NPCtype372% = 6, NPCtypeApache% = 7, NPCtypeMTF% = 8, NPCtype096 = 9
 Const NPCtype049% = 10, NPCtypeZombie% = 11, NPCtype5131% = 12, NPCtypeTentacle% = 13
 Const NPCtype860% = 14, NPCtype939% = 15, NPCtype066% = 16, NPCtypePdPlane% = 17
-Const NPCtype966% = 18, NPCtype1048a = 19, NPCtype1499% = 20, NPCtype008% = 21, NPCtypeClerk% = 22
+Const NPCtype966% = 18, NPCtype1499% = 19, NPCtype008% = 20, NPCtypeClerk% = 21
 
 Type NPCs
 	Field obj%, obj2%, obj3%, obj4%, Collider%
@@ -173,6 +173,7 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			;[End Block]
 		Case NPCtype372
 			;[Block]
+			n\NVName = "SCP-372"
 			n\Collider = CreatePivot()
 			EntityRadius n\Collider, 0.2
 			n\obj = LoadAnimMesh_Strict("GFX\npcs\372.b3d")
@@ -427,16 +428,6 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			EntityType n\Collider,HIT_PLAYER
 			
 			n\Speed = (GetINIFloat("DATA\NPCs.ini", "SCP-966", "speed") / 100.0)
-			;[End Block]
-		Case NPCtype1048a
-			;[Block]
-			n\NVName = "SCP-1048-A"
-			n\obj =	LoadAnimMesh_Strict("GFX\npcs\scp-1048a.b3d")
-			ScaleEntity n\obj, 0.05,0.05,0.05
-			SetAnimTime(n\obj, 2)
-			
-			n\Sound = LoadSound_Strict("SFX\SCP\1048A\Shriek.ogg")
-			n\Sound2 = LoadSound_Strict("SFX\SCP\1048A\Growth.ogg")
 			;[End Block]
 		Case NPCtype1499
 			;[Block]
