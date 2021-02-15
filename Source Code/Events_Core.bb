@@ -1168,9 +1168,9 @@ Function UpdateEvents()
 								EndIf
 							EndIf
 							
-							dist = Distance(EntityX(Collider), EntityX(e\room\NPC[3]\Collider),EntityZ(Collider), EntityZ(e\room\NPC[3]\Collider))
+							dist = DistanceSquared(EntityX(Collider), EntityX(e\room\NPC[3]\Collider),EntityZ(Collider), EntityZ(e\room\NPC[3]\Collider))
 							
-							If dist < 3.0 Then
+							If dist < 9.0 Then
 								e\room\NPC[3]\State3 = Min(Max(e\room\NPC[3]\State3-FPSfactor,0),50)
 							Else
 								e\room\NPC[3]\State3 = Max(e\room\NPC[3]\State3+FPSfactor,50)
@@ -1223,7 +1223,7 @@ Function UpdateEvents()
 							EndIf
 							
 							If e\room\NPC[3]\State <> 11 Then
-								If dist < Min(Max(4.0-e\room\NPC[3]\State3*0.05, 1.5),4.0) Then
+								If dist < PowTwo(Min(Max(4.0-e\room\NPC[3]\State3*0.05, 1.5),4.0)) Then
 									If e\room\NPC[3]\PathStatus <> 1 Then
 										e\room\NPC[3]\State = 7
 										PointEntity e\room\NPC[3]\obj, Collider
@@ -1242,7 +1242,7 @@ Function UpdateEvents()
 									PointEntity e\room\NPC[3]\obj, Collider
 									RotateEntity e\room\NPC[3]\Collider,0,CurveValue(EntityYaw(e\room\NPC[3]\obj),EntityYaw(e\room\NPC[3]\Collider),20.0),0,True		
 									
-									If dist > 5.5 Then
+									If dist > 30.25 Then
 										e\room\NPC[3]\PathStatus = 2
 										If e\room\NPC[3]\State2=0 Then
 											FreeSound_Strict e\room\NPC[3]\Sound
