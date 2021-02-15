@@ -4759,8 +4759,7 @@ Function UpdateRooms()
 		If x<16 And z < 16 Then
 			For i = 0 To MaxRoomEmitters-1
 				If r\SoundEmitter[i]<>0 Then 
-					dist# = EntityDistance(r\SoundEmitterObj[i],Collider)
-					If dist < r\SoundEmitterRange[i] Then
+					If EntityDistanceSquared(r\SoundEmitterObj[i],Collider) < PowTwo(r\SoundEmitterRange[i]) Then
 						r\SoundEmitterCHN[i] = LoopSound2(RoomAmbience[r\SoundEmitter[i]-1],r\SoundEmitterCHN[i], Camera, r\SoundEmitterObj[i],r\SoundEmitterRange[i])
 					EndIf
 				EndIf
@@ -4794,9 +4793,9 @@ Function UpdateRooms()
 			ShowEntity r\obj
 			For i = 0 To MaxRoomLights-1
 				If r\Lights[i] <> 0 Then
-					dist = EntityDistance(Collider,r\Lights[i])
-					If dist < HideDistance Then
-						TempLightVolume = TempLightVolume + r\LightIntensity[i]*r\LightIntensity[i]*((HideDistance-dist)/HideDistance)
+					dist = EntityDistanceSquared(Collider,r\Lights[i])
+					If dist < PowTwo(HideDistance) Then
+						TempLightVolume = TempLightVolume + r\LightIntensity[i]*r\LightIntensity[i]*((HideDistance-Sqr(dist))/HideDistance)
 					EndIf
 				Else
 					Exit
@@ -5172,7 +5171,7 @@ Function UpdateScreens()
 	
 	For s.screens = Each Screens
 		If s\room = PlayerRoom Then
-			If EntityDistance(Collider,s\obj)<1.2 Then
+			If EntityDistanceSquared(Collider,s\obj)<1.44 Then
 				EntityPick(Camera, 1.2)
 				If PickedEntity()=s\obj And s\imgpath<>"" Then
 					DrawHandIcon=True
@@ -5523,7 +5522,7 @@ Function UpdateMonitorSaving()
 			EndIf
 			
 			If close And GrabbedEntity = 0 And ClosestButton = 0 Then
-				If EntityInView(sc\ScrObj,Camera) And EntityDistance(sc\ScrObj,Camera)<1.0 Then
+				If EntityInView(sc\ScrObj,Camera) And EntityDistanceSquared(sc\ScrObj,Camera)<1.21 Then
 					If EntityVisible(sc\ScrObj,Camera) Then
 						DrawHandIcon = True
 						If MouseHit1 Then SelectedMonitor = sc
@@ -5554,10 +5553,10 @@ Function UpdateMonitorSaving()
 End Function
 
 Function UpdateLever(obj, locked=False)
-	Local dist# = EntityDistance(Camera, obj)
+	Local dist# = EntityDistanceSquared(Camera, obj)
 	
-	If dist < 8.0 Then 
-		If dist < 0.8 And (Not locked) Then 
+	If dist < 64.0 Then 
+		If dist < 0.64 And (Not locked) Then 
 			If EntityInView(obj, Camera) Then 
 				EntityPick(Camera, 0.65)
 				
@@ -6408,7 +6407,6 @@ Include "Source Code\Sky_Core.bb"
 Global UpdateRoomLightsTimer# = 0.0
 
 Function UpdateRoomLights(cam%)
-	
 	Local r.Rooms, i, random#, alpha#, dist#
 	
 	For r.Rooms = Each Rooms
@@ -6420,7 +6418,7 @@ Function UpdateRoomLights(cam%)
 						If UpdateRoomLightsTimer=0.0 Then
 							ShowEntity r\LightSprites[i]
 							
-							If EntityDistance(cam%,r\Lights%[i])<8.5 Then
+							If EntityDistanceSquared(cam%,r\Lights%[i])<72.25 Then
 								If r\LightHidden[i] Then
 									ShowEntity r\Lights%[i]
 									r\LightHidden[i] = False
@@ -6432,7 +6430,7 @@ Function UpdateRoomLights(cam%)
 								EndIf
 							EndIf
 							
-							If (EntityDistance(cam%,r\LightSprites2[i])<8.5 Lor r\RoomTemplate\UseLightCones) Then
+							If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
 								If EntityVisible(cam%,r\LightSpritesPivot[i]) Lor r\RoomTemplate\UseLightCones Then
 									If r\LightSpriteHidden%[i] Then
 										ShowEntity r\LightSprites2%[i]
@@ -6464,7 +6462,7 @@ Function UpdateRoomLights(cam%)
 									EndIf
 									
 									If r\RoomTemplate\UseLightCones Then
-										If EntityDistance(cam%,r\LightSprites2[i])>=8.5 Lor (Not EntityVisible(cam%,r\LightSpritesPivot[i])) Then
+										If EntityDistanceSquared(cam%,r\LightSprites2[i])>=72.25 Lor (Not EntityVisible(cam%,r\LightSpritesPivot[i])) Then
 											HideEntity r\LightSprites2%[i]
 											r\LightSpriteHidden%[i] = True
 										EndIf
@@ -6508,7 +6506,7 @@ Function UpdateRoomLights(cam%)
 								EndIf
 							EndIf
 						Else
-							If (EntityDistance(cam%,r\LightSprites2[i])<8.5 Lor r\RoomTemplate\UseLightCones) Then
+							If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
 								If PlayerRoom\RoomTemplate\Name$ = "173" Then
 									random# = Rnd(0.38,0.42)
 								Else
@@ -6831,7 +6829,7 @@ Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 	
 	For ch = Each Chunk
 		If (Not ch\IsSpawnChunk)
-			If Distance(EntityX(Collider),EntityX(ch\ChunkPivot),EntityZ(Collider),EntityZ(ch\ChunkPivot))>ChunkMaxDistance
+			If DistanceSquared(EntityX(Collider),EntityX(ch\ChunkPivot),EntityZ(Collider),EntityZ(ch\ChunkPivot))>PowTwo(ChunkMaxDistance)
 				FreeEntity ch\ChunkPivot
 				Delete ch
 			EndIf
@@ -6883,7 +6881,7 @@ Function UpdateChunks(r.Rooms,ChunkPartAmount%,spawnNPCs%=True)
 		For n = Each NPCs
 			If n\NPCtype = NPCtype1499 Then
 				If n\PrevState=0 Then
-					If EntityDistance(n\Collider,Collider)>ChunkMaxDistance Lor EntityY(n\Collider)<EntityY(PlayerRoom\obj)-5 Then
+					If EntityDistanceSquared(n\Collider,Collider)>PowTwo(ChunkMaxDistance) Lor EntityY(n\Collider)<EntityY(PlayerRoom\obj)-5 Then
 						;This will be updated like this so that new NPCs can spawn for the player
 						RemoveNPC(n)
 					EndIf

@@ -1492,9 +1492,9 @@ Function CreateButton(x#,y#,z#, pitch#,yaw#,roll#=0)
 End Function
 
 Function UpdateButton(obj)
-	Local dist# = EntityDistance(Collider, obj)
+	Local dist# = EntityDistanceSquared(Collider, obj)
 	
-	If dist < 0.8 Then
+	If dist < 0.64 Then
 		Local temp% = CreatePivot()
 		
 		PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
@@ -1504,7 +1504,7 @@ Function UpdateButton(obj)
 			If ClosestButton = 0 Then 
 				ClosestButton = obj
 			Else
-				If dist < EntityDistance(Collider, ClosestButton) Then ClosestButton = obj
+				If dist < EntityDistanceSquared(Collider, ClosestButton) Then ClosestButton = obj
 			EndIf							
 		EndIf
 		FreeEntity temp
@@ -1690,8 +1690,8 @@ Function UpdateDoors()
 					If d\buttons[i] <> 0 Then
 						If Abs(EntityX(Collider)-EntityX(d\buttons[i],True)) < 1.0 Then 
 							If Abs(EntityZ(Collider)-EntityZ(d\buttons[i],True)) < 1.0 Then 
-								dist# = Distance(EntityX(Collider, True), EntityX(d\buttons[i], True),EntityZ(Collider, True), EntityZ(d\buttons[i], True))
-								If dist < 0.7 Then
+								dist# = DistanceSquared(EntityX(Collider, True), EntityX(d\buttons[i], True),EntityZ(Collider, True), EntityZ(d\buttons[i], True))
+								If dist < 0.49 Then
 									Local temp% = CreatePivot()
 									
 									PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
@@ -1702,7 +1702,7 @@ Function UpdateDoors()
 											ClosestButton = d\buttons[i]
 											ClosestDoor = d
 										Else
-											If dist < EntityDistance(Collider, ClosestButton) Then ClosestButton = d\buttons[i] : ClosestDoor = d
+											If dist < EntityDistanceSquared(Collider, ClosestButton) Then ClosestButton = d\buttons[i] : ClosestDoor = d
 										EndIf							
 									EndIf
 									FreeEntity temp
@@ -1750,7 +1750,7 @@ Function UpdateDoors()
 						If d\timerstate = 0 Then d\open = (Not d\open) : d\SoundCHN = PlaySound2(CloseDoorSFX(d\dir,sound%), Camera, d\obj)
 					EndIf
 					If d\AutoClose And RemoteDoorOn = True Then
-						If EntityDistance(Camera, d\obj) < 2.1 Then
+						If EntityDistanceSquared(Camera, d\obj) < 4.41 Then
 							If (Not Wearing714) Then PlaySound_Strict HorrorSFX[7]
 							d\open = False : d\SoundCHN = PlaySound2(CloseDoorSFX(Min(d\dir,1), Rand(0, 2)), Camera, d\obj) : d\AutoClose = False
 						EndIf
@@ -5716,44 +5716,47 @@ Function DrawGUI()
 								Line x2,y2,x3,y3
 							EndIf
 							
-							Local SCPs_found% = 0
+							Local SCPs_found% = 0, Dist#
 							
 							If SelectedItem\itemtemplate\name = "S-NAV Navigator Ultimate" And (MilliSecs2() Mod 600) < 400 Then
 								If Curr173<>Null Then
-									Local dist# = EntityDistance(Camera, Curr173\obj)
-									dist = Ceil(dist / 8.0) * 8.0
-									If dist < 8.0 * 4 Then
+									Dist = EntityDistanceSquared(Camera, Curr173\obj)
+									If Dist < 1024.0 Then
+										Dist = Sqr(Ceil(Dist / 8.0) * 8.0)
 										Color 100, 0, 0
-										Oval(x - dist * 3, y - 7 - dist * 3, dist * 3 * 2, dist * 3 * 2, False)
+										Oval(x - Dist * 3, y - 7 - Dist * 3, Dist * 3 * 2, Dist * 3 * 2, False)
 										AAText(x - width / 2 + 10, y - height / 2 + 30, "SCP-173")
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
 								If Curr106<>Null Then
-									dist# = EntityDistance(Camera, Curr106\obj)
-									If dist < 8.0 * 4 Then
+									Dist# = EntityDistanceSquared(Camera, Curr106\obj)
+									If Dist < 1024.0 Then
+										Dist = Sqr(Dist)
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - Dist * 1.5, y - 7 - Dist * 1.5, Dist * 3, Dist * 3, False)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-106")
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
 								If Curr096<>Null Then 
-									dist# = EntityDistance(Camera, Curr096\obj)
-									If dist < 8.0 * 4 Then
+									Dist# = EntityDistanceSquared(Camera, Curr096\obj)
+									If Dist < 1024.0 Then
+										Dist = Sqr(Dist)
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - Dist * 1.5, y - 7 - Dist * 1.5, Dist * 3, Dist * 3, False)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-096")
 										SCPs_found% = SCPs_found% + 1
 									EndIf
 								EndIf
 								For np.NPCs = Each NPCs
 									If np\NPCtype = NPCtype049
-										dist# = EntityDistance(Camera, np\obj)
-										If dist < 8.0 * 4 Then
-											If (Not np\HideFromNVG) Then
+										If (Not np\HideFromNVG) Then
+											Dist# = EntityDistanceSquared(Camera, np\obj)
+											If Dist < 1024.0 Then
+												Dist = Sqr(Dist)
 												Color 100, 0, 0
-												Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+												Oval(x - Dist * 1.5, y - 7 - Dist * 1.5, Dist * 3, Dist * 3, False)
 												AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-049")
 												SCPs_found% = SCPs_found% + 1
 											EndIf
@@ -5763,9 +5766,9 @@ Function DrawGUI()
 								Next
 								If PlayerRoom\RoomTemplate\Name = "coffin" Then
 									If CoffinDistance < 8.0 Then
-										dist = Rnd(4.0, 8.0)
+										Dist = Rnd(4.0, 8.0)
 										Color 100, 0, 0
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - Dist * 1.5, y - 7 - Dist * 1.5, Dist * 3, Dist * 3, False)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-895")
 									EndIf
 								EndIf
@@ -5857,7 +5860,7 @@ Function DrawGUI()
 									EndIf
 									For e.Events = Each Events
 										If e\EventName = "dimension1499" Then
-											If EntityDistance(e\room\obj,Collider)>8300.0*RoomScale Then
+											If EntityDistanceSquared(e\room\obj,Collider)>PowTwo(8300.0*RoomScale) Then
 												If e\EventState2 < 5 Then
 													e\EventState2 = e\EventState2 + 1
 												EndIf
@@ -6076,7 +6079,7 @@ Function DrawMenu()
 	If MenuOpen Then
 		If PlayerRoom\RoomTemplate\Name$ <> "exit1" And PlayerRoom\RoomTemplate\Name$ <> "gatea"
 			If StopHidingTimer = 0 Then
-				If EntityDistance(Curr173\Collider, Collider)<4.0 Lor EntityDistance(Curr106\Collider, Collider)<4.0 Then 
+				If EntityDistanceSquared(Curr173\Collider, Collider)<16.0 Lor EntityDistanceSquared(Curr106\Collider, Collider)<16.0 Then 
 					StopHidingTimer = 1
 				EndIf	
 			ElseIf StopHidingTimer < 40
@@ -7848,10 +7851,10 @@ Function Use914(item.Items, setting%, x#, y#, z#)
 					it2 = Null
 					For it.Items = Each Items
 						If it<>item And it\collider <> 0 And it\Picked = False Then
-							If Distance(EntityX(it\collider,True), EntityX(item\collider, True),EntityZ(it\collider,True), EntityZ(item\collider, True)) < (180.0 * RoomScale) Then
+							If DistanceSquared(EntityX(it\collider,True), EntityX(item\collider, True),EntityZ(it\collider,True), EntityZ(item\collider, True)) < PowTwo(180.0 * RoomScale) Then
 								it2 = it
 								Exit
-							ElseIf Distance(EntityX(it\collider,True), x,EntityZ(it\collider,True),z) < (180.0 * RoomScale)
+							ElseIf DistanceSquared(EntityX(it\collider,True), x,EntityZ(it\collider,True),z) < PowTwo(180.0 * RoomScale)
 								it2 = it
 								Exit
 							EndIf

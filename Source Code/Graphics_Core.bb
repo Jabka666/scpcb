@@ -249,8 +249,8 @@ Function RenderWorld2()
 			For np.NPCs = Each NPCs
 				If np\NVName<>"" And (Not np\HideFromNVG) Then ;don't waste your time if the string is empty
 					PositionEntity temp2,np\NVX,np\NVY,np\NVZ
-					dist# = EntityDistance(temp2,Collider)
-					If dist<23.5 Then ;don't draw text if the NPC is too far away
+					dist# = EntityDistanceSquared(temp2,Collider)
+					If dist<152.75 Then ;don't draw text if the NPC is too far away
 						PointEntity temp, temp2
 						yawvalue# = WrapAngle(EntityYaw(Camera) - EntityYaw(temp))
 						xvalue# = 0.0
@@ -273,7 +273,7 @@ Function RenderWorld2()
 						
 						If (Not IsNVGBlinking%)
 							AAText GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2),np\NVName,True,True
-							AAText GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * MenuScale,f2s(dist,1)+" m",True,True
+							AAText GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * MenuScale,f2s(Sqr(dist),1)+" m",True,True
 						EndIf
 					EndIf
 				EndIf
