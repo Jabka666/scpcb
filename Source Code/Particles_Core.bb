@@ -26,8 +26,6 @@ Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lif
 	Select image
 		Case 0,5,6
 			EntityBlend(p\obj, 1)
-		Case 1,2,3,4,7
-			EntityBlend(p\obj, BLEND_ADD)
 	End Select
 	
 	p\pvt = CreatePivot()

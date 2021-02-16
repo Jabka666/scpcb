@@ -336,7 +336,6 @@ Function CreateNPC.NPCs(NPCtype%, x#, y#, z#)
 			FreeTexture tex
 			
 			EntityFX(n\obj2, 1 + 8)
-			EntityBlend(n\obj2, BLEND_ADD)
 			SpriteViewMode(n\obj2, 2)
 			
 			n\Speed = (GetINIFloat("DATA\NPCs.ini", "forestmonster", "speed") / 100.0)
