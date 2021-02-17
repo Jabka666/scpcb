@@ -675,6 +675,7 @@ Function UpdateEvents()
 						ResetEntity e\room\NPC[2]\Collider
 						e\room\NPC[2]\State = 7
 						PointEntity e\room\NPC[2]\Collider,e\room\NPC[1]\Collider
+						PointEntity e\room\NPC[1]\Collider,e\room\NPC[2]\Collider
 						
 						If e\room\NPC[0]=Null
 							e\room\NPC[3] = CreateNPC(NPCtypeGuard, EntityX(e\room\Objects[2], True), EntityY(e\room\Objects[2], True), EntityZ(e\room\Objects[2], True))
@@ -719,18 +720,15 @@ Function UpdateEvents()
 						e\EventState = Max(e\EventState, 500)
 					EndIf
 					
-					If e\EventState < 850
-						PositionEntity Curr173\Collider, e\room\x+32*RoomScale, 0.31, e\room\z+1072*RoomScale, True
-						HideEntity Curr173\obj
-					EndIf
-					
 					If e\EventState >= 500 Then
 						e\EventState = e\EventState+FPSfactor
 						
 						If e\EventState2 = 0 Then
-							ShowEntity Curr173\obj
 							If e\EventState > 900 And e\room\RoomDoors[5]\open Then
 								If e\EventState - FPSfactor <= 900 Then 
+									PositionEntity(Curr173\Collider, e\room\x + (32 * RoomScale), 0.31, e\room\z + (1072 * RoomScale), True)
+									ResetEntity(Curr173\Collider)
+									
 									e\room\NPC[1]\Sound = LoadSound_Strict("SFX\Room\Intro\WhatThe.ogg")
 									e\room\NPC[1]\SoundChn = PlaySound2(e\room\NPC[1]\Sound, Camera, e\room\NPC[1]\Collider)
 								EndIf
@@ -757,6 +755,7 @@ Function UpdateEvents()
 								
 								If e\EventState < 900+4*70 Then
 									PositionEntity Curr173\Collider, e\room\x+32*RoomScale, 0.31, e\room\z+1072*RoomScale, True
+									ResetEntity(Curr173\Collider)
 									RotateEntity Curr173\Collider,0,190,0
 									
 									If e\EventState > 900+70 And e\EventState < 900+2.5*70 Then
@@ -764,7 +763,6 @@ Function UpdateEvents()
 										PointEntity(e\room\NPC[2]\obj, Curr173\Collider)
 										RotateEntity e\room\NPC[2]\Collider, 0, CurveAngle(EntityYaw(e\room\NPC[2]\obj),EntityYaw(e\room\NPC[2]\Collider),15.0), 0
 									EndIf
-									
 								Else
 									If e\EventState-FPSfactor < 900+4*70 Then 
 										PlaySound_Strict(IntroSFX[11]) : LightBlink = 3.0
@@ -774,6 +772,7 @@ Function UpdateEvents()
 									EndIf
 									
 									PositionEntity Curr173\Collider, e\room\x-96*RoomScale, 0.31, e\room\z+592*RoomScale, True
+									ResetEntity(Curr173\Collider)
 									RotateEntity Curr173\Collider,0,190,0
 									
 									If e\room\NPC[2]\State <> 1 And KillTimer >= 0
@@ -9931,5 +9930,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11C4#1D6D
+;~B#11C3#1D6C
 ;~C#Blitz3D
