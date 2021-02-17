@@ -27,6 +27,7 @@ Function AddTextureToCache(texture%)
 		tc\name=StripPath(TextureName(texture))
 		If BumpEnabled Then
 			Local temp$=GetINIString("Data\materials.ini",tc\name,"bump")
+			
 			If temp<>"" Then
 				tc\Bump=LoadTexture_Strict(temp)
 				ApplyBumpMap(tc\Bump)

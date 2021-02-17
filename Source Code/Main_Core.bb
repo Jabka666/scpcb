@@ -23,11 +23,9 @@ Const VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 
 Global MenuWhite%, MenuBlack%
-Global ButtonSFX%
+Global ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
 
 Global ArrowIMG[4]
-
-Global LauncherIMG%
 
 Global Depth% = 0
 
@@ -56,7 +54,7 @@ If LauncherEnabled Then
 		RealGraphicWidth = GraphicWidth
 		RealGraphicHeight = GraphicHeight
 		If Fullscreen Then
-			Graphics3DExt(GraphicWidth, GraphicHeight, (16*Bit16Mode), 1)
+			Graphics3DExt(GraphicWidth, GraphicHeight, 0, 1)
 		Else
 			Graphics3DExt(GraphicWidth, GraphicHeight, 0, 2)
 		EndIf
@@ -95,7 +93,7 @@ Else
 		RealGraphicWidth = GraphicWidth
 		RealGraphicHeight = GraphicHeight
 		If Fullscreen Then
-			Graphics3DExt(GraphicWidth, GraphicHeight, (16*Bit16Mode), 1)
+			Graphics3DExt(GraphicWidth, GraphicHeight, 0, 1)
 		Else
 			Graphics3DExt(GraphicWidth, GraphicHeight, 0, 2)
 		EndIf
@@ -2910,7 +2908,7 @@ Function DrawEnding()
 		EndIf
 		
 		If EndingScreen = 0 Then
-			EndingScreen = LoadImage_Strict("GFX\endingscreen.pt")
+			EndingScreen = LoadImage_Strict("GFX\menu\endingscreen.pt")
 			
 			ShouldPlay = 23
 			CurrMusicVolume = MusicVolume
@@ -3045,7 +3043,7 @@ Function InitCredits()
 	CreditsFont2% = LoadFont_Strict("GFX\font\courbd\Courier New.ttf", 35)
 	
 	If CreditsScreen = 0
-		CreditsScreen = LoadImage_Strict("GFX\creditsscreen.pt")
+		CreditsScreen = LoadImage_Strict("GFX\menu\creditsscreen.pt")
 	EndIf
 	
 	Repeat

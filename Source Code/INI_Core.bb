@@ -405,8 +405,6 @@ Global ConsoleOpening% = GetINIInt(OptionFile, "console", "auto opening")
 Global SFXVolume# = GetINIFloat(OptionFile, "audio", "sound volume")
 Global PrevSFXVolume# = SFXVolume#
 
-Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
-
 Global Framelimit% = GetINIInt(OptionFile, "options", "framelimit")
 Global Vsync% = GetINIInt(OptionFile, "options", "vsync")
 
