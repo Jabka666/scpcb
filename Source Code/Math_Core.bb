@@ -221,6 +221,31 @@ Function GetMeshExtents(Mesh%)
 	Mesh_MagZ = maxz-minz
 End Function
 
+Function CreateLine(x1#,y1#,z1#, x2#,y2#,z2#, mesh=0)
+	If mesh = 0 Then 
+		mesh=CreateMesh()
+		EntityFX(mesh,16)
+		surf=CreateSurface(mesh)	
+		verts = 0	
+		
+		AddVertex surf,x1#,y1#,z1#,0,0
+	Else
+		surf = GetSurface(mesh,1)
+		verts = CountVertices(surf)-1
+	EndIf
+	
+	AddVertex surf,(x1#+x2#)/2,(y1#+y2#)/2,(z1#+z2#)/2,0,0 
+	; you could skip creating the above vertex and change the line below to
+	; AddTriangle surf,verts,verts+1,verts+0
+	; so your line mesh would use less vertices, the drawback is that some videocards (like the matrox g400)
+	; aren't able to create a triangle with 2 vertices. so, it's your call :)
+	AddVertex surf,x2#,y2#,z2#,1,0
+	
+	AddTriangle surf,verts,verts+2,verts+1
+	
+	Return mesh
+End Function
+
 Const ZONEAMOUNT% = 3
 
 Function GetZone(y%)
@@ -273,6 +298,13 @@ Function CalculateRoomExtents(r.Rooms)
 	EndIf
 	
 	DebugLog("roomextents: "+r\MinX+", "+r\MinY	+", "+r\MinZ	+", "+r\MaxX	+", "+r\MaxY+", "+r\MaxZ)
+End Function
+
+Function CheckRoomOverlap(r1.Rooms, r2.Rooms)
+	If (r1\MaxX	<= r2\MinX Lor r1\MaxY <= r2\MinY Lor r1\MaxZ <= r2\MinZ) Then Return False
+	If (r1\MinX	>= r2\MaxX Lor r1\MinY >= r2\MaxY Lor r1\MinZ >= r2\MaxZ) Then Return False
+	
+	Return True
 End Function
 
 ;~IDEal Editor Parameters:

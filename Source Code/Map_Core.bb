@@ -1,5 +1,340 @@
 Include "Source Code\Materials_Core.bb"
+
 Include "Source Code\Texture_Cache_Core.bb"
+
+Type Props
+	Field file$
+	Field obj
+End Type
+
+Function CreatePropObj(file$)
+	Local p.Props
+	
+	For p.Props = Each Props
+		If p\file = file Then
+			Return CopyEntity(p\obj)
+		EndIf
+	Next
+	
+	p.Props = New Props
+	p\file = file
+	p\obj = LoadMesh(file)
+	Return p\obj
+End Function
+
+Global LightVolume#, TempLightVolume#
+Global LightSpriteTex%[3]
+Global LightConeModel
+
+Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
+	Local i
+	
+	If room<>Null Then
+		For i = 0 To MaxRoomLights-1
+			If room\Lights[i]=0 Then
+				room\Lights[i] = CreateLight(ltype)
+				LightRange(room\Lights[i],range)
+				LightColor(room\Lights[i],r,g,b)
+				PositionEntity(room\Lights[i],x,y,z,True)
+				EntityParent(room\Lights[i],room\obj)
+				
+				room\LightIntensity[i] = (r+g+b)/255.0/3.0
+				
+				room\LightSprites[i]= CreateSprite()
+				PositionEntity(room\LightSprites[i], x, y, z)
+				ScaleSprite(room\LightSprites[i], 0.13 , 0.13)
+				EntityTexture(room\LightSprites[i], LightSpriteTex[0])
+				EntityBlend (room\LightSprites[i], 3)
+				EntityColor(room\LightSprites[i], r%, g%, b%)
+				EntityParent(room\LightSprites[i], room\obj)
+				
+				room\LightSpritesPivot[i] = CreatePivot()
+				EntityRadius room\LightSpritesPivot[i],0.05
+				PositionEntity(room\LightSpritesPivot[i], x, y, z)
+				EntityParent(room\LightSpritesPivot[i], room\obj)
+				
+				room\LightSprites2[i] = CreateSprite()
+				PositionEntity(room\LightSprites2[i], x, y, z)
+				ScaleSprite(room\LightSprites2[i], 0.6, 0.6)
+				EntityTexture(room\LightSprites2[i], LightSpriteTex[2])
+				EntityBlend(room\LightSprites2[i], 3)
+				EntityOrder(room\LightSprites2[i], -1)
+				EntityColor(room\LightSprites2[i], r%, g%, b%)
+				EntityParent(room\LightSprites2[i], room\obj)
+				EntityFX(room\LightSprites2[i],1)
+				RotateEntity(room\LightSprites2[i],0,0,Rand(360))
+				SpriteViewMode(room\LightSprites2[i],1)
+				room\LightSpriteHidden%[i] = True
+				HideEntity room\LightSprites2[i]
+				room\LightFlicker%[i] = Rand(1,10)
+				
+				room\LightR[i] = r
+				room\LightG[i] = g
+				room\LightB[i] = b
+				
+				HideEntity room\Lights[i]
+				
+				room\MaxLights% = room\MaxLights% + 1
+				
+				Return room\Lights[i]
+			EndIf
+		Next
+	Else
+		Local light%,sprite%
+		
+		light=CreateLight(ltype)
+		LightRange(light,range)
+		LightColor(light,r,g,b)
+		PositionEntity(light,x,y,z,True)
+		sprite=CreateSprite()
+		PositionEntity(sprite, x, y, z)
+		ScaleSprite(sprite, 0.13 , 0.13)
+		EntityTexture(sprite, LightSpriteTex[0])
+		EntityBlend (sprite, 3)
+		EntityColor(sprite,r,g,b)
+		Return light
+	EndIf
+End Function
+
+Function AddLightCones(room.Rooms)
+	Local i
+	
+	For i = 0 To MaxRoomLights-1
+		If room\Lights[i]<>0
+			room\LightCone[i] = CopyEntity(LightConeModel)
+			ScaleEntity room\LightCone[i],0.01,0.01,0.01
+			EntityColor room\LightCone[i],room\LightR[i],room\LightG[i],room\LightB[i]
+			EntityAlpha room\LightCone[i],0.15
+			EntityBlend room\LightCone[i],3
+			PositionEntity room\LightCone[i],EntityX(room\LightSpritesPivot[i],True),EntityY(room\LightSpritesPivot[i],True),EntityZ(room\LightSpritesPivot[i],True),True
+			EntityParent room\LightCone[i],room\LightSpritesPivot[i]
+			
+			If room\LightFlicker%[i] > 4
+				room\LightConeSpark[i] = CreateSprite()
+				ScaleSprite room\LightConeSpark[i],1.0,1.0
+				EntityTexture room\LightConeSpark[i],ParticleTextures[8]
+				SpriteViewMode room\LightConeSpark[i],2
+				EntityFX room\LightConeSpark[i],1
+				RotateEntity room\LightConeSpark[i],-90,0,0
+				EntityBlend room\LightConeSpark[i],3
+				EntityAlpha room\LightConeSpark[i],1.0
+				PositionEntity room\LightConeSpark[i],EntityX(room\LightSpritesPivot[i],True),EntityY(room\LightSpritesPivot[i],True)+0.05,EntityZ(room\LightSpritesPivot[i],True),True
+				EntityParent room\LightConeSpark[i],room\LightSpritesPivot[i]
+			EndIf
+		EndIf
+	Next
+End Function
+
+Type LightTemplates
+	Field roomtemplate.RoomTemplates
+	Field ltype%
+	Field x#, y#, z#
+	Field range#
+	Field r%, g%, b%
+	Field pitch#, yaw#
+	Field innerconeangle%, outerconeangle#
+End Type 
+
+Function AddTempLight.LightTemplates(rt.RoomTemplates, x#, y#, z#, ltype%, range#, r%, g%, b%)
+	lt.lighttemplates = New LightTemplates
+	lt\roomtemplate = rt
+	lt\x = x
+	lt\y = y
+	lt\z = z
+	lt\ltype = ltype
+	lt\range = range
+	lt\r = r
+	lt\g = g
+	lt\b = b
+	
+	Return lt
+End Function
+
+Global UpdateRoomLightsTimer# = 0.0
+
+Function UpdateRoomLights(cam%)
+	Local r.Rooms, i, random#, alpha#, dist#
+	
+	For r.Rooms = Each Rooms
+		If r\dist < HideDistance*0.7 Lor r = PlayerRoom Then
+			For i = 0 To r\MaxLights%-1
+				If r\Lights%[i]<>0 Then
+					If EnableRoomLights% And (SecondaryLightOn>0.5) And cam%=Camera Then
+						EntityOrder r\LightSprites2[i],-1
+						If UpdateRoomLightsTimer=0.0 Then
+							ShowEntity r\LightSprites[i]
+							
+							If EntityDistanceSquared(cam%,r\Lights%[i])<72.25 Then
+								If r\LightHidden[i] Then
+									ShowEntity r\Lights%[i]
+									r\LightHidden[i] = False
+								EndIf
+							Else
+								If (Not r\LightHidden[i]) Then
+									HideEntity r\Lights%[i]
+									r\LightHidden[i] = True
+								EndIf
+							EndIf
+							
+							If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
+								If EntityVisible(cam%,r\LightSpritesPivot[i]) Lor r\RoomTemplate\UseLightCones Then
+									If r\LightSpriteHidden%[i] Then
+										ShowEntity r\LightSprites2%[i]
+										r\LightSpriteHidden%[i] = False
+									EndIf
+									If PlayerRoom\RoomTemplate\Name$ = "173" Then
+										random# = Rnd(0.38,0.42)
+									Else
+										If r\LightFlicker%[i]<5 Then
+											random# = Rnd(0.38,0.42)
+										ElseIf r\LightFlicker%[i]>4 And r\LightFlicker%[i]<10 Then
+											random# = Rnd(0.35,0.45)
+										Else
+											random# = Rnd(0.3,0.5)
+										EndIf
+									EndIf
+									ScaleSprite r\LightSprites2[i],random#,random#
+									
+									alpha = 1.0 - Max(Min(((EntityDistance(cam, r\LightSpritesPivot[i]) + 0.5) / 7.5), 1.0), 0.0)
+									
+									If alpha# > 0.0 Then
+										EntityAlpha r\LightSprites2[i],Max(3*(BRIGHTNESS/255)*(r\LightIntensity[i]/2),1)*alpha#
+									Else
+										;Instead of rendering the sprite invisible, just hiding it if the player is far away from it
+										If (Not r\LightSpriteHidden%[i]) Then
+											HideEntity r\LightSprites2[i]
+											r\LightSpriteHidden%[i]=True
+										EndIf
+									EndIf
+									
+									If r\RoomTemplate\UseLightCones Then
+										If EntityDistanceSquared(cam%,r\LightSprites2[i])>=72.25 Lor (Not EntityVisible(cam%,r\LightSpritesPivot[i])) Then
+											HideEntity r\LightSprites2%[i]
+											r\LightSpriteHidden%[i] = True
+										EndIf
+									EndIf
+								Else
+									If (Not r\LightSpriteHidden%[i]) Then
+										HideEntity r\LightSprites2%[i]
+										r\LightSpriteHidden%[i] = True
+									EndIf
+								EndIf
+							Else
+								If (Not r\LightSpriteHidden%[i]) Then
+									HideEntity r\LightSprites2%[i]
+									r\LightSpriteHidden%[i] = True
+									If r\LightCone[i]<>0 Then HideEntity r\LightCone[i]
+									If r\LightConeSpark[i]<>0 HideEntity r\LightConeSpark[i]
+									EndIf
+								EndIf
+								
+								If r\LightCone[i]<>0 Then ShowEntity r\LightCone[i]
+								
+								If r\LightConeSpark[i]<>0 Then
+									If r\LightConeSparkTimer[i]>0 And r\LightConeSparkTimer[i]<10
+										ShowEntity r\LightConeSpark[i]
+										r\LightConeSparkTimer[i]=r\LightConeSparkTimer[i]+FPSfactor
+									Else
+										HideEntity r\LightConeSpark[i]
+										r\LightConeSparkTimer[i]=0
+									EndIf
+								EndIf
+								
+								If r\LightCone[i]<>0 Then
+									ScaleEntity r\LightCone[i],0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0)
+									If r\LightFlicker%[i]>4 Then
+										If Rand(400)=1 Then
+											SetEmitter(r\LightSpritesPivot[i],ParticleEffect[0])
+											PlaySound2(IntroSFX[Rand(10,12)],cam,r\LightSpritesPivot[i])
+											ShowEntity r\LightConeSpark[i]
+											r\LightConeSparkTimer[i] = FPSfactor
+										EndIf
+									EndIf
+								EndIf
+							Else
+								If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
+									If PlayerRoom\RoomTemplate\Name$ = "173" Then
+										random# = Rnd(0.38,0.42)
+									Else
+										If r\LightFlicker%[i]<5 Then
+											random# = Rnd(0.38,0.42)
+										ElseIf r\LightFlicker%[i]>4 And r\LightFlicker%[i]<10 Then
+											random# = Rnd(0.35,0.45)
+										Else
+											random# = Rnd(0.3,0.5)
+										EndIf
+									EndIf
+									
+									If (Not r\LightSpriteHidden[i]) Then
+										ScaleSprite r\LightSprites2[i],random#,random#
+									EndIf
+								EndIf
+								
+								If r\LightCone[i]<>0 Then
+									ScaleEntity r\LightCone[i],0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0)
+								EndIf
+								
+								If r\LightConeSpark[i]<>0 Then
+									If r\LightConeSparkTimer[i]>0 And r\LightConeSparkTimer[i]<10 Then
+										ShowEntity r\LightConeSpark[i]
+										r\LightConeSparkTimer[i]=r\LightConeSparkTimer[i]+FPSfactor
+									Else
+										HideEntity r\LightConeSpark[i]
+										r\LightConeSparkTimer[i]=0
+									EndIf
+								EndIf
+							EndIf
+							UpdateRoomLightsTimer = UpdateRoomLightsTimer + FPSfactor
+							If UpdateRoomLightsTimer >= 8 Then
+								UpdateRoomLightsTimer = 0.0
+							EndIf
+						ElseIf cam%=Camera Then
+							If SecondaryLightOn<=0.5 Then
+								HideEntity r\LightSprites[i]
+							Else
+								ShowEntity r\LightSprites[i]
+							EndIf
+							
+							If (Not r\LightHidden[i]) Then
+								HideEntity r\Lights%[i]
+								r\LightHidden[i] = True
+							EndIf
+							If (Not r\LightSpriteHidden[i]) Then
+								HideEntity r\LightSprites2[i]
+								r\LightSpriteHidden[i]=True
+							EndIf
+							If r\LightCone[i]<>0 Then HideEntity r\LightCone[i]
+							If r\LightConeSpark[i]<>0 Then HideEntity r\LightConeSpark[i]
+						Else
+						;This will make the lightsprites not glitch through the wall when they are rendered by the cameras
+							EntityOrder r\LightSprites2[i],0
+						EndIf
+					EndIf
+				Next
+			EndIf
+		Next
+End Function
+
+Global AmbientLightRoomTex%, AmbientLightRoomVal%
+
+Function AmbientLightRooms(value%=0)
+	Local mesh%,surf%,brush%,tex0%
+	
+	If value=AmbientLightRoomVal Then Return
+	AmbientLightRoomVal = value
+	
+	Local oldbuffer% = BackBuffer() ;probably shouldn't make assumptions here but who cares, why wouldn't it use the backbuffer ;GetBuffer()
+	
+	SetBuffer TextureBuffer(AmbientLightRoomTex)
+	
+	ClsColor value,value,value
+	Cls
+	ClsColor 0,0,0
+	
+	SetBuffer oldbuffer
+End Function
+
+Const RoomScale# = 8.0 / 2048.0
 
 Function LoadRMesh(file$,rt.RoomTemplates)
 	CatchErrors("Uncaught (LoadRMesh)")
@@ -1192,12 +1527,6 @@ End Function
 
 LoadRoomTemplates("Data\rooms.ini")
 
-Const RoomScale# = 8.0 / 2048.0
-Const MapSize% = 18
-
-Dim MapTemp%(MapSize+1, MapSize+1)
-Dim MapFound%(MapSize+1, MapSize+1)
-
 Global RoomAmbience%[10]
 
 Global Sky
@@ -1317,7 +1646,7 @@ Function PlaceGrid_MapCreator(r.Rooms)
 					Case ROOM2C + 1, ROOM3 + 1, ROOM4 + 1
 						AddLight%(Null,r\x+x*2.0, 8.0+(416.0*RoomScale), r\z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					Case ROOM4 + 2
-						dr=createdoor(r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*240.0*RoomScale),8.0,r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*240.0*RoomScale),EntityYaw(tile_entity,True)+90.0,Null,False,3,False,"")
+						dr=CreateDoor(r\x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*240.0*RoomScale),8.0,r\z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*240.0*RoomScale),EntityYaw(tile_entity,True)+90.0,Null,False,3,False,"")
 						PositionEntity dr\buttons[0],EntityX(dr\buttons[0],True)+(Cos(EntityYaw(tile_entity,True))*0.05),EntityY(dr\buttons[0],True)+0.0,EntityZ(dr\buttons[0],True)+(Sin(EntityYaw(tile_entity,True))*0.05),True
 						
 						AddLight%(Null, r\x+x*2.0+(Cos(EntityYaw(tile_entity,True))*555.0*RoomScale), 8.0+(469.0*RoomScale), r\z+y*2.0+(Sin(EntityYaw(tile_entity,True))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
@@ -1531,6 +1860,1593 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 	
 	CatchErrors("CreateRoom")
 End Function
+
+Type TempWayPoints
+	Field x#, y#, z#
+	Field roomtemplate.RoomTemplates
+End Type 
+
+Type WayPoints
+	Field obj
+	Field door.Doors
+	Field room.Rooms
+	Field state%
+	Field connected.WayPoints[5]
+	Field dist#[5]
+	Field Fcost#, Gcost#, Hcost#
+	Field parent.WayPoints
+End Type
+
+Function CreateWaypoint.WayPoints(x#,y#,z#,door.Doors, room.Rooms)
+	w.waypoints = New WayPoints
+	
+	w\obj = CreatePivot()
+	PositionEntity w\obj, x,y,z	
+	EntityParent w\obj, room\obj
+	
+	w\room = room
+	w\door=door
+	
+	Return w
+End Function
+
+Function InitWayPoints(loadingstart=45)
+	Local d.Doors, w.WayPoints, w2.WayPoints, r.Rooms, ClosestRoom.Rooms
+	Local x#, y#, z#
+	Local dist#, dist2#
+	
+	temper = MilliSecs()
+	
+	For d.Doors = Each Doors
+		If d\obj <> 0 Then HideEntity d\obj
+		If d\obj2 <> 0 Then HideEntity d\obj2	
+		If d\frameobj <> 0 Then HideEntity d\frameobj
+		
+		If d\room = Null Then 
+			ClosestRoom.Rooms = Null
+			dist# = 30
+			For r.Rooms = Each Rooms
+				x# = Abs(EntityX(r\obj,True)-EntityX(d\frameobj,True))
+				If x < 20.0 Then
+					z# = Abs(EntityZ(r\obj,True)-EntityZ(d\frameobj,True))
+					If z < 20.0 Then
+						dist2 = x*x+z*z
+						If dist2 < dist Then
+							ClosestRoom = r
+							dist = dist2
+						EndIf
+					EndIf
+				EndIf
+			Next
+		Else
+			ClosestRoom = d\room
+		EndIf
+		
+		If (Not d\DisableWaypoint) Then CreateWaypoint(EntityX(d\frameobj, True), EntityY(d\frameobj, True)+0.18, EntityZ(d\frameobj, True), d, ClosestRoom)
+	Next
+	
+	amount# = 0
+	For w.WayPoints = Each WayPoints
+		EntityPickMode w\obj, 1, True
+		EntityRadius w\obj, 0.2
+		amount=amount+1
+	Next
+	
+	number = 0
+	iter = 0
+	For w.WayPoints = Each WayPoints
+		
+		number = number + 1
+		iter = iter + 1
+		If iter = 20 Then 
+			DrawLoading(loadingstart+Floor((35.0/amount)*number)) 
+			iter = 0
+		EndIf
+		
+		w2.WayPoints = After(w)
+		
+		Local canCreateWayPoint% = False
+		
+		While (w2<>Null)
+			
+			If (w\room=w2\room Lor w\door<>Null Lor w2\door<>Null)
+				
+				dist# = EntityDistance(w\obj, w2\obj)
+				
+				If w\room\MaxWayPointY# = 0.0 Lor w2\room\MaxWayPointY# = 0.0
+					canCreateWayPoint = True
+				Else
+					If Abs(EntityY(w\obj)-EntityY(w2\obj))<=w\room\MaxWayPointY
+						canCreateWayPoint = True
+					EndIf
+				EndIf
+				
+				If dist < 7.0 Then
+					If canCreateWayPoint
+						If EntityVisible(w\obj, w2\obj) Then
+							For i = 0 To 4
+								If w\connected[i] = Null Then
+									w\connected[i] = w2.WayPoints 
+									w\dist[i] = dist
+									Exit
+								EndIf
+							Next
+							
+							For n = 0 To 4
+								If w2\connected[n] = Null Then 
+									w2\connected[n] = w.WayPoints 
+									w2\dist[n] = dist
+									Exit
+								EndIf					
+							Next
+						EndIf
+					EndIf	
+				EndIf
+			EndIf
+			w2 = After(w2)
+		Wend
+	Next
+	
+	For d.Doors = Each Doors
+		If d\obj <> 0 Then ShowEntity d\obj
+		If d\obj2 <> 0 Then ShowEntity d\obj2	
+		If d\frameobj <> 0 Then ShowEntity d\frameobj		
+	Next
+	
+	For w.WayPoints = Each WayPoints
+		EntityPickMode w\obj, 0, 0
+		EntityRadius w\obj, 0
+		
+		For i = 0 To 4
+			If w\connected[i]<>Null Then 
+				tline = CreateLine(EntityX(w\obj,True),EntityY(w\obj,True),EntityZ(w\obj,True),EntityX(w\connected[i]\obj,True),EntityY(w\connected[i]\obj,True),EntityZ(w\connected[i]\obj,True))
+				EntityColor(tline, 255,0,0)
+				EntityParent tline, w\obj
+			EndIf
+		Next
+	Next
+	
+	DebugLog "InitWaypoints() - "+(MilliSecs2()-temper)
+End Function
+
+Function RemoveWaypoint(w.WayPoints)
+	FreeEntity w\obj
+	Delete w
+End Function
+
+Global ClosestButton%
+
+Function CreateButton(x#,y#,z#, pitch#,yaw#,roll#=0)
+	Local obj = CopyEntity(ButtonOBJ)	
+	
+	ScaleEntity(obj, 0.03, 0.03, 0.03)
+	
+	PositionEntity obj, x,y,z
+	RotateEntity obj, pitch,yaw,roll
+	
+	EntityPickMode(obj, 2)	
+	
+	Return obj
+End Function
+
+Function UpdateButton(obj)
+	Local dist# = EntityDistanceSquared(Collider, obj)
+	
+	If dist < 0.64 Then
+		Local temp% = CreatePivot()
+		
+		PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
+		PointEntity temp,obj
+		
+		If EntityPick(temp, 0.65) = obj Then
+			If ClosestButton = 0 Then 
+				ClosestButton = obj
+			Else
+				If dist < EntityDistanceSquared(Collider, ClosestButton) Then ClosestButton = obj
+			EndIf							
+		EndIf
+		FreeEntity temp
+	EndIf			
+End Function
+
+Global BigDoorOBJ[2], HeavyDoorObj[2]
+Global OBJTunnel[7]
+
+Global UpdateDoorsTimer#
+Global DoorTempID%
+
+Global room2gw_brokendoor% = False
+Global room2gw_x# = 0.0
+Global room2gw_z# = 0.0
+
+Type Doors
+	Field obj%, obj2%, frameobj%, buttons%[2]
+	Field locked%, open%, angle%, openstate#, fastopen%
+	Field dir%
+	Field timer%, timerstate#
+	Field KeyCard%
+	Field room.Rooms
+	Field DisableWaypoint%
+	Field dist#
+	Field SoundCHN%
+	Field Code$
+	Field ID%
+	Field AutoClose%
+	Field LinkedDoor.Doors
+	Field IsElevatorDoor% = False
+	Field MTFClose% = True
+End Type 
+
+Global ClosestDoor.Doors
+Global SelectedDoor.Doors
+
+Function CreateDoor.Doors(x#, y#, z#, angle#, room.Rooms, dopen% = False,  big% = False, keycard% = False, code$="", useCollisionMesh% = False)
+	Local d.Doors, parent, i%
+	If room <> Null Then parent = room\obj
+	
+	Local d2.Doors
+	
+	d.Doors = New Doors
+	If big=1 Then
+		d\obj = CopyEntity(BigDoorOBJ[0])
+		ScaleEntity(d\obj, 55 * RoomScale, 55 * RoomScale, 55 * RoomScale)
+		d\obj2 = CopyEntity(BigDoorOBJ[1])
+		ScaleEntity(d\obj2, 55 * RoomScale, 55 * RoomScale, 55 * RoomScale)
+		
+		d\frameobj = CopyEntity(DoorColl)				
+		ScaleEntity(d\frameobj, RoomScale, RoomScale, RoomScale)
+		EntityType d\frameobj, HIT_MAP
+		EntityAlpha d\frameobj, 0.0
+	ElseIf big=2 Then
+		d\obj = CopyEntity(HeavyDoorObj[0])
+		ScaleEntity(d\obj, RoomScale, RoomScale, RoomScale)
+		d\obj2 = CopyEntity(HeavyDoorObj[1])
+		ScaleEntity(d\obj2, RoomScale, RoomScale, RoomScale)
+		
+		d\frameobj = CopyEntity(DoorFrameOBJ)
+	ElseIf big=3 Then
+		For d2 = Each Doors
+			If d2 <> d And d2\dir = 3 Then
+				d\obj = CopyEntity(d2\obj)
+				d\obj2 = CopyEntity(d2\obj2)
+				ScaleEntity d\obj, RoomScale, RoomScale, RoomScale
+				ScaleEntity d\obj2, RoomScale, RoomScale, RoomScale
+				Exit
+			EndIf
+		Next
+		If d\obj=0 Then
+			d\obj = LoadMesh_Strict("GFX\map\elevatordoor.b3d")
+			d\obj2 = CopyEntity(d\obj)
+			ScaleEntity d\obj, RoomScale, RoomScale, RoomScale
+			ScaleEntity d\obj2, RoomScale, RoomScale, RoomScale
+		EndIf
+		d\frameobj = CopyEntity(DoorFrameOBJ)
+	Else
+		d\obj = CopyEntity(DoorOBJ)
+		ScaleEntity(d\obj, (204.0 * RoomScale) / MeshWidth(d\obj), 312.0 * RoomScale / MeshHeight(d\obj), 16.0 * RoomScale / MeshDepth(d\obj))
+		
+		d\frameobj = CopyEntity(DoorFrameOBJ)
+		d\obj2 = CopyEntity(DoorOBJ)
+		
+		ScaleEntity(d\obj2, (204.0 * RoomScale) / MeshWidth(d\obj), 312.0 * RoomScale / MeshHeight(d\obj), 16.0 * RoomScale / MeshDepth(d\obj))
+	EndIf
+	
+	PositionEntity(d\frameobj, x, y, z)
+	ScaleEntity(d\frameobj, RoomScale, RoomScale, RoomScale)
+	EntityPickMode(d\frameobj, 2)
+	
+	PositionEntity(d\obj, x, y, z)
+	RotateEntity(d\obj, 0.0, angle, 0.0)
+	EntityType(d\obj, HIT_MAP)
+	EntityPickMode(d\obj, 2)
+	MakeCollBox(d\obj)
+	EntityParent(d\obj, parent)
+	
+	If d\obj2 <> 0 Then
+		PositionEntity(d\obj2, x, y, z)
+		RotateEntity(d\obj2, 0.0, angle + ((big <> 1) * 180.0), 0.0)
+		EntityType(d\obj2, HIT_MAP)
+		EntityPickMode(d\obj2, 2)
+		MakeCollBox(d\obj2)
+		EntityParent(d\obj2, parent)
+	EndIf
+	
+	For i% = 0 To 1
+		If code <> "" Then 
+			d\buttons[i]= CopyEntity(ButtonCodeOBJ)
+			EntityFX(d\buttons[i], 0.5)
+		Else
+			If keycard>0 Then
+				d\buttons[i]= CopyEntity(ButtonKeyOBJ)
+			ElseIf keycard<0
+				d\buttons[i]= CopyEntity(ButtonScannerOBJ)	
+			Else
+				d\buttons[i] = CopyEntity(ButtonOBJ)
+			EndIf
+		EndIf
+		
+		ScaleEntity(d\buttons[i], 0.03, 0.03, 0.03)
+		
+		PositionEntity(d\buttons[i], x + ((big <> 1) * (0.6 + (i * (-1.2)))) + ((big = 1) * ((-432.0 + (i * 864.0)) * RoomScale)), y + 0.7, z + ((big <> 1) * ((-0.1) + (i * 0.2))) + ((big = 1) * ((192.0 + (i * (-384.0)))) * RoomScale))
+		RotateEntity(d\buttons[i], 0.0, ((big <> 1) * (i * 180.0)) + ((big = 1) * (90.0 + (i * 180.0))), 0.0)
+		EntityParent(d\buttons[i], d\frameobj)
+		EntityPickMode(d\buttons[i], 2)
+	Next
+	
+	RotateEntity(d\frameobj, 0.0, angle, 0.0)
+	EntityParent(d\frameobj, parent)
+	
+	d\ID = DoorTempID
+	DoorTempID=DoorTempID+1
+	
+	d\KeyCard = keycard
+	d\Code = code
+	
+	d\angle = angle
+	d\open = dopen		
+	
+	If d\open And big = False And Rand(8) = 1 Then d\AutoClose = True
+	d\dir=big
+	d\room=room
+	
+	d\MTFClose = True
+	
+	Return d
+End Function
+
+Function UpdateDoors()
+	Local i%, d.Doors, x#, z#, dist#
+	
+	If UpdateDoorsTimer =< 0 Then
+		For d.Doors = Each Doors
+			Local xdist# = Abs(EntityX(Collider)-EntityX(d\obj,True))
+			Local zdist# = Abs(EntityZ(Collider)-EntityZ(d\obj,True))
+			
+			d\dist = xdist+zdist
+			
+			If d\dist > HideDistance*2 Then
+				If d\obj <> 0 Then HideEntity d\obj
+				If d\frameobj <> 0 Then HideEntity d\frameobj
+				If d\obj2 <> 0 Then HideEntity d\obj2
+				If d\buttons[0] <> 0 Then HideEntity d\buttons[0]
+				If d\buttons[1] <> 0 Then HideEntity d\buttons[1]				
+			Else
+				If d\obj <> 0 Then ShowEntity d\obj
+				If d\frameobj <> 0 Then ShowEntity d\frameobj
+				If d\obj2 <> 0 Then ShowEntity d\obj2
+				If d\buttons[0] <> 0 Then ShowEntity d\buttons[0]
+				If d\buttons[1] <> 0 Then ShowEntity d\buttons[1]
+			EndIf
+		Next
+		
+		UpdateDoorsTimer = 30
+	Else
+		UpdateDoorsTimer = Max(UpdateDoorsTimer-FPSfactor,0)
+	EndIf
+	
+	ClosestButton = 0
+	ClosestDoor = Null
+	
+	For d.Doors = Each Doors
+		If d\dist < HideDistance*2 Lor d\IsElevatorDoor>0 Then ;Make elevator doors update everytime because if not, this can cause a bug where the elevators suddenly won't work, most noticeable in room2tunnel - ENDSHN
+			If (d\openstate >= 180 Lor d\openstate <= 0) And GrabbedEntity = 0 Then
+				For i% = 0 To 1
+					If d\buttons[i] <> 0 Then
+						If Abs(EntityX(Collider)-EntityX(d\buttons[i],True)) < 1.0 Then 
+							If Abs(EntityZ(Collider)-EntityZ(d\buttons[i],True)) < 1.0 Then 
+								dist# = DistanceSquared(EntityX(Collider, True), EntityX(d\buttons[i], True),EntityZ(Collider, True), EntityZ(d\buttons[i], True))
+								If dist < 0.49 Then
+									Local temp% = CreatePivot()
+									
+									PositionEntity temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
+									PointEntity temp,d\buttons[i]
+									
+									If EntityPick(temp, 0.6) = d\buttons[i] Then
+										If ClosestButton = 0 Then
+											ClosestButton = d\buttons[i]
+											ClosestDoor = d
+										Else
+											If dist < EntityDistanceSquared(Collider, ClosestButton) Then ClosestButton = d\buttons[i] : ClosestDoor = d
+										EndIf							
+									EndIf
+									FreeEntity temp
+								EndIf							
+							EndIf
+						EndIf
+					EndIf
+				Next
+			EndIf
+			
+			If d\open Then
+				If d\openstate < 180 Then
+					Select d\dir
+						Case 0
+							d\openstate = Min(180, d\openstate + FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * (d\fastopen*2+1) * FPSfactor / 80.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate)* (d\fastopen+1) * FPSfactor / 80.0, 0, 0)		
+						Case 1
+							d\openstate = Min(180, d\openstate + FPSfactor * 0.8)
+							MoveEntity(d\obj, Sin(d\openstate) * FPSfactor / 180.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, -Sin(d\openstate) * FPSfactor / 180.0, 0, 0)
+						Case 2
+							d\openstate = Min(180, d\openstate + FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * (d\fastopen+1) * FPSfactor / 85.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate)* (d\fastopen*2+1) * FPSfactor / 120.0, 0, 0)
+						Case 3
+							d\openstate = Min(180, d\openstate + FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * (d\fastopen*2+1) * FPSfactor / 162.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate)* (d\fastopen*2+1) * FPSfactor / 162.0, 0, 0)
+						Case 4 ;Used for 914 only
+							d\openstate = Min(180, d\openstate + FPSfactor * 1.4)
+							MoveEntity(d\obj, Sin(d\openstate) * FPSfactor / 114.0, 0, 0)
+					End Select
+				Else
+					d\fastopen = 0
+					ResetEntity(d\obj)
+					If d\obj2 <> 0 Then ResetEntity(d\obj2)
+					If d\timerstate > 0 Then
+						d\timerstate = Max(0, d\timerstate - FPSfactor)
+						If d\timerstate + FPSfactor > 110 And d\timerstate <= 110 Then d\SoundCHN = PlaySound2(CautionSFX, Camera, d\obj)
+						
+						Local sound%
+						
+						If d\dir = 1 Then sound% = Rand(0, 1) Else sound% = Rand(0, 2)
+						If d\timerstate = 0 Then d\open = (Not d\open) : d\SoundCHN = PlaySound2(CloseDoorSFX(d\dir,sound%), Camera, d\obj)
+					EndIf
+					If d\AutoClose And RemoteDoorOn = True Then
+						If EntityDistanceSquared(Camera, d\obj) < 4.41 Then
+							If (Not Wearing714) Then PlaySound_Strict HorrorSFX[7]
+							d\open = False : d\SoundCHN = PlaySound2(CloseDoorSFX(Min(d\dir,1), Rand(0, 2)), Camera, d\obj) : d\AutoClose = False
+						EndIf
+					EndIf				
+				EndIf
+			Else
+				If d\openstate > 0 Then
+					Select d\dir
+						Case 0
+							d\openstate = Max(0, d\openstate - FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor * (d\fastopen+1) / 80.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate) * (d\fastopen+1) * -FPSfactor / 80.0, 0, 0)	
+						Case 1
+							d\openstate = Max(0, d\openstate - FPSfactor*0.8)
+							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor / 180.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate) * FPSfactor / 180.0, 0, 0)
+							If d\openstate < 15 And d\openstate+FPSfactor => 15
+								If ParticleAmount=2
+									For i = 0 To Rand(75,99)
+										Local pvt% = CreatePivot()
+										PositionEntity(pvt, EntityX(d\frameobj,True)+Rnd(-0.2,0.2), EntityY(d\frameobj,True)+Rnd(0.0,1.2), EntityZ(d\frameobj,True)+Rnd(-0.2,0.2))
+										RotateEntity(pvt, 0, Rnd(360), 0)
+										
+										Local p.Particles = CreateParticle(EntityX(pvt), EntityY(pvt), EntityZ(pvt), 2, 0.002, 0, 300)
+										p\speed = 0.005
+										RotateEntity(p\pvt, Rnd(-20, 20), Rnd(360), 0)
+										
+										p\SizeChange = -0.00001
+										p\size = 0.01
+										ScaleSprite p\obj,p\size,p\size
+										
+										p\Achange = -0.01
+										
+										EntityOrder p\obj,-1
+										
+										FreeEntity pvt
+									Next
+								EndIf
+							EndIf
+						Case 2
+							d\openstate = Max(0, d\openstate - FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor * (d\fastopen+1) / 85.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate) * (d\fastopen+1) * -FPSfactor / 120.0, 0, 0)
+						Case 3
+							d\openstate = Max(0, d\openstate - FPSfactor * 2 * (d\fastopen+1))
+							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor * (d\fastopen+1) / 162.0, 0, 0)
+							If d\obj2 <> 0 Then MoveEntity(d\obj2, Sin(d\openstate) * (d\fastopen+1) * -FPSfactor / 162.0, 0, 0)
+						Case 4 ;Used for 914 only
+							d\openstate = Min(180, d\openstate - FPSfactor * 1.4)
+							MoveEntity(d\obj, Sin(d\openstate) * -FPSfactor / 114.0, 0, 0)
+					End Select
+					
+					If d\angle = 0 Lor d\angle=180 Then
+						If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.15 Then
+							If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.7*(d\dir*2+1) Then
+								z# = CurveValue(EntityZ(d\frameobj,True)+0.15*Sgn(EntityZ(Collider)-EntityZ(d\frameobj, True)), EntityZ(Collider), 5)
+								PositionEntity Collider, EntityX(Collider), EntityY(Collider), z
+							EndIf
+						EndIf
+					Else
+						If Abs(EntityX(d\frameobj, True)-EntityX(Collider))<0.15 Then	
+							If Abs(EntityZ(d\frameobj, True)-EntityZ(Collider))<0.7*(d\dir*2+1) Then
+								x# = CurveValue(EntityX(d\frameobj,True)+0.15*Sgn(EntityX(Collider)-EntityX(d\frameobj, True)), EntityX(Collider), 5)
+								PositionEntity Collider, x, EntityY(Collider), EntityZ(Collider)
+							EndIf
+						EndIf
+					EndIf
+				Else
+					d\fastopen = 0
+					PositionEntity(d\obj, EntityX(d\frameobj, True), EntityY(d\frameobj, True), EntityZ(d\frameobj, True))
+					If d\obj2 <> 0 Then PositionEntity(d\obj2, EntityX(d\frameobj, True), EntityY(d\frameobj, True), EntityZ(d\frameobj, True))
+					If d\obj2 <> 0 And d\dir = 0 Then
+						MoveEntity(d\obj, 0, 0, 8.0 * RoomScale)
+						MoveEntity(d\obj2, 0, 0, 8.0 * RoomScale)
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		UpdateSoundOrigin(d\SoundCHN,Camera,d\frameobj)
+	Next
+End Function
+
+Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.Events, ignorerotation% = True)
+	Local x#, z#, sound%
+	Local dist#, dir#, n.NPCs, it.Items
+	
+	door1\IsElevatorDoor = 1
+	door2\IsElevatorDoor = 1
+	If door1\open = True And door2\open = False And door1\openstate = 180 Then 
+		State = -1
+		door1\locked = False
+		If (ClosestButton = door2\buttons[0] Lor ClosestButton = door2\buttons[1]) And MouseHit1 Then
+			UseDoor(door1,False)
+		EndIf
+	ElseIf door2\open = True And door1\open = False And door2\openstate = 180 Then
+		State = 1
+		door2\locked = False
+		If (ClosestButton = door1\buttons[0] Lor ClosestButton = door1\buttons[1]) And MouseHit1 Then
+			UseDoor(door2,False)
+		EndIf
+	ElseIf Abs(door1\openstate-door2\openstate)<0.2 Then
+		door1\IsElevatorDoor = 2
+		door2\IsElevatorDoor = 2
+	EndIf
+	
+	door1\locked = True
+	door2\locked = True
+	If door1\open Then
+		door1\IsElevatorDoor = 3
+		If Abs(EntityX(Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+			If Abs(EntityZ(Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+				If Abs(EntityY(Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+					door1\locked = False
+					door1\IsElevatorDoor = 1
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+	If door2\open Then
+		door2\IsElevatorDoor = 3
+		If Abs(EntityX(Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+			If Abs(EntityZ(Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+				If Abs(EntityY(Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+					door2\locked = False
+					door2\IsElevatorDoor = 1
+				EndIf
+			EndIf
+		EndIf	
+	EndIf
+	
+	Local inside = False
+	
+	If door1\open = False And door2\open = False Then
+		door1\locked = True
+		door2\locked = True
+		If door1\openstate = 0 And door2\openstate = 0 Then
+			If State < 0 Then
+				State = State - FPSfactor
+				If Abs(EntityX(Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+					If Abs(EntityZ(Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+						If Abs(EntityY(Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+							inside = True
+							If event\SoundCHN = 0 Then
+								event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+							Else
+								If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+							EndIf
+							CameraShake = Sin(Abs(State)/3.0)*0.3
+						EndIf
+					EndIf
+				EndIf
+				
+				If State < -500 Then
+					door1\locked = True
+					door2\locked = False
+					State = 0
+					
+					If inside Then
+						If (Not ignorerotation) Then
+							dist# = Distance(EntityX(Collider,True),EntityX(room1,True),EntityZ(Collider,True),EntityZ(room1,True))
+							dir# = point_direction(EntityX(Collider,True),EntityZ(Collider,True),EntityX(room1,True),EntityZ(room1,True))
+							dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+							dir=WrapAngle(dir)
+							x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+							z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+							RotateEntity Collider,EntityPitch(Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(Collider,True),EntityYaw(room1,True)),EntityRoll(Collider,True),True
+						Else
+							x# = Max(Min((EntityX(Collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+							z# = Max(Min((EntityZ(Collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+						EndIf
+						
+						TeleportEntity(Collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(Collider)-EntityY(room1,True)),EntityZ(room2,True)+z,0.3,True)
+						UpdateDoorsTimer = 0
+						DropSpeed = 0
+						UpdateDoors()
+						UpdateRooms()
+						
+						sound=Rand(0, 2)
+						door2\SoundCHN = PlaySound_Strict(OpenDoorSFX(3, sound))
+					EndIf
+					
+					For n.NPCs = Each NPCs
+						If Abs(EntityX(n\Collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(n\Collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(n\Collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(n\Collider,True),EntityX(room1,True),EntityZ(n\Collider,True),EntityZ(room1,True))
+										dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room1,True),EntityZ(room1,True))
+										dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+										dir=WrapAngle(dir)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
+									Else
+										x# = Max(Min((EntityX(n\Collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(n\Collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(n\Collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(n\Collider)-EntityY(room1,True)),EntityZ(room2,True)+z,n\CollRadius,True)
+									If n = Curr173
+										Curr173\IdleTimer = 10
+									EndIf
+								EndIf
+							EndIf
+						EndIf
+					Next
+					For it.Items = Each Items
+						If Abs(EntityX(it\collider)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(it\collider)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(it\collider)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(it\collider,True),EntityX(room1,True),EntityZ(it\collider,True),EntityZ(room1,True))
+										dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room1,True),EntityZ(room1,True))
+										dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+										dir=WrapAngle(dir)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
+									Else
+										x# = Max(Min((EntityX(it\collider)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(it\collider)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(it\collider, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(it\collider)-EntityY(room1,True)),EntityZ(room2,True)+z,0.01,True)
+								EndIf
+							EndIf
+						EndIf
+					Next
+					
+					UseDoor(door2,False,Not inside)
+					door1\open = False
+					
+					PlaySound2(ElevatorBeepSFX, Camera, room1, 4.0)
+				EndIf
+			Else
+				State = State + FPSfactor
+				If Abs(EntityX(Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+					If Abs(EntityZ(Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then	
+						If Abs(EntityY(Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							inside = True
+							If event\SoundCHN = 0 Then
+								event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+							Else
+								If (Not ChannelPlaying(event\SoundCHN)) Then event\SoundCHN = PlaySound_Strict(ElevatorMoveSFX)
+							EndIf
+							CameraShake = Sin(Abs(State)/3.0)*0.3
+						EndIf
+					EndIf
+				EndIf	
+				
+				If State > 500 Then 
+					door1\locked = False
+					door2\locked = True				
+					State = 0
+					
+					If inside Then	
+						If (Not ignorerotation) Then
+							dist# = Distance(EntityX(Collider,True),EntityX(room2,True),EntityZ(Collider,True),EntityZ(room2,True))
+							dir# = point_direction(EntityX(Collider,True),EntityZ(Collider,True),EntityX(room2,True),EntityZ(room2,True))
+							dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+							x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+							z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+							RotateEntity Collider,EntityPitch(Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(Collider,True),EntityYaw(room1,True)),EntityRoll(Collider,True),True
+						Else
+							x# = Max(Min((EntityX(Collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+							z# = Max(Min((EntityZ(Collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+						EndIf
+						TeleportEntity(Collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(Collider)-EntityY(room2,True)),EntityZ(room1,True)+z,0.3,True)
+						UpdateDoorsTimer = 0
+						DropSpeed = 0
+						UpdateDoors()
+						UpdateRooms()
+						
+						sound=Rand(0, 2)
+						door1\SoundCHN = PlaySound_Strict(OpenDoorSFX(3, sound))
+					EndIf
+					
+					For n.NPCs = Each NPCs
+						If Abs(EntityX(n\Collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(n\Collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(n\Collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(n\Collider,True),EntityX(room2,True),EntityZ(n\Collider,True),EntityZ(room2,True))
+										dir# = point_direction(EntityX(n\Collider,True),EntityZ(n\Collider,True),EntityX(room2,True),EntityZ(room2,True))
+										dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity n\Collider,EntityPitch(n\Collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(n\Collider,True),EntityYaw(room1,True)),EntityRoll(n\Collider,True),True
+									Else
+										x# = Max(Min((EntityX(n\Collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(n\Collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(n\Collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(n\Collider)-EntityY(room2,True)),EntityZ(room1,True)+z,n\CollRadius,True)
+									If n = Curr173
+										Curr173\IdleTimer = 10
+									EndIf
+								EndIf
+							EndIf
+						EndIf
+					Next
+					For it.Items = Each Items
+						If Abs(EntityX(it\collider)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(it\collider)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(it\collider)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(it\collider,True),EntityX(room2,True),EntityZ(it\collider,True),EntityZ(room2,True))
+										dir# = point_direction(EntityX(it\collider,True),EntityZ(it\collider,True),EntityX(room2,True),EntityZ(room2,True))
+										dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity it\collider,EntityPitch(it\collider,True),EntityYaw(room2,True)+angleDist(EntityYaw(it\collider,True),EntityYaw(room1,True)),EntityRoll(it\collider,True),True
+									Else
+										x# = Max(Min((EntityX(it\collider)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(it\collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(it\collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(it\collider)-EntityY(room2,True)),EntityZ(room1,True)+z,0.01,True)
+								EndIf
+							EndIf
+						EndIf
+					Next
+					
+					UseDoor(door1,False,Not inside)
+					door2\open = False
+					
+					PlaySound2(ElevatorBeepSFX, Camera, room2, 4.0)
+				EndIf	
+			EndIf
+		EndIf
+	EndIf
+	Return State
+End Function
+
+Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
+	Local temp% = 0
+	
+	If d\KeyCard > 0 Then
+		If SelectedItem = Null Then
+			If showmsg = True Then
+				If (Instr(Msg,"The keycard")=0 And Instr(Msg,"A keycard with")=0) Lor (MsgTimer<70*3) Then
+					Msg = "A keycard is required to operate this door."
+					MsgTimer = 70 * 7
+				EndIf
+			EndIf
+			Return
+		Else
+			Select SelectedItem\itemtemplate\tempname
+				Case "key1"
+					temp = 1
+				Case "key2"
+					temp = 2
+				Case "key3"
+					temp = 3
+				Case "key4"
+					temp = 4
+				Case "key5"
+					temp = 5
+				Case "key6"
+					temp = 6
+				Default 
+					temp = -1
+			End Select
+			
+			If temp =-1 Then 
+				If showmsg = True Then
+					If (Instr(Msg,"The keycard")=0 And Instr(Msg,"A keycard with")=0) Lor (MsgTimer<70*3) Then
+						Msg = "A keycard is required to operate this door."
+						MsgTimer = 70 * 7
+					EndIf
+				EndIf
+				Return				
+			ElseIf temp >= d\KeyCard 
+				SelectedItem = Null
+				If showmsg = True Then
+					If d\locked Then
+						PlaySound_Strict KeyCardSFX2
+						Msg = "The keycard was inserted into the slot but nothing happened."
+						MsgTimer = 70 * 7
+						Return
+					Else
+						PlaySound_Strict KeyCardSFX1
+						Msg = "The keycard was inserted into the slot."
+						MsgTimer = 70 * 7	
+					EndIf
+				EndIf
+			Else
+				SelectedItem = Null
+				If showmsg = True Then 
+					PlaySound_Strict KeyCardSFX2					
+					If d\locked Then
+						Msg = "The keycard was inserted into the slot but nothing happened."
+					Else
+						Msg = "A keycard with security clearance "+d\KeyCard+" or higher is required to operate this door."
+					EndIf
+					MsgTimer = 70 * 7					
+				EndIf
+				Return
+			EndIf
+		EndIf	
+	ElseIf d\KeyCard < 0
+		;I can't find any way to produce short circuited boolean expressions so work around this by using a temporary variable - risingstar64
+		If SelectedItem <> Null Then
+			temp = (SelectedItem\itemtemplate\tempname = "hand" And d\KeyCard=-1) Lor (SelectedItem\itemtemplate\tempname = "hand2" And d\KeyCard=-2)
+		EndIf
+		SelectedItem = Null
+		If temp <> 0 Then
+			PlaySound_Strict ScannerSFX1
+			If (Instr(Msg,"You placed your")=0) Lor (MsgTimer < 70*3) Then
+				Msg = "You place the palm of the hand onto the scanner. The scanner reads: "+Chr(34)+"DNA verified. Access granted."+Chr(34)
+			EndIf
+			MsgTimer = 70 * 10
+		Else
+			If showmsg = True Then 
+				PlaySound_Strict ScannerSFX2
+				Msg = "You placed your palm onto the scanner. The scanner reads: "+Chr(34)+"DNA does not match known sample. Access denied."+Chr(34)
+				MsgTimer = 70 * 10
+			EndIf
+			Return			
+		EndIf
+	Else
+		If d\locked Then
+			If showmsg = True Then 
+				If Not (d\IsElevatorDoor>0) Then
+					PlaySound_Strict ButtonSFX2
+					If PlayerRoom\RoomTemplate\Name <> "room2elevator" Then
+						If d\open Then
+							Msg = "You pushed the button but nothing happened."
+						Else    
+							Msg = "The door appears to be locked."
+						EndIf    
+					Else
+						Msg = "The elevator appears to be broken."
+					EndIf
+					MsgTimer = 70 * 5
+				Else
+					If d\IsElevatorDoor = 1 Then
+						Msg = "You called the elevator."
+						MsgTimer = 70 * 5
+					ElseIf d\IsElevatorDoor = 3 Then
+						Msg = "The elevator is already on this floor."
+						MsgTimer = 70 * 5
+					ElseIf (Msg<>"You called the elevator.")
+						If (Msg="You already called the elevator.") Lor (MsgTimer<70*3)	
+							Select Rand(10)
+								Case 1
+									Msg = "Stop spamming the button."
+									MsgTimer = 70 * 7
+								Case 2
+									Msg = "Pressing it harder does not make the elevator come faster."
+									MsgTimer = 70 * 7
+								Case 3
+									Msg = "If you continue pressing this button I will generate a Memory Access Violation."
+									MsgTimer = 70 * 7
+								Default
+									Msg = "You already called the elevator."
+									MsgTimer = 70 * 7
+							End Select
+						EndIf
+					Else
+						Msg = "You already called the elevator."
+						MsgTimer = 70 * 7
+					EndIf
+				EndIf
+			EndIf
+			Return
+		EndIf	
+	EndIf
+	
+	d\open = (Not d\open)
+	If d\LinkedDoor <> Null Then d\LinkedDoor\open = (Not d\LinkedDoor\open)
+	
+	Local sound = 0
+	
+	If d\dir = 1 Then sound=Rand(0, 1) Else sound=Rand(0, 2)
+	
+	If playsfx=True Then
+		If d\open Then
+			If d\LinkedDoor <> Null Then d\LinkedDoor\timerstate = d\LinkedDoor\timer
+			d\timerstate = d\timer
+			d\SoundCHN = PlaySound2 (OpenDoorSFX(d\dir, sound), Camera, d\obj)
+		Else
+			d\SoundCHN = PlaySound2 (CloseDoorSFX(d\dir, sound), Camera, d\obj)
+		EndIf
+		UpdateSoundOrigin(d\SoundCHN,Camera,d\obj)
+	Else
+		If d\open Then
+			If d\LinkedDoor <> Null Then d\LinkedDoor\timerstate = d\LinkedDoor\timer
+			d\timerstate = d\timer
+		EndIf
+	EndIf
+End Function
+
+Function RemoveDoor(d.Doors)
+	If d\buttons[0] <> 0 Then EntityParent d\buttons[0], 0
+	If d\buttons[1] <> 0 Then EntityParent d\buttons[1], 0	
+	
+	If d\obj <> 0 Then FreeEntity d\obj
+	If d\obj2 <> 0 Then FreeEntity d\obj2
+	If d\frameobj <> 0 Then FreeEntity d\frameobj
+	If d\buttons[0] <> 0 Then FreeEntity d\buttons[0]
+	If d\buttons[1] <> 0 Then FreeEntity d\buttons[1]
+	
+	Delete d
+End Function
+
+Global DecalTextures%[21]
+
+Type Decals
+	Field obj%
+	Field SizeChange#, Size#, MaxSize#
+	Field AlphaChange#, Alpha#
+	Field blendmode%
+	Field fx%
+	Field ID%
+	Field Timer#
+	Field lifetime#
+	Field x#, y#, z#
+	Field pitch#, yaw#, roll#
+End Type
+
+Function CreateDecal.Decals(id%, x#, y#, z#, pitch#, yaw#, roll#)
+	Local d.Decals = New Decals
+	
+	d\x = x
+	d\y = y
+	d\z = z
+	d\pitch = pitch
+	d\yaw = yaw
+	d\roll = roll
+	
+	d\MaxSize = 1.0
+	
+	d\Alpha = 1.0
+	d\Size = 1.0
+	d\obj = CreateSprite()
+	d\blendmode = 1
+	
+	EntityTexture(d\obj, DecalTextures[id])
+	EntityFX(d\obj, 0)
+	SpriteViewMode(d\obj, 2)
+	PositionEntity(d\obj, x, y, z)
+	RotateEntity(d\obj, pitch, yaw, roll)
+	
+	d\ID = id
+	
+	If DecalTextures[id] = 0 Lor d\obj = 0 Then Return Null
+	
+	Return d
+End Function
+
+Function UpdateDecals()
+	Local d.Decals
+	
+	For d.Decals = Each Decals
+		If d\SizeChange <> 0 Then
+			d\Size=d\Size + d\SizeChange * FPSfactor
+			ScaleSprite(d\obj, d\Size, d\Size)
+			
+			Select d\ID
+				Case 0
+					If d\Timer <= 0 Then
+						Local angle# = Rand(360)
+						Local temp# = Rnd(d\Size)
+						Local d2.Decals = CreateDecal(1, EntityX(d\obj) + Cos(angle) * temp, EntityY(d\obj) - 0.0005, EntityZ(d\obj) + Sin(angle) * temp, EntityPitch(d\obj), Rnd(360), EntityRoll(d\obj))
+						d2\Size = Rnd(0.1, 0.5) : ScaleSprite(d2\obj, d2\Size, d2\Size)
+						PlaySound2(DecaySFX[Rand(1, 3)], Camera, d2\obj, 10.0, Rnd(0.1, 0.5))
+						d\Timer = Rand(50, 100)
+					Else
+						d\Timer= d\Timer-FPSfactor
+					EndIf
+			End Select
+			
+			If d\Size >= d\MaxSize Then d\SizeChange = 0 : d\Size = d\MaxSize
+		EndIf
+		
+		If d\AlphaChange <> 0 Then
+			d\Alpha = Min(d\Alpha + FPSfactor * d\AlphaChange, 1.0)
+			EntityAlpha(d\obj, d\Alpha)
+		EndIf
+		
+		If d\lifetime > 0 Then
+			d\lifetime=Max(d\lifetime-FPSfactor,5)
+		EndIf
+		
+		If d\Size <= 0 Lor d\Alpha <= 0 Lor d\lifetime=5.0  Then
+			FreeEntity(d\obj)
+			Delete d
+		EndIf
+	Next
+End Function
+
+Global GorePics%[6]
+Global ScreenTexs%[2]
+
+Type SecurityCams
+	Field obj%, MonitorObj%
+	Field BaseObj%, CameraObj%
+	Field ScrObj%, ScrWidth#, ScrHeight#
+	Field Screen%, Cam%, ScrTexture%, ScrOverlay%
+	Field angle#, turn#, CurrAngle#
+	Field State#, PlayerState%
+	Field soundCHN%
+	Field InSight%
+	Field RenderInterval#
+	Field room.Rooms
+	Field FollowPlayer%
+	Field CoffinEffect%
+	Field AllowSaving%
+	Field MinAngle#, MaxAngle#, dir%
+End Type
+
+Global SelectedMonitor.SecurityCams
+Global CoffinCam.SecurityCams
+
+Function CreateSecurityCam.SecurityCams(x#, y#, z#, r.Rooms, screen% = False)
+	Local sc.SecurityCams = New SecurityCams
+	
+	sc\obj = CopyEntity(CamBaseOBJ)
+	ScaleEntity(sc\obj, 0.0015, 0.0015, 0.0015)
+	sc\CameraObj = CopyEntity(CamOBJ)
+	ScaleEntity(sc\CameraObj, 0.01, 0.01, 0.01)
+	
+	sc\room = r
+	
+	sc\Screen = screen
+	If screen Then
+		sc\AllowSaving = True
+		
+		sc\RenderInterval = 12
+		
+		Local scale# = RoomScale * 4.5 * 0.4
+		
+		sc\ScrObj = CreateSprite()
+		EntityFX sc\ScrObj, 17
+		SpriteViewMode(sc\ScrObj, 2)
+		sc\ScrTexture = 0
+		EntityTexture sc\ScrObj, ScreenTexs[sc\ScrTexture]
+		ScaleSprite(sc\ScrObj, MeshWidth(Monitor) * scale * 0.95 * 0.5, MeshHeight(Monitor) * scale * 0.95 * 0.5)
+		
+		sc\ScrOverlay = CreateSprite(sc\ScrObj)
+		ScaleSprite(sc\ScrOverlay, MeshWidth(Monitor) * scale * 0.95 * 0.5, MeshHeight(Monitor) * scale * 0.95 * 0.5)
+		MoveEntity(sc\ScrOverlay, 0, 0, -0.0005)
+		EntityTexture(sc\ScrOverlay, MonitorTexture)
+		SpriteViewMode(sc\ScrOverlay, 2)
+		EntityBlend(sc\ScrOverlay , 3)
+		
+		sc\MonitorObj = CopyEntity(Monitor, sc\ScrObj)
+		
+		ScaleEntity(sc\MonitorObj, scale, scale, scale)
+		
+		sc\Cam = CreateCamera()
+		CameraViewport(sc\Cam, 0, 0, 512, 512)
+		CameraRange sc\Cam, 0.05, 8.0
+		CameraZoom(sc\Cam, 0.8)
+		HideEntity(sc\Cam)	
+	EndIf
+	
+	PositionEntity(sc\obj, x, y, z)
+	
+	If r<>Null Then EntityParent(sc\obj, r\obj)
+	
+	Return sc
+End Function
+
+Function UpdateSecurityCams()
+	CatchErrors("Uncaught (UpdateSecurityCams)")
+	Local sc.SecurityCams
+	
+	;coffineffect = 0, not affected by 895
+	;coffineffect = 1, constantly affected by 895
+	;coffineffect = 2, 079 can broadcast 895 feed on this screen
+	;coffineffect = 3, 079 broadcasting 895 feed
+	
+	For sc.SecurityCams = Each SecurityCams
+		Local close = False
+		If sc\room = Null Then
+			HideEntity sc\Cam
+		Else
+			If sc\room\dist < 6.0 Lor PlayerRoom=sc\room Then 
+				close = True
+			ElseIf sc\Cam<>0
+				HideEntity sc\Cam
+			EndIf
+			
+			If sc\room <> Null
+				If sc\room\RoomTemplate\Name$ = "room2sl" Then sc\CoffinEffect = 0
+			EndIf
+			
+			If close Lor sc=CoffinCam Then 
+				If sc\FollowPlayer Then
+					If sc<>CoffinCam
+						If EntityVisible(sc\CameraObj,Camera)
+							If MTF_CameraCheckTimer>0.0
+								MTF_CameraCheckDetected=True
+							EndIf
+						EndIf
+					EndIf
+					PointEntity(sc\CameraObj, Camera)
+					Local temp# = EntityPitch(sc\CameraObj)
+					RotateEntity(sc\obj, 0, CurveAngle(EntityYaw(sc\CameraObj), EntityYaw(sc\obj), 75.0), 0)
+					
+					If temp < 40.0 Then temp = 40
+					If temp > 70.0 Then temp = 70
+					RotateEntity(sc\CameraObj, CurveAngle(temp, EntityPitch(sc\CameraObj), 75.0), EntityYaw(sc\obj), 0)
+					
+					PositionEntity(sc\CameraObj, EntityX(sc\obj, True), EntityY(sc\obj, True) - 0.083, EntityZ(sc\obj, True))
+					RotateEntity(sc\CameraObj, EntityPitch(sc\CameraObj), EntityYaw(sc\obj), 0)
+				Else
+					If sc\turn > 0 Then
+						If sc\dir = 0 Then
+							sc\CurrAngle=sc\CurrAngle+0.2 * FPSfactor
+							If sc\CurrAngle > (sc\turn * 1.3) Then sc\dir = 1
+						Else
+							sc\CurrAngle=sc\CurrAngle-0.2 * FPSfactor
+							If sc\CurrAngle < (-sc\turn * 1.3) Then sc\dir = 0
+						EndIf
+					EndIf
+					RotateEntity(sc\obj, 0, sc\room\angle + sc\angle + Max(Min(sc\CurrAngle, sc\turn), -sc\turn), 0)
+					
+					PositionEntity(sc\CameraObj, EntityX(sc\obj, True), EntityY(sc\obj, True) - 0.083, EntityZ(sc\obj, True))
+					RotateEntity(sc\CameraObj, EntityPitch(sc\CameraObj), EntityYaw(sc\obj), 0)
+					
+					If sc\Cam<>0 Then 
+						PositionEntity(sc\Cam, EntityX(sc\CameraObj, True), EntityY(sc\CameraObj, True), EntityZ(sc\CameraObj, True))
+						RotateEntity(sc\Cam, EntityPitch(sc\CameraObj), EntityYaw(sc\CameraObj), 0)
+						MoveEntity(sc\Cam, 0, 0, 0.1)
+					EndIf
+					
+					If sc<>CoffinCam
+						If (Abs(DeltaYaw(sc\CameraObj,Camera))<60.0)
+							If EntityVisible(sc\CameraObj,Camera)
+								If MTF_CameraCheckTimer>0.0
+									MTF_CameraCheckDetected=True
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+			
+			If close = True Then
+				If sc\Screen Then
+					sc\State = sc\State+FPSfactor
+					If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera) Then
+						If EntityVisible(Camera,sc\ScrObj) Then
+							If (sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) And (WearingHazmat<3) And (WearingGasMask<3) Then
+								If BlinkTimer > - 5
+									Sanity=Sanity-FPSfactor
+									DebugLog Sanity
+									RestoreSanity = False
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+					
+					If Sanity < (-1000) Then 
+						DeathMSG = Chr(34)+"What we know is that he died of cardiac arrest. My guess is that it was caused by SCP-895, although it has never been observed affecting video equipment from this far before. "
+						DeathMSG = DeathMSG + "Further testing is needed to determine whether SCP-895's "+Chr(34)+"Red Zone"+Chr(34)+" is increasing."+Chr(34)
+						
+						If VomitTimer < -10 Then
+							Kill()
+						EndIf
+					EndIf
+					
+					If VomitTimer < 0 And Sanity < -800 Then
+						RestoreSanity = False
+						Sanity = -1010
+					EndIf
+					
+					If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera) And EntityVisible(Camera,sc\ScrObj) Then
+						sc\InSight = True
+					Else
+						sc\InSight = False
+					EndIf
+					
+					If (sc\State >= sc\RenderInterval)
+						If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera)Then
+							If EntityVisible(Camera,sc\ScrObj) Then
+								If CoffinCam = Null Lor Rand(5)=5 Lor sc\CoffinEffect <> 3 Then
+									HideEntity(Camera)
+									ShowEntity(sc\Cam)
+									Cls
+									
+									UpdateRoomLights(sc\Cam)
+									
+									SetBuffer BackBuffer()
+									RenderWorld
+									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
+									
+									HideEntity(sc\Cam)
+									ShowEntity(Camera)										
+								Else
+									HideEntity(Camera)
+									ShowEntity (CoffinCam\room\obj)
+									EntityAlpha(GetChild(CoffinCam\room\obj,2),1)
+									ShowEntity(CoffinCam\Cam)
+									Cls
+									
+									UpdateRoomLights(CoffinCam\Cam)
+									
+									SetBuffer BackBuffer()
+									RenderWorld
+									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
+									
+									HideEntity (CoffinCam\room\obj)
+									HideEntity(CoffinCam\Cam)
+									ShowEntity(Camera)										
+								EndIf
+							EndIf
+						EndIf
+						sc\State = 0
+					EndIf
+					
+					If ((sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) And (WearingHazmat<3) And (WearingGasMask<3)) Then
+						If sc\InSight Then
+							Local pvt% = CreatePivot()
+							PositionEntity pvt, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
+							PointEntity(pvt, sc\ScrObj)
+							
+							RotateEntity(Collider, EntityPitch(Collider), CurveAngle(EntityYaw(pvt), EntityYaw(Collider), Min(Max(15000.0 / (-Sanity), 20.0), 200.0)), 0)
+							
+							TurnEntity(pvt, 90, 0, 0)
+							user_camera_pitch = CurveAngle(EntityPitch(pvt), user_camera_pitch + 90.0, Min(Max(15000.0 / (-Sanity), 20.0), 200.0))
+							user_camera_pitch=user_camera_pitch-90
+							
+							FreeEntity pvt
+							If (sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) Then
+								If Sanity < - 800 Then
+									If Rand(3) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
+									If Rand(6) < 5 Then
+										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
+										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX[1])
+										sc\PlayerState = 2
+										If sc\soundCHN = 0 Then
+											sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
+										Else
+											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
+										EndIf
+										If sc\CoffinEffect=3 And Rand(200)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
+									EndIf	
+									BlurTimer = 1000
+									If VomitTimer = 0 Then
+										VomitTimer = 1
+									EndIf
+								ElseIf Sanity < - 500
+									If Rand(7) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
+									If Rand(50) = 1 Then
+										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
+										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX[0])
+										sc\PlayerState = Max(sc\PlayerState, 1)
+										If sc\CoffinEffect=3 And Rand(100)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
+									EndIf
+								Else
+									EntityTexture(sc\ScrOverlay, MonitorTexture)
+								EndIf
+							EndIf
+						EndIf
+					Else
+						If sc\InSight Then
+							If (Wearing714) Lor (WearingHazmat=3) Lor (WearingGasMask=3) Then
+								EntityTexture(sc\ScrOverlay, MonitorTexture)
+							EndIf
+						EndIf
+					EndIf
+					
+					If sc\InSight And sc\CoffinEffect=0 Lor sc\CoffinEffect=2 Then
+						If sc\PlayerState = 0 Then
+							sc\PlayerState = Rand(60000, 65000)
+						EndIf
+						
+						If Rand(500) = 1 Then
+							EntityTexture(sc\ScrOverlay, OldAiPics[0])
+						EndIf
+						
+						If (MilliSecs2() Mod sc\PlayerState) >= Rand(600) Then
+							EntityTexture(sc\ScrOverlay, MonitorTexture)
+						Else
+							If sc\soundCHN = 0 Then
+								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
+								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
+							ElseIf (Not ChannelPlaying(sc\soundCHN))
+								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
+								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
+							EndIf
+							EntityTexture(sc\ScrOverlay, OldAiPics[0])
+						EndIf
+					EndIf
+				EndIf
+				If (Not sc\InSight) Then sc\soundCHN = LoopSound2(CameraSFX, sc\soundCHN, Camera, sc\CameraObj, 4.0)
+			EndIf
+			
+			If sc<>Null Then
+				If sc\room<>Null Then
+					CatchErrors("UpdateSecurityCameras ("+sc\room\RoomTemplate\Name+")")
+				Else
+					CatchErrors("UpdateSecurityCameras (screen has no room)")
+				EndIf
+			Else
+				CatchErrors("UpdateSecurityCameras (screen doesn't exist anymore)")
+			EndIf
+		EndIf
+	Next
+	Cls
+End Function
+
+Function UpdateMonitorSaving()
+	Local sc.SecurityCams
+	Local close% = False
+	
+	If SelectedDifficulty\saveType <> SAVEONSCREENS Then Return
+	
+	For sc = Each SecurityCams
+		If sc\AllowSaving And sc\Screen Then
+			close = False
+			If sc\room\dist < 6.0 Lor PlayerRoom=sc\room Then 
+				close = True
+			EndIf
+			
+			If close And GrabbedEntity = 0 And ClosestButton = 0 Then
+				If EntityInView(sc\ScrObj,Camera) And EntityDistanceSquared(sc\ScrObj,Camera)<1.21 Then
+					If EntityVisible(sc\ScrObj,Camera) Then
+						DrawHandIcon = True
+						If MouseHit1 Then SelectedMonitor = sc
+					Else
+						If SelectedMonitor = sc Then SelectedMonitor = Null
+					EndIf
+				Else
+					If SelectedMonitor = sc Then SelectedMonitor = Null
+				EndIf
+				
+				If SelectedMonitor = sc Then
+					If sc\InSight Then
+						Local pvt% = CreatePivot()
+						PositionEntity pvt, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
+						PointEntity(pvt, sc\ScrObj)
+						RotateEntity(Collider, EntityPitch(Collider), CurveAngle(EntityYaw(pvt), EntityYaw(Collider), Min(Max(15000.0 / (-Sanity), 20.0), 200.0)), 0)
+						TurnEntity(pvt, 90, 0, 0)
+						user_camera_pitch = CurveAngle(EntityPitch(pvt), user_camera_pitch + 90.0, Min(Max(15000.0 / (-Sanity), 20.0), 200.0))
+						user_camera_pitch=user_camera_pitch-90
+						FreeEntity pvt
+					EndIf
+				EndIf
+			Else
+				If SelectedMonitor = sc Then SelectedMonitor = Null
+			EndIf
+		EndIf
+	Next
+End Function
+
+Global Monitor2, Monitor3, MonitorTexture2, MonitorTexture3, MonitorTexture4, MonitorTextureOff
+Global MonitorTimer# = 0.0, MonitorTimer2# = 0.0, UpdateCheckpoint1%, UpdateCheckpoint2%
+
+Function UpdateCheckpointMonitors(numb%)
+	Local i,sf,b,t1
+	Local entity%
+	
+	If numb% = 0
+		entity% = Monitor2
+		UpdateCheckpoint1 = True
+	Else
+		entity% = Monitor3
+		UpdateCheckpoint2 = True
+	EndIf
+	
+	For i = 2 To CountSurfaces(entity)
+		sf = GetSurface(entity,i)
+		b = GetSurfaceBrush(sf)
+		If b<>0 Then
+			t1 = GetBrushTexture(b,0)
+			If t1<>0 Then
+				name$ = StripPath(TextureName(t1))
+				If Lower(name) <> "monitortexture.jpg"
+					If numb% = 0
+						If MonitorTimer# < 50
+							BrushTexture b, MonitorTexture2, 0, 0
+						Else
+							BrushTexture b, MonitorTexture4, 0, 0
+						EndIf
+					Else
+						If MonitorTimer2# < 50
+							BrushTexture b, MonitorTexture2, 0, 0
+						Else
+							BrushTexture b, MonitorTexture3, 0, 0
+						EndIf
+					EndIf
+					PaintSurface sf,b
+				EndIf
+				If name<>"" Then FreeTexture t1
+			EndIf
+			FreeBrush b
+		EndIf
+	Next
+End Function
+
+Function TurnCheckpointMonitorsOff(numb%)
+	Local i,sf,b,t1
+	Local entity%
+	
+	If numb% = 0
+		entity% = Monitor2
+		UpdateCheckpoint1 = False
+		MonitorTimer# = 0.0
+	Else
+		entity% = Monitor3
+		UpdateCheckpoint2 = False
+		MonitorTimer2# = 0.0
+	EndIf
+	
+	For i = 2 To CountSurfaces(entity)
+		sf = GetSurface(entity,i)
+		b = GetSurfaceBrush(sf)
+		If b<>0 Then
+			t1 = GetBrushTexture(b,0)
+			If t1<>0 Then
+				name$ = StripPath(TextureName(t1))
+				If Lower(name) <> "monitortexture.jpg"
+					BrushTexture b, MonitorTextureOff, 0, 0
+					PaintSurface sf,b
+				EndIf
+				If name<>"" Then FreeTexture t1
+			EndIf
+			FreeBrush b
+		EndIf
+	Next
+End Function
+
+Function TimeCheckpointMonitors()
+	If UpdateCheckpoint1
+		If MonitorTimer < 100.0
+			MonitorTimer# = Min(MonitorTimer# + FPSfactor,100.0)
+		Else
+			MonitorTimer# = 0.0
+		EndIf
+	EndIf
+	If UpdateCheckpoint2
+		If MonitorTimer2 < 100.0
+			MonitorTimer2# = Min(MonitorTimer2# + FPSfactor,100.0)
+		Else
+			MonitorTimer2# = 0.0
+		EndIf
+	EndIf
+End Function
+
+Type Screens
+	Field obj%
+	Field imgpath$
+	Field img
+	Field room.Rooms
+End Type
+
+Global SelectedScreen.Screens
+
+Type TempScreens
+	Field imgpath$
+	Field x#,y#,z#
+	Field roomtemplate.RoomTemplates
+End Type
+
+Function CreateScreen.Screens(x#,y#,z#,imgpath$,r.Rooms)
+	s.screens = New Screens
+	s\obj = CreatePivot()
+	EntityPickMode(s\obj, 1)	
+	EntityRadius s\obj, 0.1
+	
+	PositionEntity s\obj, x,y,z
+	s\imgpath = imgpath
+	s\room = r
+	EntityParent s\obj, r\obj
+	
+	Return s
+End Function
+
+Function UpdateScreens()
+	If SelectedScreen <> Null Then Return
+	If SelectedDoor <> Null Then Return
+	
+	For s.screens = Each Screens
+		If s\room = PlayerRoom Then
+			If EntityDistanceSquared(Collider,s\obj)<1.44 Then
+				EntityPick(Camera, 1.2)
+				If PickedEntity()=s\obj And s\imgpath<>"" Then
+					DrawHandIcon=True
+					If MouseUp1 Then 
+						SelectedScreen=s
+						s\img = LoadImage_Strict("GFX\screens\"+s\imgpath)
+						s\img = ResizeImage2(s\img, ImageWidth(s\img) * MenuScale, ImageHeight(s\img) * MenuScale)
+						MaskImage s\img, 255,0,255
+						PlaySound_Strict ButtonSFX
+						MouseUp1=False
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Next
+End Function
+
+Function UpdateLever%(OBJ%, Locked% = False)
+	Local Dist# = EntityDistanceSquared(Camera, OBJ)
+	Local PrevPitch# = EntityPitch(OBJ)
+	
+	If Dist < 0.64 And (Not Locked) And EntityInView(OBJ, Camera) Then 
+		EntityPick(Camera, 0.6)
+		
+		If PickedEntity() = OBJ Then
+			DrawHandIcon = True
+			If MouseHit1 Then GrabbedEntity = OBJ
+		EndIf
+		
+		If GrabbedEntity <> 0 Then
+			If MouseDown1 Lor MouseHit1 Then
+				If GrabbedEntity = OBJ Then
+					DrawHandIcon = True 
+					RotateEntity(GrabbedEntity, Max(Min(EntityPitch(OBJ) + Max(Min(Mouse_Y_Speed_1 * 8.0, 30.0), -30.0), 80.0), -80.0), EntityYaw(OBJ), 0.0)
+					
+					DrawArrowIcon[0] = True
+					DrawArrowIcon[2] = True
+				EndIf
+			EndIf
+		EndIf 
+		
+		; ~ Reset lever state if player doesn't click on the mouse
+		If (Not MouseDown1) And (Not MouseHit1) Then 
+			If EntityPitch(OBJ, True) > 0.0 Then
+				RotateEntity(OBJ, CurveValue(80.0, EntityPitch(OBJ), 10.0), EntityYaw(OBJ), 0.0)
+			Else
+				RotateEntity(OBJ, CurveValue(-80.0, EntityPitch(OBJ), 10.0), EntityYaw(OBJ), 0.0)
+			EndIf
+			GrabbedEntity = 0
+		EndIf
+	Else
+		; ~ Reset lever state if player is far away or doesn't look at the lever
+		If EntityPitch(OBJ, True) > 0.0 Then
+			RotateEntity(OBJ, CurveValue(80.0, EntityPitch(OBJ), 10.0), EntityYaw(OBJ), 0.0)
+		Else
+			RotateEntity(OBJ, CurveValue(-80.0, EntityPitch(OBJ), 10.0), EntityYaw(OBJ), 0.0)
+		EndIf
+		If GrabbedEntity <> 0 And GrabbedEntity = OBJ Then GrabbedEntity = 0
+	EndIf
+	
+	If EntityPitch(OBJ, True) > 75.0 Then
+		If PrevPitch =< 75.0 Then PlaySound2(LeverSFX, Camera, OBJ, 1.0)
+	ElseIf EntityPitch(OBJ, True) < -75.0
+		If PrevPitch >= -75.0 Then PlaySound2(LeverSFX, Camera, OBJ, 1.0)	
+	EndIf	
+	
+	If EntityPitch(OBJ, True) > 0.0 Then
+		Return(True)
+	Else
+		Return(False)
+	EndIf	
+End Function
+
+Const MapSize% = 18
+
+Dim MapTemp%(MapSize+1, MapSize+1)
 
 Function FillRoom(r.Rooms)
 	CatchErrors("Uncaught (FillRoom)")
@@ -1900,7 +3816,7 @@ Function FillRoom(r.Rooms)
 			EntityType r\Objects[3],HIT_MAP
 			EntityAlpha r\Objects[3],0.0
 			
-			d = createdoor(r\x,r\y,r\z-368.0*RoomScale,0,r,True,True,2)
+			d = CreateDoor(r\x,r\y,r\z-368.0*RoomScale,0,r,True,True,2)
 			d\AutoClose = False
 			PositionEntity (d\buttons[0], r\x - 496.0 * RoomScale, 0.7, r\z - 272.0 * RoomScale, True)
 			TurnEntity(d\buttons[0], 0, 90, 0)
@@ -2736,25 +4652,25 @@ Function FillRoom(r.Rooms)
 				EntityRadius r\Objects[n * 2 + 1], 0.1
 			Next
 			
-			r\RoomDoors[4] = createdoor(r\x+56*RoomScale,r\y-5632*RoomScale,r\z+6344*RoomScale,90,r,False,2)
+			r\RoomDoors[4] = CreateDoor(r\x+56*RoomScale,r\y-5632*RoomScale,r\z+6344*RoomScale,90,r,False,2)
 			r\RoomDoors[4]\AutoClose = False : r\RoomDoors[4]\open = False
 			For i = 0 To 1
 				FreeEntity r\RoomDoors[4]\buttons[i] : r\RoomDoors[4]\buttons[i] = 0
 			Next
 			
-			d = createdoor(r\x+1157.0*RoomScale,r\y-5632.0*RoomScale,r\z+660.0*RoomScale,0,r,False,2)
+			d = CreateDoor(r\x+1157.0*RoomScale,r\y-5632.0*RoomScale,r\z+660.0*RoomScale,0,r,False,2)
 			d\locked = True : d\open = False : d\AutoClose = False
 			For i = 0 To 1
 				FreeEntity d\buttons[i] : d\buttons[i]=0
 			Next
 			
-			d = createdoor(r\x+234.0*RoomScale,r\y-5632.0*RoomScale,r\z+5239.0*RoomScale,90,r,False,2)
+			d = CreateDoor(r\x+234.0*RoomScale,r\y-5632.0*RoomScale,r\z+5239.0*RoomScale,90,r,False,2)
 			d\locked = True : d\open = False : d\AutoClose = False
 			For i = 0 To 1
 				FreeEntity d\buttons[i] : d\buttons[i]=0
 			Next
 			
-			d = createdoor(r\x+3446.0*RoomScale,r\y-5632.0*RoomScale,r\z+6369.0*RoomScale,90,r,False,2)
+			d = CreateDoor(r\x+3446.0*RoomScale,r\y-5632.0*RoomScale,r\z+6369.0*RoomScale,90,r,False,2)
 			d\locked = True : d\open = False : d\AutoClose = False
 			For i = 0 To 1
 				FreeEntity d\buttons[i] : d\buttons[i]=0
@@ -2844,15 +4760,15 @@ Function FillRoom(r.Rooms)
 			it = CreateItem("First Aid Kit", "firstaid", r\x +385.0 * RoomScale, r\y - 3412.0 * RoomScale, r\z + 271.0 * RoomScale)
 			EntityParent(it\collider, r\obj)
 			
-			d = createdoor(r\x-272.0*RoomScale,r\y-3552.0*RoomScale,r\z+98.0*RoomScale,90,r,True,True)
+			d = CreateDoor(r\x-272.0*RoomScale,r\y-3552.0*RoomScale,r\z+98.0*RoomScale,90,r,True,True)
 			d\AutoClose = False : d\open = True : d\MTFClose = False : d\locked = True
 			For i = 0 To 1
 				FreeEntity(d\buttons[i]) : d\buttons[i]=0
 			Next
 			
-			d = createdoor(r\x-2990.0*RoomScale,r\y-3520.0*RoomScale,r\z-1824.0*RoomScale,90,r,False,2)
+			d = CreateDoor(r\x-2990.0*RoomScale,r\y-3520.0*RoomScale,r\z-1824.0*RoomScale,90,r,False,2)
 			d\locked = True : d\DisableWaypoint = True
-			d = createdoor(r\x-896.0*RoomScale,r\y,r\z-640*RoomScale,90,r,False,2)
+			d = CreateDoor(r\x-896.0*RoomScale,r\y,r\z-640*RoomScale,90,r,False,2)
 			d\locked = True : d\DisableWaypoint = True
 			
 			r\Objects[10] = CreatePivot(r\obj)
@@ -3624,7 +5540,7 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "914"
 			;[Block]
-			r\RoomDoors[2] = createdoor(r\x,0,r\z-368.0*RoomScale,0,r,False,True,2)
+			r\RoomDoors[2] = CreateDoor(r\x,0,r\z-368.0*RoomScale,0,r,False,True,2)
 			r\RoomDoors[2]\dir=1 : r\RoomDoors[2]\AutoClose=False : r\RoomDoors[2]\open=False
 			PositionEntity (r\RoomDoors[2]\buttons[0], r\x - 496.0 * RoomScale, 0.7, r\z - 272.0 * RoomScale, True)
 			TurnEntity(r\RoomDoors[2]\buttons[0], 0, 90, 0)
@@ -3980,7 +5896,7 @@ Function FillRoom(r.Rooms)
 				Next
 			Next
 			
-			r\RoomDoors[0] = createdoor(r\x,r\y,r\z - 528.0 * RoomScale,0,r,False,False,6)
+			r\RoomDoors[0] = CreateDoor(r\x,r\y,r\z - 528.0 * RoomScale,0,r,False,False,6)
 			
 			sc.SecurityCams = CreateSecurityCam(r\x-256.0*RoomScale, r\y+384.0*RoomScale, r\z+640.0*RoomScale, r)
 			sc\angle = 180
@@ -4493,14 +6409,14 @@ Function FillRoom(r.Rooms)
 			Next
 			
 			;Doors for room
-			r\RoomDoors[0] = createdoor(r\x+480.0*RoomScale,r\y,r\z-640.0*RoomScale,90,r,False,False,3)
+			r\RoomDoors[0] = CreateDoor(r\x+480.0*RoomScale,r\y,r\z-640.0*RoomScale,90,r,False,False,3)
 			r\RoomDoors[0]\AutoClose = False
 			PositionEntity r\RoomDoors[0]\buttons[0],r\x+576.0*RoomScale,EntityY(r\RoomDoors[0]\buttons[0],True),r\z-480*RoomScale,True
 			RotateEntity r\RoomDoors[0]\buttons[0],0,270,0
-			r\RoomDoors[1] = createdoor(r\x+544.0*RoomScale,r\y+480.0*RoomScale,r\z+256.0*RoomScale,270,r,False,False,3)
+			r\RoomDoors[1] = CreateDoor(r\x+544.0*RoomScale,r\y+480.0*RoomScale,r\z+256.0*RoomScale,270,r,False,False,3)
 			r\RoomDoors[1]\AutoClose = False
 			FreeEntity r\RoomDoors[1]\obj2 : r\RoomDoors[1]\obj2 = 0
-			d = createdoor(r\x+1504.0*RoomScale,r\y+480.0*RoomScale,r\z+960.0*RoomScale,0,r)
+			d = CreateDoor(r\x+1504.0*RoomScale,r\y+480.0*RoomScale,r\z+960.0*RoomScale,0,r)
 			d\AutoClose = False : d\locked = True
 			
 			;PathPoint 1 for SCP-049
@@ -4633,7 +6549,7 @@ Function FillRoom(r.Rooms)
 			em\Achange = -0.015
 			em\SizeChange = 0.007
 			
-			d = createdoor(r\x-256.0*RoomScale, 0.0, r\z-752.0*RoomScale,90,r,False,2,3)
+			d = CreateDoor(r\x-256.0*RoomScale, 0.0, r\z-752.0*RoomScale,90,r,False,2,3)
 			d\locked = True : d\open = False : d\AutoClose = False : d\MTFClose = False : d\DisableWaypoint = True
 			PositionEntity d\buttons[0],r\x-240.0*RoomScale,EntityY(d\buttons[0],True),EntityZ(d\buttons[0],True),True
 			
@@ -4699,6 +6615,8 @@ Function FillRoom(r.Rooms)
 	
 	CatchErrors("FillRoom ("+r\RoomTemplate\Name+")")
 End Function
+
+Dim MapFound%(MapSize+1, MapSize+1)
 
 Function UpdateRooms()
 	CatchErrors("Uncaught (UpdateRooms)")
@@ -4849,7 +6767,178 @@ Function UpdateRooms()
 		Next
 	EndIf
 	
-	CatchErrors("UpdateErrors")
+	CatchErrors("UpdateRooms")
+End Function
+
+Dim MapRoom$(ROOM4 + 1, 0)
+
+Function SetRoom(room_name$,room_type%,pos%,min_pos%,max_pos%) ;place a room without overwriting others
+	If max_pos<min_pos Then DebugLog "Can't place "+room_name : Return False
+	
+	DebugLog "--- SETROOM: "+Upper(room_name)+" ---"
+	Local looped%,can_place%
+	looped = False
+	can_place = True
+	While MapRoom(room_type,pos)<>""
+		DebugLog "found "+MapRoom(room_type,pos)
+		pos=pos+1
+		If pos>max_pos Then
+			If looped=False Then
+				pos=min_pos+1 : looped=True
+			Else
+				can_place=False
+				Exit
+			EndIf
+		EndIf
+	Wend
+	DebugLog room_name+" "+Str(pos)
+	If can_place=True Then
+		DebugLog "--------------"
+		MapRoom(room_type,pos)=room_name
+		Return True
+	Else
+		DebugLog "couldn't place "+room_name
+		Return False
+	EndIf
+End Function
+
+Function PreventRoomOverlap(r.Rooms)
+	If r\RoomTemplate\DisableOverlapCheck Then Return
+	
+	Local r2.Rooms,r3.Rooms
+	
+	Local isIntersecting% = False
+	
+	;Just skip it when it would try to check for the checkpoints
+	If r\RoomTemplate\Name = "checkpoint1" Lor r\RoomTemplate\Name = "checkpoint2" Lor r\RoomTemplate\Name = "start" Then Return True
+	
+	;First, check if the room is actually intersecting at all
+	For r2 = Each Rooms
+		If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
+			If CheckRoomOverlap(r, r2) Then
+				isIntersecting = True
+				Exit
+			EndIf
+		EndIf
+	Next
+	
+	;If not, then simply return it as True
+	If (Not isIntersecting)
+		Return True
+	EndIf
+	
+	;Room is interseting: First, check if the given room is a ROOM2, so we could potentially just turn it by 180 degrees
+	isIntersecting = False
+	Local x% = r\x/8.0
+	Local y% = r\z/8.0
+	If r\RoomTemplate\Shape = ROOM2 Then
+		;Room is a ROOM2, let's check if turning it 180 degrees fixes the overlapping issue
+		r\angle = r\angle + 180
+		RotateEntity r\obj,0,r\angle,0
+		CalculateRoomExtents(r)
+		
+		For r2 = Each Rooms
+			If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
+				If CheckRoomOverlap(r, r2) Then
+					;didn't work -> rotate the room back and move to the next step
+					isIntersecting = True
+					r\angle = r\angle - 180
+					RotateEntity r\obj,0,r\angle,0
+					CalculateRoomExtents(r)
+					Exit
+				EndIf
+			EndIf
+		Next
+	Else
+		isIntersecting = True
+	EndIf
+	
+	;room is ROOM2 and was able to be turned by 180 degrees
+	If (Not isIntersecting)
+		DebugLog "ROOM2 turning succesful! "+r\RoomTemplate\Name
+		Return True
+	EndIf
+	
+	;Room is either not a ROOM2 or the ROOM2 is still intersecting, now trying to swap the room with another of the same type
+	isIntersecting = True
+	
+	Local temp2,x2%,y2%,rot%,rot2%
+	
+	For r2 = Each Rooms
+		If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck)  Then
+			If r\RoomTemplate\Shape = r2\RoomTemplate\Shape And r\zone = r2\zone And (r2\RoomTemplate\Name <> "checkpoint1" And r2\RoomTemplate\Name <> "checkpoint2" And r2\RoomTemplate\Name <> "start") Then
+				x = r\x/8.0
+				y = r\z/8.0
+				rot = r\angle
+				
+				x2 = r2\x/8.0
+				y2 = r2\z/8.0
+				rot2 = r2\angle
+				
+				isIntersecting = False
+				
+				r\x = x2*8.0
+				r\z = y2*8.0
+				r\angle = rot2
+				PositionEntity r\obj,r\x,r\y,r\z
+				RotateEntity r\obj,0,r\angle,0
+				CalculateRoomExtents(r)
+				
+				r2\x = x*8.0
+				r2\z = y*8.0
+				r2\angle = rot
+				PositionEntity r2\obj,r2\x,r2\y,r2\z
+				RotateEntity r2\obj,0,r2\angle,0
+				CalculateRoomExtents(r2)
+				
+				;make sure neither room overlaps with anything after the swap
+				For r3 = Each Rooms
+					If (Not r3\RoomTemplate\DisableOverlapCheck) Then
+						If r3 <> r Then
+							If CheckRoomOverlap(r, r3) Then
+								isIntersecting = True
+								Exit
+							EndIf
+						EndIf
+						If r3 <> r2 Then
+							If CheckRoomOverlap(r2, r3) Then
+								isIntersecting = True
+								Exit
+							EndIf
+						EndIf	
+					EndIf
+				Next
+				
+				;Either the original room or the "reposition" room is intersecting, reset the position of each room to their original one
+				If isIntersecting Then
+					r\x = x*8.0
+					r\z = y*8.0
+					r\angle = rot
+					PositionEntity r\obj,r\x,r\y,r\z
+					RotateEntity r\obj,0,r\angle,0
+					CalculateRoomExtents(r)
+					
+					r2\x = x2*8.0
+					r2\z = y2*8.0
+					r2\angle = rot2
+					PositionEntity r2\obj,r2\x,r2\y,r2\z
+					RotateEntity r2\obj,0,r2\angle,0
+					CalculateRoomExtents(r2)
+					
+					isIntersecting = False
+				EndIf
+			EndIf
+		EndIf
+	Next
+	
+	;room was able to the placed in a different spot
+	If (Not isIntersecting)
+		DebugLog "Room re-placing successful! "+r\RoomTemplate\Name
+		Return True
+	EndIf
+	
+	DebugLog "Couldn't fix overlap issue for room "+r\RoomTemplate\Name
+	Return False
 End Function
 
 Function IsRoomAdjacent(this.Rooms,that.Rooms)
@@ -4861,768 +6950,8 @@ Function IsRoomAdjacent(this.Rooms,that.Rooms)
 	Return False
 End Function
 
-Global LightVolume#, TempLightVolume#
-
-Function AddLight%(room.Rooms, x#, y#, z#, ltype%, range#, r%, g%, b%)
-	Local i
-	
-	If room<>Null Then
-		For i = 0 To MaxRoomLights-1
-			If room\Lights[i]=0 Then
-				room\Lights[i] = CreateLight(ltype)
-				LightRange(room\Lights[i],range)
-				LightColor(room\Lights[i],r,g,b)
-				PositionEntity(room\Lights[i],x,y,z,True)
-				EntityParent(room\Lights[i],room\obj)
-				
-				room\LightIntensity[i] = (r+g+b)/255.0/3.0
-				
-				room\LightSprites[i]= CreateSprite()
-				PositionEntity(room\LightSprites[i], x, y, z)
-				ScaleSprite(room\LightSprites[i], 0.13 , 0.13)
-				EntityTexture(room\LightSprites[i], LightSpriteTex[0])
-				EntityBlend (room\LightSprites[i], 3)
-				EntityColor(room\LightSprites[i], r%, g%, b%)
-				EntityParent(room\LightSprites[i], room\obj)
-				
-				room\LightSpritesPivot[i] = CreatePivot()
-				EntityRadius room\LightSpritesPivot[i],0.05
-				PositionEntity(room\LightSpritesPivot[i], x, y, z)
-				EntityParent(room\LightSpritesPivot[i], room\obj)
-				
-				room\LightSprites2[i] = CreateSprite()
-				PositionEntity(room\LightSprites2[i], x, y, z)
-				ScaleSprite(room\LightSprites2[i], 0.6, 0.6)
-				EntityTexture(room\LightSprites2[i], LightSpriteTex[2])
-				EntityBlend(room\LightSprites2[i], 3)
-				EntityOrder(room\LightSprites2[i], -1)
-				EntityColor(room\LightSprites2[i], r%, g%, b%)
-				EntityParent(room\LightSprites2[i], room\obj)
-				EntityFX(room\LightSprites2[i],1)
-				RotateEntity(room\LightSprites2[i],0,0,Rand(360))
-				SpriteViewMode(room\LightSprites2[i],1)
-				room\LightSpriteHidden%[i] = True
-				HideEntity room\LightSprites2[i]
-				room\LightFlicker%[i] = Rand(1,10)
-				
-				room\LightR[i] = r
-				room\LightG[i] = g
-				room\LightB[i] = b
-				
-				HideEntity room\Lights[i]
-				
-				room\MaxLights% = room\MaxLights% + 1
-				
-				Return room\Lights[i]
-			EndIf
-		Next
-	Else
-		Local light%,sprite%
-		
-		light=CreateLight(ltype)
-		LightRange(light,range)
-		LightColor(light,r,g,b)
-		PositionEntity(light,x,y,z,True)
-		sprite=CreateSprite()
-		PositionEntity(sprite, x, y, z)
-		ScaleSprite(sprite, 0.13 , 0.13)
-		EntityTexture(sprite, LightSpriteTex[0])
-		EntityBlend (sprite, 3)
-		EntityColor(sprite,r,g,b)
-		Return light
-	EndIf
-End Function
-
-Type LightTemplates
-	Field roomtemplate.RoomTemplates
-	Field ltype%
-	Field x#, y#, z#
-	Field range#
-	Field r%, g%, b%
-	Field pitch#, yaw#
-	Field innerconeangle%, outerconeangle#
-End Type 
-
-Function AddTempLight.LightTemplates(rt.RoomTemplates, x#, y#, z#, ltype%, range#, r%, g%, b%)
-	lt.lighttemplates = New LightTemplates
-	lt\roomtemplate = rt
-	lt\x = x
-	lt\y = y
-	lt\z = z
-	lt\ltype = ltype
-	lt\range = range
-	lt\r = r
-	lt\g = g
-	lt\b = b
-	
-	Return lt
-End Function
-
-Type TempWayPoints
-	Field x#, y#, z#
-	Field roomtemplate.RoomTemplates
-End Type 
-
-Type WayPoints
-	Field obj
-	Field door.Doors
-	Field room.Rooms
-	Field state%
-	Field connected.WayPoints[5]
-	Field dist#[5]
-	Field Fcost#, Gcost#, Hcost#
-	Field parent.WayPoints
-End Type
-
-Function CreateWaypoint.WayPoints(x#,y#,z#,door.Doors, room.Rooms)
-	w.waypoints = New WayPoints
-	
-	w\obj = CreatePivot()
-	PositionEntity w\obj, x,y,z	
-	EntityParent w\obj, room\obj
-	
-	w\room = room
-	w\door=door
-	
-	Return w
-End Function
-
-Function InitWayPoints(loadingstart=45)
-	Local d.Doors, w.WayPoints, w2.WayPoints, r.Rooms, ClosestRoom.Rooms
-	Local x#, y#, z#
-	Local dist#, dist2#
-	
-	temper = MilliSecs()
-	
-	For d.Doors = Each Doors
-		If d\obj <> 0 Then HideEntity d\obj
-		If d\obj2 <> 0 Then HideEntity d\obj2	
-		If d\frameobj <> 0 Then HideEntity d\frameobj
-		
-		If d\room = Null Then 
-			ClosestRoom.Rooms = Null
-			dist# = 30
-			For r.Rooms = Each Rooms
-				x# = Abs(EntityX(r\obj,True)-EntityX(d\frameobj,True))
-				If x < 20.0 Then
-					z# = Abs(EntityZ(r\obj,True)-EntityZ(d\frameobj,True))
-					If z < 20.0 Then
-						dist2 = x*x+z*z
-						If dist2 < dist Then
-							ClosestRoom = r
-							dist = dist2
-						EndIf
-					EndIf
-				EndIf
-			Next
-		Else
-			ClosestRoom = d\room
-		EndIf
-		
-		If (Not d\DisableWaypoint) Then CreateWaypoint(EntityX(d\frameobj, True), EntityY(d\frameobj, True)+0.18, EntityZ(d\frameobj, True), d, ClosestRoom)
-	Next
-	
-	amount# = 0
-	For w.WayPoints = Each WayPoints
-		EntityPickMode w\obj, 1, True
-		EntityRadius w\obj, 0.2
-		amount=amount+1
-	Next
-	
-	number = 0
-	iter = 0
-	For w.WayPoints = Each WayPoints
-		
-		number = number + 1
-		iter = iter + 1
-		If iter = 20 Then 
-			DrawLoading(loadingstart+Floor((35.0/amount)*number)) 
-			iter = 0
-		EndIf
-		
-		w2.WayPoints = After(w)
-		
-		Local canCreateWayPoint% = False
-		
-		While (w2<>Null)
-			
-			If (w\room=w2\room Lor w\door<>Null Lor w2\door<>Null)
-				
-				dist# = EntityDistance(w\obj, w2\obj)
-				
-				If w\room\MaxWayPointY# = 0.0 Lor w2\room\MaxWayPointY# = 0.0
-					canCreateWayPoint = True
-				Else
-					If Abs(EntityY(w\obj)-EntityY(w2\obj))<=w\room\MaxWayPointY
-						canCreateWayPoint = True
-					EndIf
-				EndIf
-				
-				If dist < 7.0 Then
-					If canCreateWayPoint
-						If EntityVisible(w\obj, w2\obj) Then
-							For i = 0 To 4
-								If w\connected[i] = Null Then
-									w\connected[i] = w2.WayPoints 
-									w\dist[i] = dist
-									Exit
-								EndIf
-							Next
-							
-							For n = 0 To 4
-								If w2\connected[n] = Null Then 
-									w2\connected[n] = w.WayPoints 
-									w2\dist[n] = dist
-									Exit
-								EndIf					
-							Next
-						EndIf
-					EndIf	
-				EndIf
-			EndIf
-			w2 = After(w2)
-		Wend
-	Next
-	
-	For d.Doors = Each Doors
-		If d\obj <> 0 Then ShowEntity d\obj
-		If d\obj2 <> 0 Then ShowEntity d\obj2	
-		If d\frameobj <> 0 Then ShowEntity d\frameobj		
-	Next
-	
-	For w.WayPoints = Each WayPoints
-		EntityPickMode w\obj, 0, 0
-		EntityRadius w\obj, 0
-		
-		For i = 0 To 4
-			If w\connected[i]<>Null Then 
-				tline = CreateLine(EntityX(w\obj,True),EntityY(w\obj,True),EntityZ(w\obj,True),EntityX(w\connected[i]\obj,True),EntityY(w\connected[i]\obj,True),EntityZ(w\connected[i]\obj,True))
-				EntityColor(tline, 255,0,0)
-				EntityParent tline, w\obj
-			EndIf
-		Next
-	Next
-	
-	DebugLog "InitWaypoints() - "+(MilliSecs2()-temper)
-End Function
-
-Function RemoveWaypoint(w.WayPoints)
-	FreeEntity w\obj
-	Delete w
-End Function
-
-Function CreateLine(x1#,y1#,z1#, x2#,y2#,z2#, mesh=0)
-	If mesh = 0 Then 
-		mesh=CreateMesh()
-		EntityFX(mesh,16)
-		surf=CreateSurface(mesh)	
-		verts = 0	
-		
-		AddVertex surf,x1#,y1#,z1#,0,0
-	Else
-		surf = GetSurface(mesh,1)
-		verts = CountVertices(surf)-1
-	EndIf
-	
-	AddVertex surf,(x1#+x2#)/2,(y1#+y2#)/2,(z1#+z2#)/2,0,0 
-	; you could skip creating the above vertex and change the line below to
-	; AddTriangle surf,verts,verts+1,verts+0
-	; so your line mesh would use less vertices, the drawback is that some videocards (like the matrox g400)
-	; aren't able to create a triangle with 2 vertices. so, it's your call :)
-	AddVertex surf,x2#,y2#,z2#,1,0
-	
-	AddTriangle surf,verts,verts+2,verts+1
-	
-	Return mesh
-End Function
-
-Global SelectedScreen.Screens
-
-Type Screens
-	Field obj%
-	Field imgpath$
-	Field img
-	Field room.Rooms
-End Type
-
-Type TempScreens
-	Field imgpath$
-	Field x#,y#,z#
-	Field roomtemplate.RoomTemplates
-End Type
-
-Function CreateScreen.Screens(x#,y#,z#,imgpath$,r.Rooms)
-	s.screens = New Screens
-	s\obj = CreatePivot()
-	EntityPickMode(s\obj, 1)	
-	EntityRadius s\obj, 0.1
-	
-	PositionEntity s\obj, x,y,z
-	s\imgpath = imgpath
-	s\room = r
-	EntityParent s\obj, r\obj
-	
-	Return s
-End Function
-
-Function UpdateScreens()
-	If SelectedScreen <> Null Then Return
-	If SelectedDoor <> Null Then Return
-	
-	For s.screens = Each Screens
-		If s\room = PlayerRoom Then
-			If EntityDistanceSquared(Collider,s\obj)<1.44 Then
-				EntityPick(Camera, 1.2)
-				If PickedEntity()=s\obj And s\imgpath<>"" Then
-					DrawHandIcon=True
-					If MouseUp1 Then 
-						SelectedScreen=s
-						s\img = LoadImage_Strict("GFX\screens\"+s\imgpath)
-						s\img = ResizeImage2(s\img, ImageWidth(s\img) * MenuScale, ImageHeight(s\img) * MenuScale)
-						MaskImage s\img, 255,0,255
-						PlaySound_Strict ButtonSFX
-						MouseUp1=False
-					EndIf
-				EndIf
-			EndIf
-		EndIf
-	Next
-End Function
-
 Dim MapName$(MapSize, MapSize)
 Dim MapRoomID%(ROOM4 + 1)
-Dim MapRoom$(ROOM4 + 1, 0)
-
-Global GorePics%[6]
-
-Global SelectedMonitor.SecurityCams
-Global CoffinCam.SecurityCams
-
-Type SecurityCams
-	Field obj%, MonitorObj%
-	Field BaseObj%, CameraObj%
-	Field ScrObj%, ScrWidth#, ScrHeight#
-	Field Screen%, Cam%, ScrTexture%, ScrOverlay%
-	Field angle#, turn#, CurrAngle#
-	Field State#, PlayerState%
-	Field soundCHN%
-	Field InSight%
-	Field RenderInterval#
-	Field room.Rooms
-	Field FollowPlayer%
-	Field CoffinEffect%
-	Field AllowSaving%
-	Field MinAngle#, MaxAngle#, dir%
-End Type
-
-Global ScreenTexs%[2]
-
-Function CreateSecurityCam.SecurityCams(x#, y#, z#, r.Rooms, screen% = False)
-	Local sc.SecurityCams = New SecurityCams
-	
-	sc\obj = CopyEntity(CamBaseOBJ)
-	ScaleEntity(sc\obj, 0.0015, 0.0015, 0.0015)
-	sc\CameraObj = CopyEntity(CamOBJ)
-	ScaleEntity(sc\CameraObj, 0.01, 0.01, 0.01)
-	
-	sc\room = r
-	
-	sc\Screen = screen
-	If screen Then
-		sc\AllowSaving = True
-		
-		sc\RenderInterval = 12
-		
-		Local scale# = RoomScale * 4.5 * 0.4
-		
-		sc\ScrObj = CreateSprite()
-		EntityFX sc\ScrObj, 17
-		SpriteViewMode(sc\ScrObj, 2)
-		sc\ScrTexture = 0
-		EntityTexture sc\ScrObj, ScreenTexs[sc\ScrTexture]
-		ScaleSprite(sc\ScrObj, MeshWidth(Monitor) * scale * 0.95 * 0.5, MeshHeight(Monitor) * scale * 0.95 * 0.5)
-		
-		sc\ScrOverlay = CreateSprite(sc\ScrObj)
-		ScaleSprite(sc\ScrOverlay, MeshWidth(Monitor) * scale * 0.95 * 0.5, MeshHeight(Monitor) * scale * 0.95 * 0.5)
-		MoveEntity(sc\ScrOverlay, 0, 0, -0.0005)
-		EntityTexture(sc\ScrOverlay, MonitorTexture)
-		SpriteViewMode(sc\ScrOverlay, 2)
-		EntityBlend(sc\ScrOverlay , 3)
-		
-		sc\MonitorObj = CopyEntity(Monitor, sc\ScrObj)
-		
-		ScaleEntity(sc\MonitorObj, scale, scale, scale)
-		
-		sc\Cam = CreateCamera()
-		CameraViewport(sc\Cam, 0, 0, 512, 512)
-		CameraRange sc\Cam, 0.05, 8.0
-		CameraZoom(sc\Cam, 0.8)
-		HideEntity(sc\Cam)	
-	EndIf
-	
-	PositionEntity(sc\obj, x, y, z)
-	
-	If r<>Null Then EntityParent(sc\obj, r\obj)
-	
-	Return sc
-End Function
-
-Function UpdateSecurityCams()
-	CatchErrors("Uncaught (UpdateSecurityCams)")
-	Local sc.SecurityCams
-	
-	;coffineffect = 0, not affected by 895
-	;coffineffect = 1, constantly affected by 895
-	;coffineffect = 2, 079 can broadcast 895 feed on this screen
-	;coffineffect = 3, 079 broadcasting 895 feed
-	
-	For sc.SecurityCams = Each SecurityCams
-		Local close = False
-		If sc\room = Null Then
-			HideEntity sc\Cam
-		Else
-			If sc\room\dist < 6.0 Lor PlayerRoom=sc\room Then 
-				close = True
-			ElseIf sc\Cam<>0
-				HideEntity sc\Cam
-			EndIf
-			
-			If sc\room <> Null
-				If sc\room\RoomTemplate\Name$ = "room2sl" Then sc\CoffinEffect = 0
-			EndIf
-			
-			If close Lor sc=CoffinCam Then 
-				If sc\FollowPlayer Then
-					If sc<>CoffinCam
-						If EntityVisible(sc\CameraObj,Camera)
-							If MTF_CameraCheckTimer>0.0
-								MTF_CameraCheckDetected=True
-							EndIf
-						EndIf
-					EndIf
-					PointEntity(sc\CameraObj, Camera)
-					Local temp# = EntityPitch(sc\CameraObj)
-					RotateEntity(sc\obj, 0, CurveAngle(EntityYaw(sc\CameraObj), EntityYaw(sc\obj), 75.0), 0)
-					
-					If temp < 40.0 Then temp = 40
-					If temp > 70.0 Then temp = 70
-					RotateEntity(sc\CameraObj, CurveAngle(temp, EntityPitch(sc\CameraObj), 75.0), EntityYaw(sc\obj), 0)
-					
-					PositionEntity(sc\CameraObj, EntityX(sc\obj, True), EntityY(sc\obj, True) - 0.083, EntityZ(sc\obj, True))
-					RotateEntity(sc\CameraObj, EntityPitch(sc\CameraObj), EntityYaw(sc\obj), 0)
-				Else
-					If sc\turn > 0 Then
-						If sc\dir = 0 Then
-							sc\CurrAngle=sc\CurrAngle+0.2 * FPSfactor
-							If sc\CurrAngle > (sc\turn * 1.3) Then sc\dir = 1
-						Else
-							sc\CurrAngle=sc\CurrAngle-0.2 * FPSfactor
-							If sc\CurrAngle < (-sc\turn * 1.3) Then sc\dir = 0
-						EndIf
-					EndIf
-					RotateEntity(sc\obj, 0, sc\room\angle + sc\angle + Max(Min(sc\CurrAngle, sc\turn), -sc\turn), 0)
-					
-					PositionEntity(sc\CameraObj, EntityX(sc\obj, True), EntityY(sc\obj, True) - 0.083, EntityZ(sc\obj, True))
-					RotateEntity(sc\CameraObj, EntityPitch(sc\CameraObj), EntityYaw(sc\obj), 0)
-					
-					If sc\Cam<>0 Then 
-						PositionEntity(sc\Cam, EntityX(sc\CameraObj, True), EntityY(sc\CameraObj, True), EntityZ(sc\CameraObj, True))
-						RotateEntity(sc\Cam, EntityPitch(sc\CameraObj), EntityYaw(sc\CameraObj), 0)
-						MoveEntity(sc\Cam, 0, 0, 0.1)
-					EndIf
-					
-					If sc<>CoffinCam
-						If (Abs(DeltaYaw(sc\CameraObj,Camera))<60.0)
-							If EntityVisible(sc\CameraObj,Camera)
-								If MTF_CameraCheckTimer>0.0
-									MTF_CameraCheckDetected=True
-								EndIf
-							EndIf
-						EndIf
-					EndIf
-				EndIf
-			EndIf
-			
-			If close = True Then
-				If sc\Screen Then
-					sc\State = sc\State+FPSfactor
-					If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera) Then
-						If EntityVisible(Camera,sc\ScrObj) Then
-							If (sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) And (WearingHazmat<3) And (WearingGasMask<3) Then
-								If BlinkTimer > - 5
-									Sanity=Sanity-FPSfactor
-									DebugLog Sanity
-									RestoreSanity = False
-								EndIf
-							EndIf
-						EndIf
-					EndIf
-					
-					If Sanity < (-1000) Then 
-						DeathMSG = Chr(34)+"What we know is that he died of cardiac arrest. My guess is that it was caused by SCP-895, although it has never been observed affecting video equipment from this far before. "
-						DeathMSG = DeathMSG + "Further testing is needed to determine whether SCP-895's "+Chr(34)+"Red Zone"+Chr(34)+" is increasing."+Chr(34)
-						
-						If VomitTimer < -10 Then
-							Kill()
-						EndIf
-					EndIf
-					
-					If VomitTimer < 0 And Sanity < -800 Then
-						RestoreSanity = False
-						Sanity = -1010
-					EndIf
-					
-					If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera) And EntityVisible(Camera,sc\ScrObj) Then
-						sc\InSight = True
-					Else
-						sc\InSight = False
-					EndIf
-					
-					If (sc\State >= sc\RenderInterval)
-						If BlinkTimer > - 5 And EntityInView(sc\ScrObj, Camera)Then
-							If EntityVisible(Camera,sc\ScrObj) Then
-								If CoffinCam = Null Lor Rand(5)=5 Lor sc\CoffinEffect <> 3 Then
-									HideEntity(Camera)
-									ShowEntity(sc\Cam)
-									Cls
-									
-									UpdateRoomLights(sc\Cam)
-									
-									SetBuffer BackBuffer()
-									RenderWorld
-									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
-									
-									HideEntity(sc\Cam)
-									ShowEntity(Camera)										
-								Else
-									HideEntity(Camera)
-									ShowEntity (CoffinCam\room\obj)
-									EntityAlpha(GetChild(CoffinCam\room\obj,2),1)
-									ShowEntity(CoffinCam\Cam)
-									Cls
-									
-									UpdateRoomLights(CoffinCam\Cam)
-									
-									SetBuffer BackBuffer()
-									RenderWorld
-									CopyRect 0,0,512,512,0,0,BackBuffer(),TextureBuffer(ScreenTexs[sc\ScrTexture])
-									
-									HideEntity (CoffinCam\room\obj)
-									HideEntity(CoffinCam\Cam)
-									ShowEntity(Camera)										
-								EndIf
-							EndIf
-						EndIf
-						sc\State = 0
-					EndIf
-					
-					If ((sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) And (WearingHazmat<3) And (WearingGasMask<3)) Then
-						If sc\InSight Then
-							Local pvt% = CreatePivot()
-							PositionEntity pvt, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
-							PointEntity(pvt, sc\ScrObj)
-							
-							RotateEntity(Collider, EntityPitch(Collider), CurveAngle(EntityYaw(pvt), EntityYaw(Collider), Min(Max(15000.0 / (-Sanity), 20.0), 200.0)), 0)
-							
-							TurnEntity(pvt, 90, 0, 0)
-							user_camera_pitch = CurveAngle(EntityPitch(pvt), user_camera_pitch + 90.0, Min(Max(15000.0 / (-Sanity), 20.0), 200.0))
-							user_camera_pitch=user_camera_pitch-90
-							
-							FreeEntity pvt
-							If (sc\CoffinEffect=1 Lor sc\CoffinEffect=3) And (Not Wearing714) Then
-								If Sanity < - 800 Then
-									If Rand(3) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
-									If Rand(6) < 5 Then
-										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
-										If sc\PlayerState = 1 Then PlaySound_Strict(HorrorSFX[1])
-										sc\PlayerState = 2
-										If sc\soundCHN = 0 Then
-											sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
-										Else
-											If Not ChannelPlaying(sc\soundCHN) Then sc\soundCHN = PlaySound_Strict(HorrorSFX[4])
-										EndIf
-										If sc\CoffinEffect=3 And Rand(200)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
-									EndIf	
-									BlurTimer = 1000
-									If VomitTimer = 0 Then
-										VomitTimer = 1
-									EndIf
-								ElseIf Sanity < - 500
-									If Rand(7) = 1 Then EntityTexture(sc\ScrOverlay, MonitorTexture)
-									If Rand(50) = 1 Then
-										EntityTexture(sc\ScrOverlay, GorePics[Rand(0, 5)])
-										If sc\PlayerState = 0 Then PlaySound_Strict(HorrorSFX[0])
-										sc\PlayerState = Max(sc\PlayerState, 1)
-										If sc\CoffinEffect=3 And Rand(100)=1 Then sc\CoffinEffect=2 : sc\PlayerState = Rand(10000, 20000)
-									EndIf
-								Else
-									EntityTexture(sc\ScrOverlay, MonitorTexture)
-								EndIf
-							EndIf
-						EndIf
-					Else
-						If sc\InSight Then
-							If (Wearing714) Lor (WearingHazmat=3) Lor (WearingGasMask=3) Then
-								EntityTexture(sc\ScrOverlay, MonitorTexture)
-							EndIf
-						EndIf
-					EndIf
-					
-					If sc\InSight And sc\CoffinEffect=0 Lor sc\CoffinEffect=2 Then
-						If sc\PlayerState = 0 Then
-							sc\PlayerState = Rand(60000, 65000)
-						EndIf
-						
-						If Rand(500) = 1 Then
-							EntityTexture(sc\ScrOverlay, OldAiPics[0])
-						EndIf
-						
-						If (MilliSecs2() Mod sc\PlayerState) >= Rand(600) Then
-							EntityTexture(sc\ScrOverlay, MonitorTexture)
-						Else
-							If sc\soundCHN = 0 Then
-								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
-								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
-							ElseIf (Not ChannelPlaying(sc\soundCHN))
-								sc\soundCHN = PlaySound_Strict(LoadTempSound("SFX\SCP\079\Broadcast"+Rand(1,3)+".ogg"))
-								If sc\CoffinEffect=2 Then sc\CoffinEffect=3 : sc\PlayerState = 0
-							EndIf
-							EntityTexture(sc\ScrOverlay, OldAiPics[0])
-						EndIf
-					EndIf
-				EndIf
-				If (Not sc\InSight) Then sc\soundCHN = LoopSound2(CameraSFX, sc\soundCHN, Camera, sc\CameraObj, 4.0)
-			EndIf
-			
-			If sc<>Null Then
-				If sc\room<>Null Then
-					CatchErrors("UpdateSecurityCameras ("+sc\room\RoomTemplate\Name+")")
-				Else
-					CatchErrors("UpdateSecurityCameras (screen has no room)")
-				EndIf
-			Else
-				CatchErrors("UpdateSecurityCameras (screen doesn't exist anymore)")
-			EndIf
-		EndIf
-	Next
-	Cls
-End Function
-
-Function UpdateMonitorSaving()
-	Local sc.SecurityCams
-	Local close% = False
-	
-	If SelectedDifficulty\saveType <> SAVEONSCREENS Then Return
-	
-	For sc = Each SecurityCams
-		If sc\AllowSaving And sc\Screen Then
-			close = False
-			If sc\room\dist < 6.0 Lor PlayerRoom=sc\room Then 
-				close = True
-			EndIf
-			
-			If close And GrabbedEntity = 0 And ClosestButton = 0 Then
-				If EntityInView(sc\ScrObj,Camera) And EntityDistanceSquared(sc\ScrObj,Camera)<1.21 Then
-					If EntityVisible(sc\ScrObj,Camera) Then
-						DrawHandIcon = True
-						If MouseHit1 Then SelectedMonitor = sc
-					Else
-						If SelectedMonitor = sc Then SelectedMonitor = Null
-					EndIf
-				Else
-					If SelectedMonitor = sc Then SelectedMonitor = Null
-				EndIf
-				
-				If SelectedMonitor = sc Then
-					If sc\InSight Then
-						Local pvt% = CreatePivot()
-						PositionEntity pvt, EntityX(Camera), EntityY(Camera), EntityZ(Camera)
-						PointEntity(pvt, sc\ScrObj)
-						RotateEntity(Collider, EntityPitch(Collider), CurveAngle(EntityYaw(pvt), EntityYaw(Collider), Min(Max(15000.0 / (-Sanity), 20.0), 200.0)), 0)
-						TurnEntity(pvt, 90, 0, 0)
-						user_camera_pitch = CurveAngle(EntityPitch(pvt), user_camera_pitch + 90.0, Min(Max(15000.0 / (-Sanity), 20.0), 200.0))
-						user_camera_pitch=user_camera_pitch-90
-						FreeEntity pvt
-					EndIf
-				EndIf
-			Else
-				If SelectedMonitor = sc Then SelectedMonitor = Null
-			EndIf
-		EndIf
-	Next
-End Function
-
-Function UpdateLever(obj, locked=False)
-	Local dist# = EntityDistanceSquared(Camera, obj)
-	
-	If dist < 64.0 Then 
-		If dist < 0.64 And (Not locked) Then 
-			If EntityInView(obj, Camera) Then 
-				EntityPick(Camera, 0.65)
-				
-				If PickedEntity() = obj Then
-					DrawHandIcon = True
-					If MouseHit1 Then GrabbedEntity = obj
-				EndIf
-				
-				prevpitch# = EntityPitch(obj)
-				
-				If (MouseDown1 Lor MouseHit1) Then
-					If GrabbedEntity <> 0 Then
-						If GrabbedEntity = obj Then
-							DrawHandIcon = True 
-							RotateEntity(GrabbedEntity, Max(Min(EntityPitch(obj)+Max(Min(mouse_y_speed_1 * 8,30.0),-30), 80), -80), EntityYaw(obj), 0)
-							
-							DrawArrowIcon[0] = True
-							DrawArrowIcon[2] = True
-						EndIf
-					EndIf
-				EndIf 
-				
-				If EntityPitch(obj,True) > 75 Then
-					If prevpitch =< 75 Then PlaySound2(LeverSFX, Camera, obj, 1.0)
-				ElseIf EntityPitch(obj,True) < -75
-					If prevpitch => -75 Then PlaySound2(LeverSFX, Camera, obj, 1.0)	
-				EndIf						
-			EndIf
-		EndIf
-		
-		If MouseDown1=False And MouseHit1=False Then 
-			If EntityPitch(obj,True) > 0 Then
-				RotateEntity(obj, CurveValue(80, EntityPitch(obj), 10), EntityYaw(obj), 0)
-			Else
-				RotateEntity(obj, CurveValue(-80, EntityPitch(obj), 10), EntityYaw(obj), 0)
-			EndIf
-			GrabbedEntity = 0
-		EndIf
-	EndIf
-	
-	If EntityPitch(obj,True) > 0 Then
-		Return True
-	Else
-		Return False
-	EndIf	
-End Function
-
-Type Props
-	Field file$
-	Field obj
-End Type
-
-Function CreatePropObj(file$)
-	Local p.Props
-	
-	For p.Props = Each Props
-		If p\file = file Then
-			Return CopyEntity(p\obj)
-		EndIf
-	Next
-	
-	p.Props = New Props
-	p\file = file
-	p\obj = LoadMesh(file)
-	Return p\obj
-End Function
 
 Function CreateMap()
 	DebugLog ("Generating a map using the seed "+RandomSeed)
@@ -6283,36 +7612,6 @@ Function CreateMap()
 	Next
 End Function
 
-Function SetRoom(room_name$,room_type%,pos%,min_pos%,max_pos%) ;place a room without overwriting others
-	If max_pos<min_pos Then DebugLog "Can't place "+room_name : Return False
-	
-	DebugLog "--- SETROOM: "+Upper(room_name)+" ---"
-	Local looped%,can_place%
-	looped = False
-	can_place = True
-	While MapRoom(room_type,pos)<>""
-		DebugLog "found "+MapRoom(room_type,pos)
-		pos=pos+1
-		If pos>max_pos Then
-			If looped=False Then
-				pos=min_pos+1 : looped=True
-			Else
-				can_place=False
-				Exit
-			EndIf
-		EndIf
-	Wend
-	DebugLog room_name+" "+Str(pos)
-	If can_place=True Then
-		DebugLog "--------------"
-		MapRoom(room_type,pos)=room_name
-		Return True
-	Else
-		DebugLog "couldn't place "+room_name
-		Return False
-	EndIf
-End Function
-
 Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	DebugLog "load_terrain: "+hmap
 	
@@ -6403,280 +7702,6 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 End Function
 
 Include "Source Code\Sky_Core.bb"
-
-Global UpdateRoomLightsTimer# = 0.0
-
-Function UpdateRoomLights(cam%)
-	Local r.Rooms, i, random#, alpha#, dist#
-	
-	For r.Rooms = Each Rooms
-		If r\dist < HideDistance*0.7 Lor r = PlayerRoom Then
-			For i = 0 To r\MaxLights%-1
-				If r\Lights%[i]<>0 Then
-					If EnableRoomLights% And (SecondaryLightOn>0.5) And cam%=Camera Then
-						EntityOrder r\LightSprites2[i],-1
-						If UpdateRoomLightsTimer=0.0 Then
-							ShowEntity r\LightSprites[i]
-							
-							If EntityDistanceSquared(cam%,r\Lights%[i])<72.25 Then
-								If r\LightHidden[i] Then
-									ShowEntity r\Lights%[i]
-									r\LightHidden[i] = False
-								EndIf
-							Else
-								If (Not r\LightHidden[i]) Then
-									HideEntity r\Lights%[i]
-									r\LightHidden[i] = True
-								EndIf
-							EndIf
-							
-							If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
-								If EntityVisible(cam%,r\LightSpritesPivot[i]) Lor r\RoomTemplate\UseLightCones Then
-									If r\LightSpriteHidden%[i] Then
-										ShowEntity r\LightSprites2%[i]
-										r\LightSpriteHidden%[i] = False
-									EndIf
-									If PlayerRoom\RoomTemplate\Name$ = "173" Then
-										random# = Rnd(0.38,0.42)
-									Else
-										If r\LightFlicker%[i]<5 Then
-											random# = Rnd(0.38,0.42)
-										ElseIf r\LightFlicker%[i]>4 And r\LightFlicker%[i]<10 Then
-											random# = Rnd(0.35,0.45)
-										Else
-											random# = Rnd(0.3,0.5)
-										EndIf
-									EndIf
-									ScaleSprite r\LightSprites2[i],random#,random#
-									
-									alpha = 1.0 - Max(Min(((EntityDistance(cam, r\LightSpritesPivot[i]) + 0.5) / 7.5), 1.0), 0.0)
-									
-									If alpha# > 0.0 Then
-										EntityAlpha r\LightSprites2[i],Max(3*(BRIGHTNESS/255)*(r\LightIntensity[i]/2),1)*alpha#
-									Else
-										;Instead of rendering the sprite invisible, just hiding it if the player is far away from it
-										If (Not r\LightSpriteHidden%[i]) Then
-											HideEntity r\LightSprites2[i]
-											r\LightSpriteHidden%[i]=True
-										EndIf
-									EndIf
-									
-									If r\RoomTemplate\UseLightCones Then
-										If EntityDistanceSquared(cam%,r\LightSprites2[i])>=72.25 Lor (Not EntityVisible(cam%,r\LightSpritesPivot[i])) Then
-											HideEntity r\LightSprites2%[i]
-											r\LightSpriteHidden%[i] = True
-										EndIf
-									EndIf
-								Else
-									If (Not r\LightSpriteHidden%[i]) Then
-										HideEntity r\LightSprites2%[i]
-										r\LightSpriteHidden%[i] = True
-									EndIf
-								EndIf
-							Else
-								If (Not r\LightSpriteHidden%[i]) Then
-									HideEntity r\LightSprites2%[i]
-									r\LightSpriteHidden%[i] = True
-									If r\LightCone[i]<>0 Then HideEntity r\LightCone[i]
-									If r\LightConeSpark[i]<>0 HideEntity r\LightConeSpark[i]
-									EndIf
-								EndIf
-							
-							If r\LightCone[i]<>0 Then ShowEntity r\LightCone[i]
-							
-							If r\LightConeSpark[i]<>0 Then
-								If r\LightConeSparkTimer[i]>0 And r\LightConeSparkTimer[i]<10
-									ShowEntity r\LightConeSpark[i]
-									r\LightConeSparkTimer[i]=r\LightConeSparkTimer[i]+FPSfactor
-								Else
-									HideEntity r\LightConeSpark[i]
-									r\LightConeSparkTimer[i]=0
-								EndIf
-							EndIf
-							
-							If r\LightCone[i]<>0 Then
-								ScaleEntity r\LightCone[i],0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0)
-								If r\LightFlicker%[i]>4 Then
-									If Rand(400)=1 Then
-										SetEmitter(r\LightSpritesPivot[i],ParticleEffect[0])
-										PlaySound2(IntroSFX[Rand(10,12)],cam,r\LightSpritesPivot[i])
-										ShowEntity r\LightConeSpark[i]
-										r\LightConeSparkTimer[i] = FPSfactor
-									EndIf
-								EndIf
-							EndIf
-						Else
-							If (EntityDistanceSquared(cam%,r\LightSprites2[i])<72.25 Lor r\RoomTemplate\UseLightCones) Then
-								If PlayerRoom\RoomTemplate\Name$ = "173" Then
-									random# = Rnd(0.38,0.42)
-								Else
-									If r\LightFlicker%[i]<5 Then
-										random# = Rnd(0.38,0.42)
-									ElseIf r\LightFlicker%[i]>4 And r\LightFlicker%[i]<10 Then
-										random# = Rnd(0.35,0.45)
-									Else
-										random# = Rnd(0.3,0.5)
-									EndIf
-								EndIf
-								
-								If (Not r\LightSpriteHidden[i]) Then
-									ScaleSprite r\LightSprites2[i],random#,random#
-								EndIf
-							EndIf
-							
-							If r\LightCone[i]<>0 Then
-								ScaleEntity r\LightCone[i],0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0),0.005+Max(((-0.4+random#)*0.025),0)
-							EndIf
-							
-							If r\LightConeSpark[i]<>0 Then
-								If r\LightConeSparkTimer[i]>0 And r\LightConeSparkTimer[i]<10 Then
-									ShowEntity r\LightConeSpark[i]
-									r\LightConeSparkTimer[i]=r\LightConeSparkTimer[i]+FPSfactor
-								Else
-									HideEntity r\LightConeSpark[i]
-									r\LightConeSparkTimer[i]=0
-								EndIf
-							EndIf
-						EndIf
-						UpdateRoomLightsTimer = UpdateRoomLightsTimer + FPSfactor
-						If UpdateRoomLightsTimer >= 8 Then
-							UpdateRoomLightsTimer = 0.0
-						EndIf
-					ElseIf cam%=Camera Then
-						If SecondaryLightOn<=0.5 Then
-							HideEntity r\LightSprites[i]
-						Else
-							ShowEntity r\LightSprites[i]
-						EndIf
-						
-						If (Not r\LightHidden[i]) Then
-							HideEntity r\Lights%[i]
-							r\LightHidden[i] = True
-						EndIf
-						If (Not r\LightSpriteHidden[i]) Then
-							HideEntity r\LightSprites2[i]
-							r\LightSpriteHidden[i]=True
-						EndIf
-						If r\LightCone[i]<>0 Then HideEntity r\LightCone[i]
-						If r\LightConeSpark[i]<>0 Then HideEntity r\LightConeSpark[i]
-					Else
-						;This will make the lightsprites not glitch through the wall when they are rendered by the cameras
-						EntityOrder r\LightSprites2[i],0
-					EndIf
-				EndIf
-			Next
-		EndIf
-	Next
-	
-End Function
-
-Function UpdateCheckpointMonitors(numb%)
-	Local i,sf,b,t1
-	Local entity%
-	
-	If numb% = 0
-		entity% = Monitor2
-		UpdateCheckpoint1 = True
-	Else
-		entity% = Monitor3
-		UpdateCheckpoint2 = True
-	EndIf
-	
-	For i = 2 To CountSurfaces(entity)
-		sf = GetSurface(entity,i)
-		b = GetSurfaceBrush(sf)
-		If b<>0 Then
-			t1 = GetBrushTexture(b,0)
-			If t1<>0 Then
-				name$ = StripPath(TextureName(t1))
-				If Lower(name) <> "monitortexture.jpg"
-					If numb% = 0
-						If MonitorTimer# < 50
-							BrushTexture b, MonitorTexture2, 0, 0
-						Else
-							BrushTexture b, MonitorTexture4, 0, 0
-						EndIf
-					Else
-						If MonitorTimer2# < 50
-							BrushTexture b, MonitorTexture2, 0, 0
-						Else
-							BrushTexture b, MonitorTexture3, 0, 0
-						EndIf
-					EndIf
-					PaintSurface sf,b
-				EndIf
-				If name<>"" Then FreeTexture t1
-			EndIf
-			FreeBrush b
-		EndIf
-	Next
-End Function
-
-Function TurnCheckpointMonitorsOff(numb%)
-	Local i,sf,b,t1
-	Local entity%
-	
-	If numb% = 0
-		entity% = Monitor2
-		UpdateCheckpoint1 = False
-		MonitorTimer# = 0.0
-	Else
-		entity% = Monitor3
-		UpdateCheckpoint2 = False
-		MonitorTimer2# = 0.0
-	EndIf
-	
-	For i = 2 To CountSurfaces(entity)
-		sf = GetSurface(entity,i)
-		b = GetSurfaceBrush(sf)
-		If b<>0 Then
-			t1 = GetBrushTexture(b,0)
-			If t1<>0 Then
-				name$ = StripPath(TextureName(t1))
-				If Lower(name) <> "monitortexture.jpg"
-					BrushTexture b, MonitorTextureOff, 0, 0
-					PaintSurface sf,b
-				EndIf
-				If name<>"" Then FreeTexture t1
-			EndIf
-			FreeBrush b
-		EndIf
-	Next
-End Function
-
-Function TimeCheckpointMonitors()
-	If UpdateCheckpoint1
-		If MonitorTimer < 100.0
-			MonitorTimer# = Min(MonitorTimer# + FPSfactor,100.0)
-		Else
-			MonitorTimer# = 0.0
-		EndIf
-	EndIf
-	If UpdateCheckpoint2
-		If MonitorTimer2 < 100.0
-			MonitorTimer2# = Min(MonitorTimer2# + FPSfactor,100.0)
-		Else
-			MonitorTimer2# = 0.0
-		EndIf
-	EndIf
-End Function
-
-Function AmbientLightRooms(value%=0)
-	Local mesh%,surf%,brush%,tex0%
-	
-	If value=AmbientLightRoomVal Then Return
-	AmbientLightRoomVal = value
-	
-	Local oldbuffer% = BackBuffer() ;probably shouldn't make assumptions here but who cares, why wouldn't it use the backbuffer ;GetBuffer()
-	
-	SetBuffer TextureBuffer(AmbientLightRoomTex)
-	
-	ClsColor value,value,value
-	Cls
-	ClsColor 0,0,0
-	
-	SetBuffer oldbuffer
-End Function
 
 Global CHUNKDATA[64 ^ 2]
 
@@ -6915,181 +7940,6 @@ Type Dummy1499
 	Field anim%
 	Field obj%
 End Type
-
-Function AddLightCones(room.Rooms)
-	Local i
-	
-	For i = 0 To MaxRoomLights-1
-		If room\Lights[i]<>0
-			room\LightCone[i] = CopyEntity(LightConeModel)
-			ScaleEntity room\LightCone[i],0.01,0.01,0.01
-			EntityColor room\LightCone[i],room\LightR[i],room\LightG[i],room\LightB[i]
-			EntityAlpha room\LightCone[i],0.15
-			EntityBlend room\LightCone[i],3
-			PositionEntity room\LightCone[i],EntityX(room\LightSpritesPivot[i],True),EntityY(room\LightSpritesPivot[i],True),EntityZ(room\LightSpritesPivot[i],True),True
-			EntityParent room\LightCone[i],room\LightSpritesPivot[i]
-			
-			If room\LightFlicker%[i] > 4
-				room\LightConeSpark[i] = CreateSprite()
-				ScaleSprite room\LightConeSpark[i],1.0,1.0
-				EntityTexture room\LightConeSpark[i],ParticleTextures[8]
-				SpriteViewMode room\LightConeSpark[i],2
-				EntityFX room\LightConeSpark[i],1
-				RotateEntity room\LightConeSpark[i],-90,0,0
-				EntityBlend room\LightConeSpark[i],3
-				EntityAlpha room\LightConeSpark[i],1.0
-				PositionEntity room\LightConeSpark[i],EntityX(room\LightSpritesPivot[i],True),EntityY(room\LightSpritesPivot[i],True)+0.05,EntityZ(room\LightSpritesPivot[i],True),True
-				EntityParent room\LightConeSpark[i],room\LightSpritesPivot[i]
-			EndIf
-		EndIf
-	Next
-End Function
-
-Function CheckRoomOverlap(r1.Rooms, r2.Rooms)
-	If (r1\MaxX	<= r2\MinX Lor r1\MaxY <= r2\MinY Lor r1\MaxZ <= r2\MinZ) Then Return False
-	If (r1\MinX	>= r2\MaxX Lor r1\MinY >= r2\MaxY Lor r1\MinZ >= r2\MaxZ) Then Return False
-	
-	Return True
-End Function
-
-Function PreventRoomOverlap(r.Rooms)
-	If r\RoomTemplate\DisableOverlapCheck Then Return
-	
-	Local r2.Rooms,r3.Rooms
-	
-	Local isIntersecting% = False
-	
-	;Just skip it when it would try to check for the checkpoints
-	If r\RoomTemplate\Name = "checkpoint1" Lor r\RoomTemplate\Name = "checkpoint2" Lor r\RoomTemplate\Name = "start" Then Return True
-	
-	;First, check if the room is actually intersecting at all
-	For r2 = Each Rooms
-		If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
-			If CheckRoomOverlap(r, r2) Then
-				isIntersecting = True
-				Exit
-			EndIf
-		EndIf
-	Next
-	
-	;If not, then simply return it as True
-	If (Not isIntersecting)
-		Return True
-	EndIf
-	
-	;Room is interseting: First, check if the given room is a ROOM2, so we could potentially just turn it by 180 degrees
-	isIntersecting = False
-	Local x% = r\x/8.0
-	Local y% = r\z/8.0
-	If r\RoomTemplate\Shape = ROOM2 Then
-		;Room is a ROOM2, let's check if turning it 180 degrees fixes the overlapping issue
-		r\angle = r\angle + 180
-		RotateEntity r\obj,0,r\angle,0
-		CalculateRoomExtents(r)
-		
-		For r2 = Each Rooms
-			If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
-				If CheckRoomOverlap(r, r2) Then
-					;didn't work -> rotate the room back and move to the next step
-					isIntersecting = True
-					r\angle = r\angle - 180
-					RotateEntity r\obj,0,r\angle,0
-					CalculateRoomExtents(r)
-					Exit
-				EndIf
-			EndIf
-		Next
-	Else
-		isIntersecting = True
-	EndIf
-	
-	;room is ROOM2 and was able to be turned by 180 degrees
-	If (Not isIntersecting)
-		DebugLog "ROOM2 turning succesful! "+r\RoomTemplate\Name
-		Return True
-	EndIf
-	
-	;Room is either not a ROOM2 or the ROOM2 is still intersecting, now trying to swap the room with another of the same type
-	isIntersecting = True
-	
-	Local temp2,x2%,y2%,rot%,rot2%
-	
-	For r2 = Each Rooms
-		If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck)  Then
-			If r\RoomTemplate\Shape = r2\RoomTemplate\Shape And r\zone = r2\zone And (r2\RoomTemplate\Name <> "checkpoint1" And r2\RoomTemplate\Name <> "checkpoint2" And r2\RoomTemplate\Name <> "start") Then
-				x = r\x/8.0
-				y = r\z/8.0
-				rot = r\angle
-				
-				x2 = r2\x/8.0
-				y2 = r2\z/8.0
-				rot2 = r2\angle
-				
-				isIntersecting = False
-				
-				r\x = x2*8.0
-				r\z = y2*8.0
-				r\angle = rot2
-				PositionEntity r\obj,r\x,r\y,r\z
-				RotateEntity r\obj,0,r\angle,0
-				CalculateRoomExtents(r)
-				
-				r2\x = x*8.0
-				r2\z = y*8.0
-				r2\angle = rot
-				PositionEntity r2\obj,r2\x,r2\y,r2\z
-				RotateEntity r2\obj,0,r2\angle,0
-				CalculateRoomExtents(r2)
-				
-				;make sure neither room overlaps with anything after the swap
-				For r3 = Each Rooms
-					If (Not r3\RoomTemplate\DisableOverlapCheck) Then
-						If r3 <> r Then
-							If CheckRoomOverlap(r, r3) Then
-								isIntersecting = True
-								Exit
-							EndIf
-						EndIf
-						If r3 <> r2 Then
-							If CheckRoomOverlap(r2, r3) Then
-								isIntersecting = True
-								Exit
-							EndIf
-						EndIf	
-					EndIf
-				Next
-				
-				;Either the original room or the "reposition" room is intersecting, reset the position of each room to their original one
-				If isIntersecting Then
-					r\x = x*8.0
-					r\z = y*8.0
-					r\angle = rot
-					PositionEntity r\obj,r\x,r\y,r\z
-					RotateEntity r\obj,0,r\angle,0
-					CalculateRoomExtents(r)
-					
-					r2\x = x2*8.0
-					r2\z = y2*8.0
-					r2\angle = rot2
-					PositionEntity r2\obj,r2\x,r2\y,r2\z
-					RotateEntity r2\obj,0,r2\angle,0
-					CalculateRoomExtents(r2)
-					
-					isIntersecting = False
-				EndIf
-			EndIf
-		EndIf
-	Next
-	
-	;room was able to the placed in a different spot
-	If (Not isIntersecting)
-		DebugLog "Room re-placing successful! "+r\RoomTemplate\Name
-		Return True
-	EndIf
-	
-	DebugLog "Couldn't fix overlap issue for room "+r\RoomTemplate\Name
-	Return False
-End Function
 
 ;~IDEal Editor Parameters:
 ;~C#Blitz3D
