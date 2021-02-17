@@ -368,7 +368,7 @@ Function PlayStartupVideos()
 		
 		If (Not Movie) Then
 			PutINIValue(OptionFile, "options", "play startup video", 0)
-			RuntimeError("Movie " + Chr(34) + MovieFile + Chr(34) + "not found.")
+			RuntimeError("Movie " + Chr(34) + MovieFile + Chr(34) + " not found.")
 		EndIf
 		Movie = OpenMovie(MovieFile + ".avi")
 		

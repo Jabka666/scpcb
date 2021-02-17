@@ -2749,7 +2749,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 		Else
 			If showmsg = True Then 
 				PlaySound_Strict ScannerSFX2
-				Msg = "You placed your palm onto the scanner. The scanner reads: "+Chr(34)+"DNA does not match known sample. Access denied."+Chr(34)
+				Msg = "You placed your palm onto the scanner. The scanner reads: "+Chr(34)+"DNA doesn't match known sample. Access denied."+Chr(34)
 				MsgTimer = 70 * 10
 			EndIf
 			Return			
@@ -2783,7 +2783,7 @@ Function UseDoor(d.Doors, showmsg%=True, playsfx%=True)
 									Msg = "Stop spamming the button."
 									MsgTimer = 70 * 7
 								Case 2
-									Msg = "Pressing it harder does not make the elevator come faster."
+									Msg = "Pressing it harder doesn't make the elevator come faster."
 									MsgTimer = 70 * 7
 								Case 3
 									Msg = "If you continue pressing this button I will generate a Memory Access Violation."
@@ -7659,16 +7659,16 @@ Function load_terrain(hmap,yscale#=0.7,t1%,t2%,mask%)
 	DebugLog "load_terrain: "+hmap
 	
 	; load the heightmap
-	If hmap = 0 Then RuntimeError "Heightmap image "+hmap+" does not exist."
+	If (Not hmap) Then RuntimeError("Heightmap Image " + Chr(34) + hmap + Chr(34) + " not found.")
 	
 	; store heightmap dimensions
 	Local x = ImageWidth(hmap)-1, y = ImageHeight(hmap)-1
 	Local lx,ly,index
 	
 	; load texture and lightmaps
-	If t1 = 0 Then RuntimeError "load_terrain error: invalid texture 1"
-	If t2 = 0 Then RuntimeError "load_terrain error: invalid texture 2"
-	If mask = 0 Then RuntimeError "load_terrain error: invalid texture mask"
+	If (Not t1) Then RuntimeError("Texture #1 " + Chr(34) + t1 + Chr(34) + " not found.")
+	If (Not t2) Then RuntimeError("Texture #2 " + Chr(34) + t2 + Chr(34) + " not found.")
+	If (Not mask) Then RuntimeError("Mask image " + Chr(34) + mask + Chr(34) + " not found.")
 	
 	; auto scale the textures to the right size
 	If t1 Then ScaleTexture t1,x/4,y/4

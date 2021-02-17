@@ -23,7 +23,7 @@ Const EASY = 0, NORMAL = 1, HARD = 2
 
 difficulties[SAFE] = New Difficulty
 difficulties[SAFE]\name = "Safe"
-difficulties[SAFE]\description ="The game can be saved any time. However, as in the case of SCP Objects, a Safe classification does not mean that handling it does not pose a threat."
+difficulties[SAFE]\description ="The game can be saved any time. However, as in the case of SCP Objects, a Safe classification doesn't mean that handling it doesn't pose a threat."
 difficulties[SAFE]\permaDeath = False
 difficulties[SAFE]\aggressiveNPCs = False
 difficulties[SAFE]\saveType = SAVEANYWHERE

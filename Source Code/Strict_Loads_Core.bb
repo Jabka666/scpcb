@@ -290,7 +290,7 @@ Function LoadTexture_Strict(File$,flags=1)
 End Function   
 
 Function LoadBrush_Strict(file$,flags,u#=1.0,v#=1.0)
-	If FileType(file$)<>1 Then RuntimeError "Brush Texture " + file$ + "not found."
+	If FileType(file$)<>1 Then RuntimeError "Brush Texture " + file$ + " not found."
 	tmp = LoadBrush(file$, flags, u, v)
 	If tmp = 0 Then RuntimeError "Failed to load Brush: " + file$ 
 	Return tmp 

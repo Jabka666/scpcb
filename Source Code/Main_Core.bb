@@ -569,7 +569,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Resets the player's death timer after the dying")
 							CreateConsoleMsg("animation triggers.")
-							CreateConsoleMsg("Does not affect injury, blood loss")
+							CreateConsoleMsg("Doesn't affect injury, blood loss")
 							CreateConsoleMsg("or 008 infection values.")
 							CreateConsoleMsg("******************************")
 						Case "teleport"
@@ -3764,7 +3764,7 @@ Function DrawGUI()
 												Msg = "There seems to be no place for batteries in this radio."
 												MsgTimer = 70 * 5
 											Case "18vradio"
-												Msg = "The battery does not fit inside this radio."
+												Msg = "The battery doesn't fit inside this radio."
 												MsgTimer = 70 * 5
 											Case "radio"
 												If SelectedItem\itemtemplate\sound <> 66 Then PlaySound_Strict(PickSFX[SelectedItem\itemtemplate\sound])	
@@ -3796,7 +3796,7 @@ Function DrawGUI()
 								;[Block]
 								Select Inventory[MouseSlot]\itemtemplate\name
 									Case "S-NAV Navigator", "S-NAV 300 Navigator", "S-NAV 310 Navigator"
-										Msg = "The battery does not fit inside this navigator."
+										Msg = "The battery doesn't fit inside this navigator."
 										MsgTimer = 70 * 5
 									Case "S-NAV Navigator Ultimate"
 										Msg = "There seems to be no place for batteries in this navigator."
@@ -4030,7 +4030,7 @@ Function DrawGUI()
 				Case "firstaid", "finefirstaid", "firstaid2"
 					;[Block]
 					If Bloodloss = 0 And Injuries = 0 Then
-						Msg = "You do not need to use a first aid kit right now."
+						Msg = "You don't need to use a first aid kit right now."
 						MsgTimer = 70*5
 						SelectedItem = Null
 					Else

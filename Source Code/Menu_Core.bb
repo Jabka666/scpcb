@@ -99,7 +99,7 @@ Function UpdateMainMenu()
 				Case 14
 					MenuStr = "black white black white black white gray"
 				Case 15
-					MenuStr = "Stone does not care"
+					MenuStr = "Stone doesn't care"
 				Case 16
 					MenuStr = "9341"
 				Case 17
@@ -1789,7 +1789,7 @@ Function DrawOptionsTooltip(x%,y%,width%,height%,option$,value#=0,ingame%=False)
 			txt = txt + "next track at random."
 			R = 255
 			G = 255
-			txt2 = "Note that the random mode does not prevent previously played tracks from repeating."
+			txt2 = "Note that the random mode doesn't prevent previously played tracks from repeating."
 		Case "usertrackscan"
 			txt = "Re-checks the user tracks directory for any new or removed sound files."
 			;[End Block]

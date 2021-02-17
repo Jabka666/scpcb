@@ -3709,7 +3709,7 @@ Function UpdateNPCs()
 								Case 2
 									Msg=Chr(34)+"It feels like something's in this room with me."+Chr(34)
 								Case 3
-									Msg="You feel like something is here with you, but you do not see anything."
+									Msg="You feel like something is here with you, but you don't see anything."
 								Case 4
 									Msg=Chr(34)+"Is my mind playing tricks on me or is there someone else here?"+Chr(34)
 								Case 5
@@ -6740,7 +6740,7 @@ Function ManipulateNPCBones()
 			If bonename$<>""
 				pvt% = CreatePivot()
 				bone% = FindChild(n\obj,bonename$)
-				If bone% = 0 Then RuntimeError "ERROR: NPC bone "+Chr(34)+bonename$+Chr(34)+" does not exist."
+				If bone% = 0 Then RuntimeError "ERROR: NPC bone "+Chr(34)+bonename$+Chr(34)+" doesn't exist."
 				PositionEntity pvt%,EntityX(bone%,True),EntityY(bone%,True),EntityZ(bone%,True)
 				Select n\ManipulationType
 					Case 0 ;<--- looking at player
