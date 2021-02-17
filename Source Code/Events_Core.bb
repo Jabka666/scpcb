@@ -1059,10 +1059,12 @@ Function UpdateEvents()
 							If e\room\NPC[5]\State <> 11
 								If EntityDistanceSquared(e\room\NPC[3]\Collider,e\room\NPC[5]\Collider)>25.0 And EntityDistanceSquared(e\room\NPC[4]\Collider,e\room\NPC[5]\Collider)
 									If EntityDistanceSquared(e\room\NPC[5]\Collider,Collider)<12.25
-										e\room\NPC[5]\State = 11
-										e\room\NPC[5]\State3 = 1
+										For i = 3 To 5
+											e\room\NPC[i]\State = 11
+											e\room\NPC[i]\State3 = 1
+											e\room\NPC[i]\Reload = 70*3
+										Next
 										e\room\NPC[5]\SoundChn2 = PlaySound2(e\room\NPC[5]\Sound2,Camera,e\room\NPC[5]\Collider)
-										e\room\NPC[5]\Reload = 70*3
 									EndIf
 								EndIf
 							EndIf
@@ -1208,10 +1210,12 @@ Function UpdateEvents()
 								If e\room\NPC[5]\State <> 11
 									If EntityDistanceSquared(e\room\NPC[3]\Collider,e\room\NPC[5]\Collider)>25.0 And EntityDistanceSquared(e\room\NPC[4]\Collider,e\room\NPC[5]\Collider)
 										If EntityDistanceSquared(e\room\NPC[5]\Collider,Collider)<12.25
-											e\room\NPC[5]\State = 11
-											e\room\NPC[5]\State3 = 1
+											For i = 3 To 5
+												e\room\NPC[i]\State = 11
+												e\room\NPC[i]\State3 = 1
+												e\room\NPC[i]\Reload = 70*3
+											Next
 											e\room\NPC[5]\SoundChn2 = PlaySound2(e\room\NPC[5]\Sound2,Camera,e\room\NPC[5]\Collider)
-											e\room\NPC[5]\Reload = 70*3
 										EndIf
 									EndIf
 								EndIf
@@ -1829,7 +1833,7 @@ Function UpdateEvents()
 					EndIf
 				Else
 					If KillTimer<0 Then
-						If e\room\NPC[3]\State = 1 Then 
+						If e\room\NPC[3]\State = 1 Lor e\room\NPC[3]\State = 11 Then 
 							LoadEventSound(e,"SFX\Room\Intro\Guard\Ulgrin\EscortTerminated.ogg")
 							PlaySound_Strict e\Sound
 						EndIf
@@ -9915,5 +9919,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11B4#1D5D
+;~B#11B8#1D61
 ;~C#Blitz3D
