@@ -157,17 +157,19 @@ Function UpdateScreenGamma()
 	EntityAlpha fresize_image,1.0
 End Function
 
+Const BRIGHTNESS% = 50
+
 Function RenderWorld2()
 	CameraProjMode ark_blur_cam,0
 	CameraProjMode Camera,1
 	
 	If WearingNightVision>0 And WearingNightVision<3 Then
-		AmbientLight Min(Brightness*2,255), Min(Brightness*2,255), Min(Brightness*2,255)
+		AmbientLight Min(BRIGHTNESS*2,255), Min(BRIGHTNESS*2,255), Min(BRIGHTNESS*2,255)
 	ElseIf WearingNightVision=3
 		AmbientLight 255,255,255
 	ElseIf PlayerRoom<>Null
 		If (PlayerRoom\RoomTemplate\Name<>"173") And (PlayerRoom\RoomTemplate\Name<>"exit1") And (PlayerRoom\RoomTemplate\Name<>"gatea") Then
-			AmbientLight Brightness, Brightness, Brightness
+			AmbientLight BRIGHTNESS, BRIGHTNESS, BRIGHTNESS
 		EndIf
 	EndIf
 	

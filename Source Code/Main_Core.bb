@@ -2497,7 +2497,7 @@ Repeat
 				CameraClsColor(Camera, 0,0,0)
 			EndIf
 			
-			AmbientLight Brightness, Brightness, Brightness	
+			AmbientLight BRIGHTNESS, BRIGHTNESS, BRIGHTNESS	
 			PlayerSoundVolume = CurveValue(0.0, PlayerSoundVolume, 5.0)
 			
 			CanSave% = True
@@ -6767,7 +6767,6 @@ Function LoadEntities()
 	Panel294 = LoadImage_Strict("GFX\294panel.jpg")
 	MaskImage(Panel294, 255,0,255)
 	
-	Brightness% = GetINIFloat("options.ini", "options", "brightness")
 	CameraFogNear# = GetINIFloat("options.ini", "options", "camera fog near")
 	CameraFogFar# = GetINIFloat("options.ini", "options", "camera fog far")
 	StoredCameraFogFar# = CameraFogFar
@@ -6788,7 +6787,7 @@ Function LoadEntities()
 	CameraFogMode (Camera, 1)
 	CameraFogRange (Camera, CameraFogNear, CameraFogFar)
 	CameraFogColor (Camera, 0, 0, 0)
-	AmbientLight Brightness, Brightness, Brightness
+	AmbientLight BRIGHTNESS, BRIGHTNESS, BRIGHTNESS
 	
 	ScreenTexs[0] = CreateTexture(512, 512, 1+256)
 	ScreenTexs[1] = CreateTexture(512, 512, 1+256)

@@ -639,7 +639,7 @@ Function UpdateEvents()
 						e\room\RoomDoors[2]\open=True
 						
 						ShowEntity Fog
-						AmbientLight Brightness, Brightness, Brightness
+						AmbientLight BRIGHTNESS, BRIGHTNESS, BRIGHTNESS
 						CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 						CameraFogMode(Camera, 1)
 						If SelectedDifficulty\saveType = SAVEANYWHERE Then
@@ -1830,7 +1830,7 @@ Function UpdateEvents()
 												Next
 												
 												ShowEntity Fog
-												AmbientLight Brightness, Brightness, Brightness
+												AmbientLight BRIGHTNESS, BRIGHTNESS, BRIGHTNESS
 												CameraFogRange(Camera, CameraFogNear, CameraFogFar)
 												CameraFogMode(Camera, 1)
 												

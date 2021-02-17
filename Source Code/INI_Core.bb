@@ -433,7 +433,6 @@ Global InvertMouse% = GetINIInt(OptionFile, "options", "invert mouse y")
 Global BumpEnabled% = GetINIInt(OptionFile, "options", "bump mapping enabled")
 Global HUDenabled% = GetINIInt(OptionFile, "options", "HUD enabled")
 
-Global Brightness% = GetINIFloat(OptionFile, "options", "brightness")
 Global CameraFogNear# = GetINIFloat(OptionFile, "options", "camera fog near")
 Global CameraFogFar# = GetINIFloat(OptionFile, "options", "camera fog far")
 
