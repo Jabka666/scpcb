@@ -1,7 +1,7 @@
 Function SaveGame(file$)
 	CatchErrors("Uncaught (SaveGame)")
 	
-	If Not Playable Then Return ;don't save if the player can't move at all
+	If (Not Playable) Lor IsZombie Then Return ;don't save if the player can't move at all
 	
 	If DropSpeed#>0.02*FPSfactor Lor DropSpeed#<-0.02*FPSfactor Then Return
 	
