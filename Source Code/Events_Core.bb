@@ -1013,6 +1013,10 @@ Function UpdateEvents()
 										e\room\NPC[3]\PathStatus = FindPath(e\room\NPC[3],PlayerRoom\x-320*RoomScale, 0.3, PlayerRoom\z-704*RoomScale)
 										e\room\NPC[4]\PathStatus = FindPath(e\room\NPC[4],PlayerRoom\x-320*RoomScale, 0.3, PlayerRoom\z-704*RoomScale)
 										
+										e\room\RoomDoors[6]\locked = False		
+										UseDoor(e\room\RoomDoors[6], False)
+										e\room\RoomDoors[6]\locked = True
+										
 										e\EventState3 = 710
 									EndIf
 								Else ;inside the cell
@@ -9919,5 +9923,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11B8#1D61
+;~B#11BC#1D65
 ;~C#Blitz3D
