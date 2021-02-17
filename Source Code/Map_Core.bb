@@ -2381,7 +2381,7 @@ End Function
 
 Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.Events, ignorerotation% = True)
 	Local x#, z#, sound%
-	Local dist#, dir#, n.NPCs, it.Items
+	Local dist#, dir#, n.NPCs, it.Items, de.Decals
 	
 	door1\IsElevatorDoor = 1
 	door2\IsElevatorDoor = 1
@@ -2523,6 +2523,27 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 							EndIf
 						EndIf
 					Next
+					For de.Decals = Each Decals
+						If Abs(EntityX(de\obj)-EntityX(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(de\obj)-EntityZ(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(de\obj)-EntityY(room1,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(de\obj,True),EntityX(room1,True),EntityZ(de\obj,True),EntityZ(room1,True))
+										dir# = point_direction(EntityX(de\obj,True),EntityZ(de\obj,True),EntityX(room1,True),EntityZ(room1,True))
+										dir=dir+EntityYaw(room2,True)-EntityYaw(room1,True)
+										dir=WrapAngle(dir)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity de\obj,EntityPitch(de\obj,True),EntityYaw(room2,True)+angleDist(EntityYaw(de\obj,True),EntityYaw(room1,True)),EntityRoll(de\obj,True),True
+									Else
+										x# = Max(Min((EntityX(de\obj)-EntityX(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(de\obj)-EntityZ(room1,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(de\obj, EntityX(room2,True)+x,(0.1*FPSfactor)+EntityY(room2,True)+(EntityY(de\obj)-EntityY(room1,True)),EntityZ(room2,True)+z,0.01,True)
+								EndIf
+							EndIf
+						EndIf
+					Next
 					
 					UseDoor(door2,False,Not inside)
 					door1\open = False
@@ -2611,6 +2632,26 @@ Function UpdateElevators#(State#, door1.Doors, door2.Doors, room1, room2, event.
 										z# = Max(Min((EntityZ(it\collider)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
 									EndIf
 									TeleportEntity(it\collider, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(it\collider)-EntityY(room2,True)),EntityZ(room1,True)+z,0.01,True)
+								EndIf
+							EndIf
+						EndIf
+					Next
+					For de.Decals = Each Decals
+						If Abs(EntityX(de\obj)-EntityX(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+							If Abs(EntityZ(de\obj)-EntityZ(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+								If Abs(EntityY(de\obj)-EntityY(room2,True))<280.0*RoomScale+(0.015*FPSfactor) Then
+									If (Not ignorerotation) Then
+										dist# = Distance(EntityX(de\obj,True),EntityX(room2,True),EntityZ(de\obj,True),EntityZ(room2,True))
+										dir# = point_direction(EntityX(de\obj,True),EntityZ(de\obj,True),EntityX(room2,True),EntityZ(room2,True))
+										dir=dir+EntityYaw(room1,True)-EntityYaw(room2,True)
+										x# = Max(Min(Cos(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min(Sin(dir)*dist,280*RoomScale-0.22),-280*RoomScale+0.22)
+										RotateEntity de\obj,EntityPitch(de\obj,True),EntityYaw(room2,True)+angleDist(EntityYaw(de\obj,True),EntityYaw(room1,True)),EntityRoll(de\obj,True),True
+									Else
+										x# = Max(Min((EntityX(de\obj)-EntityX(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+										z# = Max(Min((EntityZ(de\obj)-EntityZ(room2,True)),280*RoomScale-0.22),-280*RoomScale+0.22)
+									EndIf
+									TeleportEntity(de\obj, EntityX(room1,True)+x,(0.1*FPSfactor)+EntityY(room1,True)+(EntityY(de\obj)-EntityY(room2,True)),EntityZ(room1,True)+z,0.01,True)
 								EndIf
 							EndIf
 						EndIf
