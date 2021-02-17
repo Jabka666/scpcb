@@ -187,7 +187,7 @@ Global DropSpeed#, HeadDropSpeed#, CurrSpeed#
 Global user_camera_pitch#, side#
 Global Crouch%, CrouchState#
 
-Global PlayerZone%, PlayerRoom.Rooms
+Global PlayerZone%
 
 Global GrabbedEntity%
 
@@ -8262,39 +8262,6 @@ Function CheckForPlayerInFacility()
 	EndIf
 	
 	Return True
-End Function
-
-Function CheckTriggers$()
-	Local i%,sx#,sy#,sz#
-	Local inside% = -1
-	
-	If PlayerRoom\TriggerboxAmount = 0
-		Return ""
-	Else
-		For i = 0 To PlayerRoom\TriggerboxAmount-1
-			EntityAlpha PlayerRoom\Triggerbox[i],1.0
-			sx# = EntityScaleX(PlayerRoom\Triggerbox[i], 1)
-			sy# = Max(EntityScaleY(PlayerRoom\Triggerbox[i], 1), 0.001)
-			sz# = EntityScaleZ(PlayerRoom\Triggerbox[i], 1)
-			GetMeshExtents(PlayerRoom\Triggerbox[i])
-			If DebugHUD
-				EntityColor PlayerRoom\Triggerbox[i],255,255,0
-				EntityAlpha PlayerRoom\Triggerbox[i],0.2
-			Else
-				EntityColor PlayerRoom\Triggerbox[i],255,255,255
-				EntityAlpha PlayerRoom\Triggerbox[i],0.0
-			EndIf
-			If EntityX(Collider)>((sx#*Mesh_MinX)+PlayerRoom\x) And EntityX(Collider)<((sx#*Mesh_MaxX)+PlayerRoom\x)
-				If EntityY(Collider)>((sy#*Mesh_MinY)+PlayerRoom\y) And EntityY(Collider)<((sy#*Mesh_MaxY)+PlayerRoom\y)
-					If EntityZ(Collider)>((sz#*Mesh_MinZ)+PlayerRoom\z) And EntityZ(Collider)<((sz#*Mesh_MaxZ)+PlayerRoom\z)
-						inside% = i%
-						Exit
-					EndIf
-				EndIf
-			EndIf
-		Next
-		If inside% > -1 Then Return PlayerRoom\TriggerboxName[inside%]
-	EndIf
 End Function
 
 Function TeleportEntity(entity%,x#,y#,z#,customradius#=0.3,isglobal%=False,pickrange#=2.0,dir%=0)
