@@ -1392,24 +1392,9 @@ Function UpdateEvents()
 							SetNPCFrame(e\room\NPC[7], 182)
 							
 							If e\room\NPC[6]\State=1 And e\room\NPC[7]\Sound<>0 Then 
-								If e\room\NPC[7]\SoundChn<>0 Then
-									If (Not ChannelPlaying(e\room\NPC[7]\SoundChn)) Then FreeSound_Strict e\room\NPC[7]\Sound : e\room\NPC[7]\Sound=0	
-								EndIf
-								
 								If e\room\NPC[7]\Sound<>0 Then e\room\NPC[7]\SoundChn = LoopSound2(e\room\NPC[7]\Sound, e\room\NPC[7]\SoundChn, Camera, e\room\NPC[7]\Collider, 7.0)
 							EndIf
 						EndIf
-						
-						For i = 3 To 4
-							If e\room\NPC[i]\Sound <> 0 Then
-								If ChannelPlaying(e\room\NPC[i]\SoundChn)=False Then
-									FreeSound_Strict e\room\NPC[i]\Sound 
-									e\room\NPC[i]\Sound=0
-								Else
-									e\room\NPC[i]\SoundChn=LoopSound2(e\room\NPC[i]\Sound, e\room\NPC[i]\SoundChn, Camera, e\room\NPC[i]\Collider)
-								EndIf
-							EndIf
-						Next
 					Else
 						;ambience inside the chamber
 						If IntroSFX[18]<>0 Then e\SoundCHN2 = LoopSound2(IntroSFX[18], e\SoundCHN2, Camera, e\room\Objects[4], 6)
@@ -9930,5 +9915,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#11C3#1D6C
+;~B#11B4#1D5D
 ;~C#Blitz3D
