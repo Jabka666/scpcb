@@ -340,49 +340,49 @@ Function PlayStartupVideos()
 	HidePointer()
 	
 	Local ScaledGraphicHeight%
-	Local Ratio# = Float(RealGraphicWidth)/Float(RealGraphicHeight)
+	Local Ratio# = Float(RealGraphicWidth) / Float(RealGraphicHeight)
 	
-	If Ratio>1.76 And Ratio<1.78
+	If Ratio > 1.76 And Ratio < 1.78 Then
 		ScaledGraphicHeight = RealGraphicHeight
-		DebugLog "Not Scaled"
 	Else
-		ScaledGraphicHeight% = Float(RealGraphicWidth)/(16.0/9.0)
-		DebugLog "Scaled: "+ScaledGraphicHeight
+		ScaledGraphicHeight = Float(RealGraphicWidth) / (16.0 / 9.0)
 	EndIf
 	
-	Local i, moviefile$
+	Local MovieFile$, i%
 	
 	For i = 0 To 1
 		Select i
 			Case 0
-				moviefile$ = "GFX\menu\startup_Undertow"
+				;[Block]
+				MovieFile = "GFX\menu\startup_Undertow"
+				;[End Block]
 			Case 1
-				moviefile$ = "GFX\menu\startup_TSS"
+				;[Block]
+				MovieFile = "GFX\menu\startup_TSS"
+				;[End Block]
 		End Select
 		
-		Local SplashScreenVideo = BlitzMovie_OpenD3D(moviefile$+".avi", SystemProperty("Direct3DDevice7"), SystemProperty("DirectDraw7"))
+		Local Movie% = OpenMovie(MovieFile + ".avi")
 		
-		If SplashScreenVideo = 0 Then
-			PutINIValue(OptionFile, "options", "play startup video", "false")
-			Return
+		If (Not Movie) Then
+			PutINIValue(OptionFile, "options", "play startup video", 0)
+			RuntimeError("Movie " + Chr(34) + MovieFile + Chr(34) + "not found.")
 		EndIf
-		SplashScreenVideo = BlitzMovie_Play()
+		Movie = OpenMovie(MovieFile + ".avi")
 		
-		Local SplashScreenAudio = StreamSound_Strict(moviefile$+".ogg",SFXVolume,0)
+		Local SplashScreenAudio% = StreamSound_Strict(MovieFile + ".ogg", SFXVolume, 0)
 		
 		Repeat
-			Cls
-			BlitzMovie_DrawD3D(0, (RealGraphicHeight/2-ScaledGraphicHeight/2), RealGraphicWidth, ScaledGraphicHeight)
-			Flip
+			Cls()
+			DrawMovie(Movie, 0, (RealGraphicHeight / 2 - ScaledGraphicHeight / 2),RealGraphicWidth, ScaledGraphicHeight)
+			Flip()
 		Until (GetKey() Lor (Not IsStreamPlaying_Strict(SplashScreenAudio)))
 		StopStream_Strict(SplashScreenAudio)
-		BlitzMovie_Stop()
-		BlitzMovie_Close()
+		CloseMovie(Movie)
 		
-		Cls
-		Flip
+		Cls()
+		Flip()
 	Next
-	
 	ShowPointer()
 End Function
 

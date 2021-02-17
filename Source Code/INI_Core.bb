@@ -430,16 +430,16 @@ Global MouseSmooth# = GetINIFloat(OptionFile,"options", "mouse smoothing", 1.0)
 	
 Global InvertMouse% = GetINIInt(OptionFile, "options", "invert mouse y")
 
-Global BumpEnabled% = GetINIInt("options.ini", "options", "bump mapping enabled")
-Global HUDenabled% = GetINIInt("options.ini", "options", "HUD enabled")
+Global BumpEnabled% = GetINIInt(OptionFile, "options", "bump mapping enabled")
+Global HUDenabled% = GetINIInt(OptionFile, "options", "HUD enabled")
 
-Global Brightness% = GetINIFloat("options.ini", "options", "brightness")
-Global CameraFogNear# = GetINIFloat("options.ini", "options", "camera fog near")
-Global CameraFogFar# = GetINIFloat("options.ini", "options", "camera fog far")
+Global Brightness% = GetINIFloat(OptionFile, "options", "brightness")
+Global CameraFogNear# = GetINIFloat(OptionFile, "options", "camera fog near")
+Global CameraFogFar# = GetINIFloat(OptionFile, "options", "camera fog far")
 
-Global MouseSens# = GetINIFloat("options.ini", "options", "mouse sensitivity")
+Global MouseSens# = GetINIFloat(OptionFile, "options", "mouse sensitivity")
 
-Global EnableVRam% = GetINIInt("options.ini", "options", "enable vram")
+Global EnableVRam% = GetINIInt(OptionFile, "options", "enable vram")
 
 Global EnableUserTracks% = GetINIInt(OptionFile, "audio", "enable user tracks")
 Global UserTrackMode% = GetINIInt(OptionFile, "audio", "user track setting")
@@ -452,7 +452,9 @@ Global PrevMusicVolume# = MusicVolume#
 Global AATextEnable% = GetINIInt(OptionFile, "options", "antialiased text")
 Global AATextEnable_Prev% = AATextEnable
 
-Global AchvMSGenabled% = GetINIInt("options.ini", "options", "achievement popup enabled")
+Global AchvMSGenabled% = GetINIInt(OptionFile, "options", "achievement popup enabled")
+
+Global PlayStartup% = GetINIInt(OptionFile, "options", "play startup video")
 
 ; ~ Save options to .ini
 Function SaveOptionsINI()
