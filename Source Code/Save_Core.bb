@@ -39,8 +39,8 @@ Function SaveGame(file$)
 	WriteFloat f, BlinkEffect
 	WriteFloat f, BlinkEffectTimer
 	
-	WriteInt f, DeathTimer
-	WriteInt f, BlurTimer
+	WriteFloat f, DeathTimer
+	WriteFloat f, BlurTimer
 	WriteFloat f, HealTimer
 	
 	WriteByte f, Crouch
@@ -158,7 +158,7 @@ Function SaveGame(file$)
 		WriteFloat f, n\LastDist
 		WriteInt f, n\LastSeen
 		
-		WriteInt f, n\CurrSpeed
+		WriteFloat f, n\CurrSpeed
 		
 		WriteFloat f, n\Angle
 		
@@ -179,7 +179,7 @@ Function SaveGame(file$)
 		
 		WriteFloat f, AnimTime(n\obj)
 		
-		WriteInt f, n\IsDead
+		WriteByte f, n\IsDead
 		WriteFloat f, n\PathX
 		WriteFloat f, n\PathZ
 		WriteInt f, n\HP
@@ -497,8 +497,8 @@ Function LoadGame(file$)
 	BlinkEffect = ReadFloat(f)	
 	BlinkEffectTimer = ReadFloat(f)
 	
-	DeathTimer = ReadInt(f)	
-	BlurTimer = ReadInt(f)	
+	DeathTimer = ReadFloat(f)	
+	BlurTimer = ReadFloat(f)	
 	HealTimer = ReadFloat(f)
 	
 	Crouch = ReadByte(f)
@@ -615,7 +615,7 @@ Function LoadGame(file$)
 		n\LastDist = ReadFloat(f)
 		n\LastSeen = ReadInt(f)
 		
-		n\CurrSpeed = ReadInt(f)
+		n\CurrSpeed = ReadFloat(f)
 		n\Angle = ReadFloat(f)
 		n\Reload = ReadFloat(f)
 		
@@ -642,7 +642,7 @@ Function LoadGame(file$)
 		
 		n\Frame = frame
 		
-		n\IsDead = ReadInt(f)
+		n\IsDead = ReadByte(f)
 		n\PathX = ReadFloat(f)
 		n\PathZ = ReadFloat(f)
 		n\HP = ReadInt(f)
@@ -1272,9 +1272,6 @@ Function LoadGameQuick(file$)
 	
 	CameraShake = 0
 	Shake = 0
-	LightFlash = 0
-	BlurTimer = 0
-	
 	KillTimer = 0
 	FallTimer = 0
 	MenuOpen = False
@@ -1312,8 +1309,8 @@ Function LoadGameQuick(file$)
 	BlinkEffect = ReadFloat(f)	
 	BlinkEffectTimer = ReadFloat(f)	
 	
-	DeathTimer = ReadInt(f)	
-	BlurTimer = ReadInt(f)	
+	DeathTimer = ReadFloat(f)	
+	BlurTimer = ReadFloat(f)	
 	HealTimer = ReadFloat(f)
 	
 	Crouch = ReadByte(f)
@@ -1434,7 +1431,7 @@ Function LoadGameQuick(file$)
 		n\LastDist = ReadFloat(f)
 		n\LastSeen = ReadInt(f)
 		
-		n\CurrSpeed = ReadInt(f)
+		n\CurrSpeed = ReadFloat(f)
 		n\Angle = ReadFloat(f)
 		n\Reload = ReadFloat(f)
 		
@@ -1460,7 +1457,7 @@ Function LoadGameQuick(file$)
 		
 		n\Frame = frame
 		
-		n\IsDead = ReadInt(f)
+		n\IsDead = ReadByte(f)
 		n\PathX = ReadFloat(f)
 		n\PathZ = ReadFloat(f)
 		n\HP = ReadInt(f)

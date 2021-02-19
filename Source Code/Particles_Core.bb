@@ -2,8 +2,7 @@ Global ParticleTextures%[9]
 
 Type Particles
 	Field obj%, pvt%
-	Field image%
-	Field R#, G#, B#, A#, size#
+	Field A#, size#
 	Field speed#, yspeed#, gravity#
 	Field Rchange#, Gchange#, Bchange#, Achange#
 	Field SizeChange#
@@ -31,9 +30,8 @@ Function CreateParticle.Particles(x#, y#, z#, image%, size#, gravity# = 1.0, lif
 	p\pvt = CreatePivot()
 	PositionEntity(p\pvt, x, y, z, True)
 	
-	p\image = image
 	p\gravity = gravity * 0.004
-	p\R = 255 : p\G = 255 : p\B = 255 : p\A = 1.0
+	p\A = 1.0
 	p\size = size
 	ScaleSprite(p\obj, p\size, p\size)
 	Return p
@@ -72,14 +70,11 @@ Function RemoveParticle(p.Particles)
 	Delete p
 End Function
 
-Global InSmoke%
-Global HissSFX% = LoadSound_Strict("SFX\General\Hiss.ogg")
 Global SmokeDelay# = 0.0
 
 Type Emitters
 	Field Obj%
 	Field Size#
-	Field MinImage%, MaxImage%
 	Field Gravity#
 	Field LifeTime%
 	Field Disable%
@@ -90,10 +85,10 @@ Type Emitters
 End Type 
 
 Function UpdateEmitters()
-	InSmoke = False
+	Local InSmoke% = False
 	For e.emitters = Each Emitters
 		If FPSfactor > 0 And (PlayerRoom = e\room Lor e\room\dist < 8) Then
-			Local p.Particles = CreateParticle(EntityX(e\obj, True), EntityY(e\obj, True), EntityZ(e\obj, True), Rand(e\minimage, e\maximage), e\size, e\gravity, e\lifetime)
+			Local p.Particles = CreateParticle(EntityX(e\obj, True), EntityY(e\obj, True), EntityZ(e\obj, True), 0, e\size, e\gravity, e\lifetime)
 			p\speed = e\speed
 			RotateEntity(p\pvt, EntityPitch(e\Obj, True), EntityYaw(e\Obj, True), EntityRoll(e\Obj, True), True)
 			TurnEntity(p\pvt, Rnd(-e\RandAngle, e\RandAngle), Rnd(-e\RandAngle, e\RandAngle), 0)
@@ -159,8 +154,6 @@ Function CreateEmitter.Emitters(x#, y#, z#, emittertype%)
 			e\Speed = 0.004
 			e\RandAngle = 40
 			e\Achange = -0.01
-			
-			e\MinImage = 6 : e\MaxImage = 6
 	End Select
 	
 	For r.Rooms = Each Rooms

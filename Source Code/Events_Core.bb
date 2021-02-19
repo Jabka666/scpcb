@@ -7180,7 +7180,7 @@ Function UpdateEvents()
 							em\SizeChange = 0.007
 							
 							For z = 0 To Ceil(3.3333*(ParticleAmount+1))
-								p.Particles = CreateParticle(EntityX(em\Obj, True), 448*RoomScale, EntityZ(em\Obj, True), Rand(em\MinImage, em\MaxImage), em\Size, em\Gravity, em\LifeTime)
+								p.Particles = CreateParticle(EntityX(em\Obj, True), 448*RoomScale, EntityZ(em\Obj, True), 0, em\Size, em\Gravity, em\LifeTime)
 								p\speed = em\Speed
 								RotateEntity(p\pvt, Rnd(360), Rnd(360), 0, True)
 								p\size = 0.05
