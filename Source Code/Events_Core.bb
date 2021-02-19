@@ -602,8 +602,6 @@ Function InitEvents()
 	CreateEvent("room2offices035","room2offices",0)
 	
 	CreateEvent("room2pit106", "room2pit", 0, 0.07 + (0.1*SelectedDifficulty\aggressiveNPCs))
-	
-	CreateEvent("room1archive", "room1archive", 0, 1.0)
 End Function
 
 Global QuickLoadIcon% = LoadImage_Strict("GFX\menu\QuickLoading.png")
@@ -10283,5 +10281,5 @@ Function Update096ElevatorEvent#(e.Events,EventState#,d.Doors,elevatorobj%)
 End Function
 
 ;~IDEal Editor Parameters:
-;~B#132C#1ED5
+;~B#132A#1ED3
 ;~C#Blitz3D

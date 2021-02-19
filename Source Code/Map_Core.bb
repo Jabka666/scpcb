@@ -5939,7 +5939,7 @@ Function FillRoom(r.Rooms)
 				Next
 			Next
 			
-			r\RoomDoors[0] = CreateDoor(r\x,r\y,r\z - 528.0 * RoomScale,0,r,False,False,6)
+			r\RoomDoors[0] = CreateDoor(r\x,r\y,r\z - 528.0 * RoomScale,0,r,False,False,Rand(1, 3))
 			
 			sc.SecurityCams = CreateSecurityCam(r\x-256.0*RoomScale, r\y+384.0*RoomScale, r\z+640.0*RoomScale, r)
 			sc\angle = 180
