@@ -637,7 +637,7 @@ Function UpdateConsole()
 					CreateConsoleMsg("Room: "+PlayerRoom\RoomTemplate\Name)
 					For ev.Events = Each Events
 						If ev\room = PlayerRoom Then
-							CreateConsoleMsg("Room event: "+ev\EventName)	
+							CreateConsoleMsg("Room event: "+ev\EventName+", ID: " +ev\EventID)
 							CreateConsoleMsg("-    state: "+ev\EventState)
 							CreateConsoleMsg("-    state2: "+ev\EventState2)	
 							CreateConsoleMsg("-    state3: "+ev\EventState3)
@@ -1010,7 +1010,7 @@ Function UpdateConsole()
 					Next
 					
 					For e.Events = Each Events
-						If e\EventName = "alarm" Then 
+						If e\EventID = e_alarm Then 
 							If e\room\NPC[0] <> Null Then RemoveNPC(e\room\NPC[0])
 							If e\room\NPC[1] <> Null Then RemoveNPC(e\room\NPC[1])
 							If e\room\NPC[2] <> Null Then RemoveNPC(e\room\NPC[2])
@@ -1083,7 +1083,7 @@ Function UpdateConsole()
 				Case "toggle_warhead_lever"
 					;[Block]
 					For e.Events = Each Events
-						If e\EventName = "room2nuke" Then
+						If e\EventID = e_room2nuke Then
 							e\EventState = (Not e\EventState)
 							Exit
 						EndIf
@@ -1096,7 +1096,7 @@ Function UpdateConsole()
 					Select StrTemp
 						Case "a"
 							For e.Events = Each Events
-								If e\EventName = "gateaentrance" Then
+								If e\EventID = e_gateaentrance Then
 									e\EventState3 = 1
 									e\room\RoomDoors[1]\open = True
 									Exit
@@ -1105,7 +1105,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("Gate A is now unlocked.")	
 						Case "b"
 							For e.Events = Each Events
-								If e\EventName = "exit1" Then
+								If e\EventID = e_exit1 Then
 									e\EventState3 = 1
 									e\room\RoomDoors[4]\open = True
 									Exit
@@ -1114,10 +1114,10 @@ Function UpdateConsole()
 							CreateConsoleMsg("Gate B is now unlocked.")	
 						Default
 							For e.Events = Each Events
-								If e\EventName = "gateaentrance" Then
+								If e\EventID = e_gateaentrance Then
 									e\EventState3 = 1
 									e\room\RoomDoors[1]\open = True
-								ElseIf e\EventName = "exit1" Then
+								ElseIf e\EventID = e_exit1 Then
 									e\EventState3 = 1
 									e\room\RoomDoors[4]\open = True
 								EndIf
@@ -1658,7 +1658,7 @@ Repeat
 					PlayerZone = 4
 				ElseIf PlayerRoom\RoomTemplate\Name = "room860"
 					For e.Events = Each Events
-						If e\EventName = "room860"
+						If e\EventID = e_room860
 							If e\EventState = 1.0
 								PlayerZone = 5
 								PositionEntity (SoundEmitter, EntityX(SoundEmitter), 30.0, EntityZ(SoundEmitter))
@@ -1997,7 +1997,7 @@ Repeat
 		If PlayerRoom <> Null Then
 			If PlayerRoom\RoomTemplate\Name = "173" Then
 				For e.Events = Each Events
-					If e\EventName = "173" Then
+					If e\EventID = e_173 Then
 						If e\EventState3 => 40 And e\EventState3 < 50 Then
 							If InvOpen Then
 								Msg = "Double click on the document to view it."
@@ -3093,7 +3093,7 @@ Function DrawGUI()
 			AAText x - 50, 150, "Room: " + PlayerRoom\RoomTemplate\Name
 			For ev.Events = Each Events
 				If ev\room = PlayerRoom Then
-					AAText x - 50, 170, "Room event: " + ev\EventName   
+					AAText x - 50, 170, "Room event: " + ev\EventName + ", ID: " + ev\EventID
 					AAText x - 50, 190, "state: " + ev\EventState
 					AAText x - 50, 210, "state2: " + ev\EventState2   
 					AAText x - 50, 230, "state3: " + ev\EventState3
@@ -3924,7 +3924,7 @@ Function DrawGUI()
 						EndIf
 						
 						For e.Events = Each Events
-							If e\EventName = "room1123" Then 
+							If e\EventID = e_room1123 Then 
 								If e\EventState = 0 Then
 									LightFlash = 3
 									PlaySound_Strict(LoadTempSound("SFX\SCP\1123\Touch.ogg"))		
@@ -4829,7 +4829,7 @@ Function DrawGUI()
 						NavWorks% = False
 					ElseIf PlayerRoom\RoomTemplate\Name$ = "room860" Then
 						For e.Events = Each Events
-							If e\EventName = "room860" Then
+							If e\EventID = e_room860 Then
 								If e\EventState = 1.0 Then
 									NavWorks% = False
 								EndIf
@@ -5069,7 +5069,7 @@ Function DrawGUI()
 										EndIf
 									EndIf
 									For e.Events = Each Events
-										If e\EventName = "dimension1499" Then
+										If e\EventID = e_dimension1499 Then
 											If EntityDistanceSquared(e\room\obj,Collider)>PowTwo(8300.0*RoomScale) Then
 												If e\EventState2 < 5 Then
 													e\EventState2 = e\EventState2 + 1
@@ -6532,17 +6532,14 @@ Function InitNewGame()
 	If SelectedMap = "" Then InitEvents()
 	
 	For e.Events = Each Events
-		If e\EventName = "room2nuke"
+		If e\EventID = e_room2nuke
 			e\EventState = 1
-			DebugLog "room2nuke"
 		EndIf
-		If e\EventName = "room106"
+		If e\EventID = e_room106
 			e\EventState2 = 1
-			DebugLog "room106"
 		EndIf	
-		If e\EventName = "room2sl"
+		If e\EventID = e_room2sl
 			e\EventState3 = 1
-			DebugLog "room2sl"
 		EndIf
 	Next
 	
@@ -6624,7 +6621,7 @@ Function InitLoadGame()
 	
 	For e.Events = Each Events
 		;Loading the necessary stuff for dimension1499, but this will only be done if the player is in this dimension already
-		If e\EventName = "dimension1499"
+		If e\EventID = e_dimension1499
 			If e\EventState = 2
 				;[Block]
 				DrawLoading(91)
@@ -7905,7 +7902,7 @@ Function Update008()
 	
 	If PlayerRoom\RoomTemplate\Name = "room860"
 		For e.Events = Each Events
-			If e\EventName = "room860"
+			If e\EventID = e_room860
 				If e\EventState = 1.0
 					teleportForInfect = False
 				EndIf

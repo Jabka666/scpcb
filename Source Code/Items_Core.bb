@@ -590,7 +590,7 @@ Function PickItem(item.Items)
 							EndIf
 							
 							For e.Events = Each Events
-								If e\eventname = "room1123" Then 
+								If e\EventID = e_room1123 Then 
 									If e\eventstate = 0 Then
 										LightFlash = 3
 										PlaySound_Strict(LoadTempSound("SFX\SCP\1123\Touch.ogg"))

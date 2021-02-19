@@ -811,7 +811,7 @@ Function UpdateNPCs()
 					;checking if 106 is allowed to spawn
 					If PlayerRoom\RoomTemplate\Name$ = "dimension1499" Then spawn106% = False
 					For e.Events = Each Events
-						If e\EventName = "room860"
+						If e\EventID = e_room860
 							If e\EventState = 1
 								spawn106% = False
 							EndIf
@@ -824,7 +824,7 @@ Function UpdateNPCs()
 					;GateA event has been triggered - don't make 106 disapper!
 					;The reason why this is a seperate For loop is because we need to make sure that room860 would not be able to overwrite the "spawn106%" variable
 					For e.events = Each Events
-						If e\EventName = "gatea"
+						If e\EventID = e_gatea
 							If e\EventState <> 0
 								spawn106% = True
 								If PlayerRoom\RoomTemplate\Name$ = "dimension1499" Then
@@ -1561,7 +1561,7 @@ Function UpdateNPCs()
 												If PlayerRoom\RoomTemplate\Name$ = "room049"
 													DeathMSG = "Three (3) active instances of SCP-049-2 discovered in the tunnel outside SCP-049's containment chamber. Terminated by Nine-Tailed Fox."
 													For e.events = Each Events
-														If e\EventName = "room049" Then e\EventState=-1 : Exit
+														If e\EventID = e_room049 Then e\EventState=-1 : Exit
 													Next
 												Else
 													DeathMSG = "An active instance of SCP-049-2 was discovered in [REDACTED]. Terminated by Nine-Tailed Fox."
@@ -4577,7 +4577,7 @@ Function UpdateNPCs()
 						If n\InFacility=1
 							If PlayerRoom\RoomTemplate\Name$ <> "173"
 								For e.Events = Each Events
-									If e\EventName = "room860"
+									If e\EventID = e_room860
 										If e\EventState = 1.0
 											UpdateGravity = True
 											Exit
@@ -6816,7 +6816,7 @@ Function PlayerInReachableRoom(canSpawnIn049Chamber%=False)
 	;Player is in 860's test room and inside the forest, returning false
 	temp = False
 	For e = Each Events
-		If e\EventName$ = "room860" And e\EventState = 1.0 Then
+		If e\EventID = e_room860 And e\EventState = 1.0 Then
 			temp = True
 			Exit
 		EndIf

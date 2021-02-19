@@ -350,6 +350,7 @@ Function SaveGame(file$)
 	WriteInt f, temp
 	For e.Events = Each Events
 		WriteString f, e\EventName
+		WriteInt f, e\EventID
 		WriteFloat f, e\EventState
 		WriteFloat f, e\EventState2	
 		WriteFloat f, e\EventState3	
@@ -977,7 +978,7 @@ Function LoadGame(file$)
 	For i = 1 To temp
 		Local e.Events = New Events
 		e\EventName = ReadString(f)
-		
+		e\EventID = ReadInt(f)
 		e\EventState =ReadFloat(f)
 		e\EventState2 =ReadFloat(f)		
 		e\EventState3 =ReadFloat(f)
@@ -994,12 +995,11 @@ Function LoadGame(file$)
 	
 	For e.Events = Each Events
 		;Reset for the monitor loading and stuff for room2sl
-		If e\EventName = "room2sl"
+		If e\EventID = e_room2sl
 			e\EventState = 0.0
 			e\EventStr = ""
-			DebugLog "Reset Eventstate in "+e\EventName
-		;Reset dimension1499
-		ElseIf e\EventName = "dimension1499"
+			;Reset dimension1499
+		ElseIf e\EventID = e_dimension1499
 			If e\EventState > 0.0
 				e\EventState = 0.0
 				e\EventStr = ""
@@ -1018,14 +1018,13 @@ Function LoadGame(file$)
 				For du.Dummy1499 = Each Dummy1499
 					Delete(du)
 				Next
-				DebugLog "Reset Eventstate in "+e\EventName
 			EndIf
 		;Reset the forest event to make it loading properly
-		ElseIf e\EventName = "room860"
+		ElseIf e\EventID = e_room860
 			e\EventStr = ""
-		ElseIf e\EventName = "room205"
+		ElseIf e\EventID = e_room205
 			e\EventStr = ""
-		ElseIf e\EventName = "room106"
+		ElseIf e\EventID = e_room106
 			If e\EventState2 = False Then
 				PositionEntity (e\room\Objects[6],EntityX(e\room\Objects[6],True),-1280.0*RoomScale,EntityZ(e\room\Objects[6],True),True)
 			EndIf
@@ -1704,7 +1703,7 @@ Function LoadGameQuick(file$)
 	For i = 1 To temp
 		e.Events = New Events
 		e\EventName = ReadString(f)
-		
+		e\EventID = ReadInt(f)
 		e\EventState = ReadFloat(f)
 		e\EventState2 = ReadFloat(f)
 		e\EventState3 = ReadFloat(f)		
@@ -1717,14 +1716,14 @@ Function LoadGameQuick(file$)
 			EndIf
 		Next	
 		e\EventStr = ReadString(f)
-		If e\EventName = "alarm"
+		If e\EventID = e_alarm
 			;A hacky fix for the case that the intro objects aren't loaded when they should
 			;Altough I'm too lazy to add those objects there because at the time where you can save, those objects are already in the ground anyway - ENDSHN
 			If e\room\Objects[0]=0
 				e\room\Objects[0]=CreatePivot()
 				e\room\Objects[1]=CreatePivot()
 			EndIf
-		ElseIf e\EventName = "room860" Then
+		ElseIf e\EventID = e_room860 Then
 			If e\EventState = 1.0 Then
 				ShowEntity e\room\fr\Forest_Pivot
 			EndIf
@@ -2134,11 +2133,13 @@ Function LoadMap(file$)
 					If Rnd(0.0,1.0)<=prob Then
 						e.Events = New Events
 						e\EventName = name
+						e\EventID = FindEventID(name)
 						e\room = r   
 					EndIf
 				ElseIf prob = 0.0 And name <> "" Then
 					e.Events = New Events
 					e\EventName = name
+					e\EventID = FindEventID(name)
 					e\room = r  
 				EndIf
 			EndIf
@@ -2300,11 +2301,13 @@ Function LoadMap(file$)
 					If Rnd(0.0,1.0)<=prob Then
 						e.Events = New Events
 						e\EventName = name
+						e\EventID = FindEventID(name)
 						e\room = r   
 					EndIf
 				ElseIf prob = 0.0 And name <> "" Then
 					e.Events = New Events
 					e\EventName = name
+					e\EventID = FindEventID(name)
 					e\room = r
 				EndIf
 			EndIf
