@@ -2449,7 +2449,7 @@ Function MovePlayer()
 	EndIf
 	
 	If (Not NoClip) Then 
-		If ((KeyDown(KEY_DOWN) Lor KeyDown(KEY_UP)) Lor (KeyDown(KEY_RIGHT) Lor KeyDown(KEY_LEFT)) And Playable) Lor ForceMove>0 Then
+		If (Playable And (KeyDown(KEY_DOWN) Xor KeyDown(KEY_UP)) Lor (KeyDown(KEY_RIGHT) Xor KeyDown(KEY_LEFT))) Lor ForceMove > 0 Then
 			If Crouch = 0 And (KeyDown(KEY_SPRINT)) And Stamina > 0.0 And (Not IsZombie) Then
 				Sprint = 2.5
 				Stamina = Stamina - FPSfactor * 0.4 * StaminaEffect
@@ -2520,61 +2520,80 @@ Function MovePlayer()
 	
 	If KeyHit(KEY_CROUCH) And Playable Then Crouch = (Not Crouch)
 	
-	Local temp2# = (Speed * Sprint) / (1.0+CrouchState)
+	Local Temp2# = (Speed * Sprint) / (1.0 + CrouchState)
 	
 	If NoClip Then 
-		Shake = 0
-		CurrSpeed = 0
-		CrouchState = 0
-		Crouch = 0
+		Shake = 0.0 : CurrSpeed = 0.0
 		
-		RotateEntity Collider, WrapAngle(EntityPitch(Camera)), WrapAngle(EntityYaw(Camera)), 0
+		RotateEntity(Collider, WrapAngle(EntityPitch(Camera)), WrapAngle(EntityYaw(Camera)), 0.0)
 		
-		temp2 = temp2 * NoClipSpeed
+		Temp2 = Temp2 * NoClipSpeed
 		
-		If KeyDown(KEY_DOWN) Then MoveEntity Collider, 0, 0, -temp2*FPSfactor
-		If KeyDown(KEY_UP) Then MoveEntity Collider, 0, 0, temp2*FPSfactor
+		If KeyDown(KEY_DOWN) Then MoveEntity(Collider, 0.0, 0.0, (-Temp2) * FPSfactor)
+		If KeyDown(KEY_UP) Then MoveEntity(Collider, 0.0, 0.0, Temp2 * FPSfactor)
 		
-		If KeyDown(KEY_LEFT) Then MoveEntity Collider, -temp2*FPSfactor, 0, 0
-		If KeyDown(KEY_RIGHT) Then MoveEntity Collider, temp2*FPSfactor, 0, 0	
+		If KeyDown(KEY_LEFT) Then MoveEntity(Collider, (-Temp2) * FPSfactor, 0.0, 0.0)
+		If KeyDown(KEY_RIGHT) Then MoveEntity(Collider, Temp2 * FPSfactor, 0.0, 0.0)
 		
-		ResetEntity Collider
+		ResetEntity(Collider)
 	Else
-		temp2# = temp2 / Max((Injuries+3.0)/3.0,1.0)
-		If Injuries > 0.5 Then 
-			temp2 = temp2*Min((Sin(Shake/2)+1.2),1.0)
-		EndIf
-		
+		Temp2 = Temp2 / Max((Injuries + 3.0) / 3.0, 1.0)
+		If Injuries > 0.5 Then Temp2 = Temp2 * Min((Sin(Shake / 2.0) + 1.2), 1.0)
 		temp = False
-		If (Not IsZombie%)
+		If (Not IsZombie) Then
 			If KeyDown(KEY_DOWN) And Playable Then
-				temp = True 
-				angle = 180
-				If KeyDown(KEY_LEFT) Then angle = 135 
-				If KeyDown(KEY_RIGHT) Then angle = -135 
-			ElseIf (KeyDown(KEY_UP) And Playable) Then
+				If (Not KeyDown(KEY_UP)) Then
+					temp = True
+					angle = 180.0
+					If KeyDown(KEY_LEFT) Then
+						If (Not KeyDown(KEY_RIGHT)) Then angle = 135.0
+					ElseIf KeyDown(KEY_RIGHT)
+						angle = -135.0
+					EndIf
+				Else
+					If KeyDown(KEY_LEFT) Then
+						If (Not KeyDown(KEY_RIGHT)) Then
+							temp = True
+							angle = 90.0
+						EndIf
+					ElseIf KeyDown(KEY_RIGHT)
+						temp = True
+						angle = -90.0
+					EndIf
+				EndIf
+			ElseIf KeyDown(KEY_UP) And Playable
 				temp = True
-				angle = 0
-				If KeyDown(KEY_LEFT) Then angle = 45 
-				If KeyDown(KEY_RIGHT) Then angle = -45 
-			ElseIf ForceMove>0 Then
-				temp=True
+				angle = 0.0
+				If KeyDown(KEY_LEFT) Then
+					If (Not KeyDown(KEY_RIGHT)) Then angle = 45.0
+				ElseIf KeyDown(KEY_RIGHT)
+					angle = -45.0
+				EndIf
+			ElseIf ForceMove > 0.0
+				temp = True
 				angle = ForceAngle
-			ElseIf Playable Then
-				If KeyDown(KEY_LEFT) Then angle = 90 : temp = True
-				If KeyDown(KEY_RIGHT) Then angle = -90 : temp = True 
+			ElseIf Playable
+				If KeyDown(KEY_LEFT) Then
+					If (Not KeyDown(KEY_RIGHT)) Then
+						temp = True
+						angle = 90.0
+					EndIf
+				ElseIf KeyDown(KEY_RIGHT)
+					temp = True
+					angle = -90.0
+				EndIf
 			EndIf
 		Else
-			temp=True
+			temp = True
 			angle = ForceAngle
 		EndIf
 		
-		angle = WrapAngle(EntityYaw(Collider,True)+angle+90.0)
+		angle = WrapAngle(EntityYaw(Collider, True) + angle + 90.0)
 		
 		If temp Then 
-			CurrSpeed = CurveValue(temp2, CurrSpeed, 20.0)
+			CurrSpeed = CurveValue(Temp2, CurrSpeed, 20.0)
 		Else
-			CurrSpeed = Max(CurveValue(0.0, CurrSpeed-0.1, 1.0),0.0)
+			CurrSpeed = Max(CurveValue(0.0, CurrSpeed - 0.1, 1.0), 0.0)
 		EndIf
 		
 		If (Not UnableToMove%) Then TranslateEntity Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True
@@ -2619,13 +2638,13 @@ Function MovePlayer()
 	ForceMove = False
 	
 	If Injuries > 1.0 Then
-		temp2 = Bloodloss
+		Temp2 = Bloodloss
 		BlurTimer = Max(Max(Sin(MilliSecs2()/100.0)*Bloodloss*30.0,Bloodloss*2*(2.0-CrouchState)),BlurTimer)
 		If (Not I_427\Using And I_427\Timer < 70*360) Then
 			Bloodloss = Min(Bloodloss + (Min(Injuries,3.5)/300.0)*FPSfactor,100)
 		EndIf
 		
-		If temp2 <= 60 And Bloodloss > 60 Then
+		If Temp2 <= 60 And Bloodloss > 60 Then
 			Msg = "You are feeling faint from the amount of blood you have lost."
 			MsgTimer = 70*4
 		EndIf
