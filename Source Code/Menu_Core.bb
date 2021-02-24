@@ -508,7 +508,7 @@ Function UpdateMainMenu()
 						DrawFrame(x, y, 420 * MenuScale, 200 * MenuScale)
 						RowText("Are you sure you want to delete this save?", x + 20 * MenuScale, y + 15 * MenuScale, 400 * MenuScale, 200 * MenuScale)
 						If DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", False) Then
-							DeleteFile(CurrentDir() + SavePath + SaveMSG + "\save.txt")
+							DeleteFile(CurrentDir() + SavePath + SaveMSG + "\save.cb")
 							DeleteDir(CurrentDir() + SavePath + SaveMSG)
 							SaveMSG = ""
 							LoadSaveGames()

@@ -2065,7 +2065,7 @@ Function Kill()
 		KillAnim = Rand(0,1)
 		PlaySound_Strict(DamageSFX[0])
 		If SelectedDifficulty\permaDeath Then
-			DeleteFile(CurrentDir() + SavePath + CurrSave+"\save.txt") 
+			DeleteFile(CurrentDir() + SavePath + CurrSave+"\save.cb") 
 			DeleteDir(SavePath + CurrSave)
 			LoadSaveGames()
 		EndIf

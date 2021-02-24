@@ -14,7 +14,7 @@ Function SaveGame(file$)
 	
 	CreateDir(file)
 	
-	Local f% = WriteFile(file + "save.txt")
+	Local f% = WriteFile(file + "save.cb")
 	
 	WriteString f, CurrentTime()
 	WriteString f, CurrentDate()
@@ -465,7 +465,7 @@ Function LoadGame(file$)
 	GameSaved = True
 	
 	Local x#, y#, z#, i%, temp%, strtemp$, r.Rooms, id%, n.NPCs, do.Doors
-	Local f% = ReadFile(file + "save.txt")
+	Local f% = ReadFile(file + "save.cb")
 	
 	strtemp = ReadString(f)
 	strtemp = ReadString(f)
@@ -1258,7 +1258,7 @@ Function LoadGameQuick(file$)
 	
 	Local x#, y#, z#, i%, temp%, strtemp$, id%
 	Local player_x#,player_y#,player_z#, r.Rooms, n.NPCs, do.Doors
-	Local f% = ReadFile(file + "save.txt")
+	Local f% = ReadFile(file + "save.cb")
 	
 	strtemp = ReadString(f)
 	strtemp = ReadString(f)
@@ -1945,7 +1945,7 @@ Function LoadSaveGames()
 		If file$="" Then Exit 
 		If FileType(SavePath+"\"+file$) = 2 Then 
 			If file <> "." And file <> ".." Then 
-				If (FileType(SavePath + file + "\save.txt")>0) Then
+				If (FileType(SavePath + file + "\save.cb")>0) Then
 					SaveGameAmount=SaveGameAmount+1
 				EndIf
 			EndIf
@@ -1962,7 +1962,7 @@ Function LoadSaveGames()
 		If file$="" Then Exit 
 		If FileType(SavePath+"\"+file$) = 2 Then 
 			If file <> "." And file <> ".." Then 
-				If (FileType(SavePath + file + "\save.txt")>0) Then
+				If (FileType(SavePath + file + "\save.cb")>0) Then
 					SaveGames(i) = file
 					i=i+1
 				EndIf
@@ -1975,8 +1975,8 @@ Function LoadSaveGames()
 	Dim SaveGameDate$(SaveGameAmount + 1)
 	Dim SaveGameVersion$(SaveGameAmount + 1)
 	For i = 1 To SaveGameAmount
-		DebugLog (SavePath + SaveGames(i - 1) + "\save.txt")
-		Local f% = ReadFile(SavePath + SaveGames(i - 1) + "\save.txt")
+		DebugLog (SavePath + SaveGames(i - 1) + "\save.cb")
+		Local f% = ReadFile(SavePath + SaveGames(i - 1) + "\save.cb")
 		SaveGameTime(i - 1) = ReadString(f)
 		SaveGameDate(i - 1) = ReadString(f)
 		;Skip all data until the CompatibleVersion number
