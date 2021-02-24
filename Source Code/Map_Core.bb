@@ -1444,7 +1444,7 @@ End Type
 Function CreateRoomTemplate.RoomTemplates(meshpath$)
 	Local rt.RoomTemplates = New RoomTemplates
 	
-	rt\objPath = meshpath
+	rt\objPath = "GFX\map\" + meshpath
 	
 	rt\id = RoomTempID
 	RoomTempID=RoomTempID+1
@@ -1464,36 +1464,38 @@ Function LoadRoomTemplates(file$)
 		TemporaryString = Trim(ReadLine(f))
 		If Left(TemporaryString,1) = "[" Then
 			TemporaryString = Mid(TemporaryString, 2, Len(TemporaryString) - 2)
-			StrTemp = GetINIString(file, TemporaryString, "mesh path")
-			
-			rt = CreateRoomTemplate(StrTemp)
-			rt\Name = Lower(TemporaryString)
-			
-			StrTemp = Lower(GetINIString(file, TemporaryString, "shape"))
-			
-			Select StrTemp
-				Case "room1", "1"
-					rt\Shape = ROOM1
-				Case "room2", "2"
-					rt\Shape = ROOM2
-				Case "room2c", "2c"
-					rt\Shape = ROOM2C
-				Case "room3", "3"
-					rt\Shape = ROOM3
-				Case "room4", "4"
-					rt\Shape = ROOM4
-				Default
-			End Select
-			
-			For i = 0 To 4
-				rt\zone[i]= GetINIInt(file, TemporaryString, "zone"+(i+1))
-			Next
-			
-			rt\Commonness = Max(Min(GetINIInt(file, TemporaryString, "commonness"), 100), 0)
-			rt\Large = GetINIInt(file, TemporaryString, "large")
-			rt\DisableDecals = GetINIInt(file, TemporaryString, "disabledecals")
-			rt\UseLightCones = GetINIInt(file, TemporaryString, "usevolumelighting")
-			rt\DisableOverlapCheck = GetINIInt(file, TemporaryString, "disableoverlapcheck")
+			If TemporaryString <> "room ambience" Then
+				StrTemp = GetINIString(file, TemporaryString, "mesh path")
+				
+				rt = CreateRoomTemplate(StrTemp)
+				rt\Name = Lower(TemporaryString)
+				
+				StrTemp = Lower(GetINIString(file, TemporaryString, "shape"))
+				
+				Select StrTemp
+					Case "room1", "1"
+						rt\Shape = ROOM1
+					Case "room2", "2"
+						rt\Shape = ROOM2
+					Case "room2c", "2c"
+						rt\Shape = ROOM2C
+					Case "room3", "3"
+						rt\Shape = ROOM3
+					Case "room4", "4"
+						rt\Shape = ROOM4
+					Default
+				End Select
+				
+				For i = 0 To 4
+					rt\zone[i]= GetINIInt(file, TemporaryString, "zone"+(i+1))
+				Next
+				
+				rt\Commonness = Max(Min(GetINIInt(file, TemporaryString, "commonness"), 100), 0)
+				rt\Large = GetINIInt(file, TemporaryString, "large")
+				rt\DisableDecals = GetINIInt(file, TemporaryString, "disabledecals")
+				rt\UseLightCones = GetINIInt(file, TemporaryString, "usevolumelighting")
+				rt\DisableOverlapCheck = GetINIInt(file, TemporaryString, "disableoverlapcheck")
+			EndIf
 		EndIf
 	Wend
 	
