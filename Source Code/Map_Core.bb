@@ -5874,13 +5874,14 @@ Function FillRoom(r.Rooms)
 			For xtemp = 0 To 1
 				For ytemp = 0 To 2
 					For ztemp = 0 To 2
-						
 						tempstr$ = "9V Battery" : tempstr2$ = "bat"
-						chance% = Rand(-10,100)
+						
+						Local ItemChance% = Rand(-10,100)
+						
 						Select True
-							Case (chance<0)
+							Case (ItemChance<0)
 								Exit
-							Case (chance<40) ;40% chance for a document
+							Case (ItemChance<40) ;40% chance for a document
 								tempstr="Document SCP-"
 								Select Rand(1,6)
 									Case 1
@@ -5899,26 +5900,26 @@ Function FillRoom(r.Rooms)
 										tempstr=tempstr+"966"
 								End Select
 								tempstr2="paper"
-							Case (chance>=40) And (chance<45) ;5% chance for a key card
+							Case (ItemChance>=40) And (ItemChance<45) ;5% chance for a key card
 								temp3%=Rand(1,2)
 								tempstr="Level "+Str(temp3)+" Key Card"
 								tempstr2="key"+Str(temp3)
-							Case (chance>=45) And (chance<50) ;5% chance for a medkit
+							Case (ItemChance>=45) And (ItemChance<50) ;5% chance for a medkit
 								tempstr="First Aid Kit"
 								tempstr2="firstaid"
-							Case (chance>=50) And (chance<60) ;10% chance for a battery
+							Case (ItemChance>=50) And (ItemChance<60) ;10% chance for a battery
 								tempstr="9V Battery"
 								tempstr2="bat"
-							Case (chance>=60) And (chance<70) ;10% chance for an SNAV
+							Case (ItemChance>=60) And (ItemChance<70) ;10% chance for an SNAV
 								tempstr="S-NAV 300 Navigator"
 								tempstr2="nav"
-							Case (chance>=70) And (chance<85) ;15% chance for a radio
+							Case (ItemChance>=70) And (ItemChance<85) ;15% chance for a radio
 								tempstr="Radio Transceiver"
 								tempstr2="radio"
-							Case (chance>=85) And (chance<95) ;10% chance for a clipboard
+							Case (ItemChance>=85) And (ItemChance<95) ;10% chance for a clipboard
 								tempstr="Clipboard"
 								tempstr2="clipboard"
-							Case (chance>=95) And (chance=<100) ;5% chance for misc
+							Case (ItemChance>=95) And (ItemChance=<100) ;5% chance for misc
 								temp3%=Rand(1,3)
 								Select temp3
 									Case 1 ;playing card

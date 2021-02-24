@@ -99,9 +99,9 @@ Function MilliSecs2()
 	Return retVal
 End Function
 
-Function chance%(chanc%)
+Function chance%(value%)
 	;perform a chance given a probability
-	Return (Rand(0,100)<=chanc)
+	Return (Rand(0,100)<=value)
 End Function
 
 Function turn_if_deviating%(max_deviation_distance_%,pathx%,center_%,dir%,retval%=0)
