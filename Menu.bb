@@ -33,7 +33,8 @@ Global IntroEnabled% = GetINIInt(OptionFile, "options", "intro enabled")
 Global SelectedInputBox%
 
 Global SavePath$ = "Saves\"
-Global SaveMSG$
+Global SaveToDelete$
+Global SaveMSG%
 
 ;nykyisen tallennuksen nimi ja samalla missä kansiossa tallennustiedosto sijaitsee saves-kansiossa
 Global CurrSave$
@@ -231,31 +232,6 @@ Function UpdateMainMenu()
 		
 		DrawFrame(x, y, width, height)
 		
-		If DrawButton(x + width + 20 * MenuScale, y, 580 * MenuScale - width - 20 * MenuScale, height, "BACK", False) Then 
-			Select MainMenuTab
-				Case 1
-					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-					MainMenuTab = 0
-				Case 2
-					CurrLoadGamePage = 0
-					MainMenuTab = 0
-				Case 3,5,6,7 ;save the options
-					SaveOptionsINI()
-					
-					UserTrackCheck% = 0
-					UserTrackCheck2% = 0
-					
-					AntiAlias Opt_AntiAlias
-					MainMenuTab = 0
-				Case 4 ;move back to the "new game" tab
-					MainMenuTab = 1
-					CurrLoadGamePage = 0
-					MouseHit1 = False
-				Default
-					MainMenuTab = 0
-			End Select
-		EndIf
-		
 		Select MainMenuTab
 			Case 1 ; New game
 				;[Block]
@@ -404,6 +380,7 @@ Function UpdateMainMenu()
 					
 					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
 					
+					Return
 				EndIf
 				
 				;[End Block]
@@ -436,7 +413,7 @@ Function UpdateMainMenu()
 				
 				AASetFont Font2
 				
-				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/6.0)-1 And SaveMSG = "" Then 
+				If CurrLoadGamePage < Ceil(Float(SaveGameAmount)/6.0)-1 And (Not SaveMSG) Then 
 					If DrawButton(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, ">") Then
 						CurrLoadGamePage = CurrLoadGamePage+1
 					EndIf
@@ -445,7 +422,7 @@ Function UpdateMainMenu()
 					Color(100, 100, 100)
 					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", True, True)
 				EndIf
-				If CurrLoadGamePage > 0 And SaveMSG = "" Then
+				If CurrLoadGamePage > 0 And (Not SaveMSG) Then
 					If DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<") Then
 						CurrLoadGamePage = CurrLoadGamePage-1
 					EndIf
@@ -486,7 +463,7 @@ Function UpdateMainMenu()
 							AAText(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(i - 1))
 							AAText(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1))
 							
-							If SaveMSG = "" Then
+							If Not SaveMSG Then
 								If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
 									DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
@@ -499,13 +476,13 @@ Function UpdateMainMenu()
 										CurrSave = SaveGames(i - 1)
 										InitLoadGame()
 										MainMenuOpen = False
+										Return
 									EndIf
 								EndIf
 								
 								If DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Delete", False) Then
-									SaveMSG = SaveGames(i - 1)
-									DebugLog SaveMSG
-									Exit
+									SaveToDelete = SaveGames(i - 1)
+									DebugLog SaveToDelete
 								EndIf
 							Else
 								DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
@@ -527,20 +504,21 @@ Function UpdateMainMenu()
 						EndIf
 					Next
 					
-					If SaveMSG <> ""
+					If SaveToDelete <> ""
+						SaveMSG = True
 						x = 740 * MenuScale
 						y = 376 * MenuScale
 						DrawFrame(x, y, 420 * MenuScale, 200 * MenuScale)
 						RowText("Are you sure you want to delete this save?", x + 20 * MenuScale, y + 15 * MenuScale, 400 * MenuScale, 200 * MenuScale)
 						;AAText(x + 20 * MenuScale, y + 15 * MenuScale, "Are you sure you want to delete this save?")
 						If DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", False) Then
-							DeleteFile(CurrentDir() + SavePath + SaveMSG + "\save.txt")
-							DeleteDir(CurrentDir() + SavePath + SaveMSG)
-							SaveMSG = ""
+							DeleteFile(CurrentDir() + SavePath + SaveToDelete + "\save.txt")
+							DeleteDir(CurrentDir() + SavePath + SaveToDelete)
+							SaveToDelete = "" : SaveMSG = False
 							LoadSaveGames()
 						EndIf
 						If DrawButton(x + 250 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "No", False) Then
-							SaveMSG = ""
+							SaveToDelete = "" : SaveMSG = False
 						EndIf
 					EndIf
 				EndIf
@@ -1107,6 +1085,38 @@ Function UpdateMainMenu()
 				EndIf
 				;[End Block]
 		End Select
+		
+		x = 579 * MenuScale
+		y = 286 * MenuScale
+		
+		width = 160 * MenuScale
+		height = 70 * MenuScale
+		
+		If DrawButton(x, y, width, height, "BACK", False) Then 
+			Select MainMenuTab
+				Case 1
+					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
+					MainMenuTab = 0
+				Case 2
+					SaveToDelete = "" : SaveMSG = False
+					CurrLoadGamePage = 0
+					MainMenuTab = 0
+				Case 3,5,6,7 ;save the options
+					SaveOptionsINI()
+					
+					UserTrackCheck% = 0
+					UserTrackCheck2% = 0
+					
+					AntiAlias Opt_AntiAlias
+					MainMenuTab = 0
+				Case 4 ;move back to the "new game" tab
+					MainMenuTab = 1
+					CurrLoadGamePage = 0
+					MouseHit1 = False
+				Default
+					MainMenuTab = 0
+			End Select
+		EndIf
 		
 	End If
 	
