@@ -7205,7 +7205,7 @@ Function DrawMenu()
 			AASetFont Font2
 			AAText(x, y-(122-45)*MenuScale, "QUIT?",False,True)
 			AASetFont Font1
-		ElseIf KillTimer >= 0 Then
+		ElseIf KillTimer >= 0 Or SelectedEnding <> "" Then
 			AASetFont Font2
 			AAText(x, y-(122-45)*MenuScale, "PAUSED",False,True)
 			AASetFont Font1
@@ -7220,12 +7220,7 @@ Function DrawMenu()
 		Local SeparationConst% = 76*scale
 		Local imgsize% = 64
 		
-		If AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG <= 0
-			AASetFont Font1
-			AAText x, y, "Difficulty: "+SelectedDifficulty\name
-			AAText x, y+20*MenuScale, "Save: "+CurrSave
-			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
-		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
+		If AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then
 				AchievementsMenu = 0
 				OptionsMenu = 0
@@ -7609,7 +7604,7 @@ Function DrawMenu()
 					EndIf
 					;[End Block]
 			End Select
-		ElseIf AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG > 0 And KillTimer >= 0
+		ElseIf AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG > 0
 			Local QuitButton% = 60 
 			If SelectedDifficulty\saveType = SAVEONQUIT Or SelectedDifficulty\saveType = SAVEANYWHERE Then
 				Local RN$ = PlayerRoom\RoomTemplate\Name$
@@ -7627,6 +7622,7 @@ Function DrawMenu()
 						MainMenuTab = 0
 						CurrSave = ""
 						FlushKeys()
+						Return
 					EndIf
 				EndIf
 			EndIf
@@ -7638,7 +7634,46 @@ Function DrawMenu()
 				MainMenuTab = 0
 				CurrSave = ""
 				FlushKeys()
+				Return
 			EndIf
+			
+			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
+				AchievementsMenu = 0
+				OptionsMenu = 0
+				QuitMSG = 0
+				MouseHit1 = False
+			EndIf
+		ElseIf AchievementsMenu > 0 And OptionsMenu <= 0 And QuitMSG <= 0
+			;DebugLog AchievementsMenu
+			If AchievementsMenu <= Floor(Float(MAXACHIEVEMENTS-1)/12.0) Then 
+				If DrawButton(x+341*MenuScale, y + 344*MenuScale, 50*MenuScale, 60*MenuScale, ">") Then
+					AchievementsMenu = AchievementsMenu+1
+				EndIf
+			EndIf
+			If AchievementsMenu > 1 Then
+				If DrawButton(x+41*MenuScale, y + 344*MenuScale, 50*MenuScale, 60*MenuScale, "<") Then
+					AchievementsMenu = AchievementsMenu-1
+				EndIf
+			EndIf
+			
+			For i=0 To 11
+				If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
+					DrawAchvIMG(AchvXIMG,y+((i/4)*120*MenuScale),i+((AchievementsMenu-1)*12))
+				Else
+					Exit
+				EndIf
+			Next
+			
+			For i=0 To 11
+				If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
+					If MouseOn(AchvXIMG+((i Mod 4)*SeparationConst),y+((i/4)*120*MenuScale),64*scale,64*scale) Then
+						AchievementTooltip(i+((AchievementsMenu-1)*12))
+						Exit
+					EndIf
+				Else
+					Exit
+				EndIf
+			Next
 			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
 				AchievementsMenu = 0
@@ -7647,54 +7682,15 @@ Function DrawMenu()
 				MouseHit1 = False
 			EndIf
 		Else
-			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
-				AchievementsMenu = 0
-				OptionsMenu = 0
-				QuitMSG = 0
-				MouseHit1 = False
-			EndIf
+			AASetFont Font1
+			AAText x, y, "Difficulty: "+SelectedDifficulty\name
+			AAText x, y+20*MenuScale, "Save: "+CurrSave
+			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
 			
-			If AchievementsMenu>0 Then
-				;DebugLog AchievementsMenu
-				If AchievementsMenu <= Floor(Float(MAXACHIEVEMENTS-1)/12.0) Then 
-					If DrawButton(x+341*MenuScale, y + 344*MenuScale, 50*MenuScale, 60*MenuScale, ">") Then
-						AchievementsMenu = AchievementsMenu+1
-					EndIf
-				EndIf
-				If AchievementsMenu > 1 Then
-					If DrawButton(x+41*MenuScale, y + 344*MenuScale, 50*MenuScale, 60*MenuScale, "<") Then
-						AchievementsMenu = AchievementsMenu-1
-					EndIf
-				EndIf
-				
-				For i=0 To 11
-					If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
-						DrawAchvIMG(AchvXIMG,y+((i/4)*120*MenuScale),i+((AchievementsMenu-1)*12))
-					Else
-						Exit
-					EndIf
-				Next
-				
-				For i=0 To 11
-					If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
-						If MouseOn(AchvXIMG+((i Mod 4)*SeparationConst),y+((i/4)*120*MenuScale),64*scale,64*scale) Then
-							AchievementTooltip(i+((AchievementsMenu-1)*12))
-							Exit
-						EndIf
-					Else
-						Exit
-					EndIf
-				Next
-				
-			EndIf
-		EndIf
-		
-		y = y+10
-		
-		If AchievementsMenu<=0 And OptionsMenu<=0 And QuitMSG<=0 Then
-			If KillTimer >= 0 Then	
-				
-				y = y+ 72*MenuScale
+			y = y + 10*MenuScale
+			
+			If KillTimer >= 0 Or SelectedEnding <> "" Then
+				y = y + 72*MenuScale
 				
 				If DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Resume", True, True) Then
 					MenuOpen = False
@@ -7744,6 +7740,8 @@ Function DrawMenu()
 							FPSfactor = 0
 							
 							ResetInput()
+							
+							Return
 						EndIf
 					Else
 						DrawFrame(x,y,390*MenuScale, 60*MenuScale)
@@ -7752,12 +7750,13 @@ Function DrawMenu()
 						AAText(x + (390*MenuScale) / 2, y + (60*MenuScale) / 2, "Load Game", True, True)
 					EndIf
 					y = y + 75*MenuScale
-			EndIf
+				EndIf
 				
 				If DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Achievements") Then AchievementsMenu = 1
 				y = y + 75*MenuScale
 				If DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Options") Then OptionsMenu = 1
 				y = y + 75*MenuScale
+				If DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Quit") Then QuitMSG = 1
 			Else
 				y = y+104*MenuScale
 				If GameSaved And (Not SelectedDifficulty\permaDeath) Then
@@ -7800,6 +7799,8 @@ Function DrawMenu()
 						FPSfactor = 0
 						
 						ResetInput()
+						
+						Return
 					EndIf
 				Else
 					DrawButton(x, y, 390*MenuScale, 60*MenuScale, "")
@@ -7813,18 +7814,12 @@ Function DrawMenu()
 					MainMenuTab = 0
 					CurrSave = ""
 					FlushKeys()
+					Return
 				EndIf
 				y= y + 80*MenuScale
+				AASetFont Font1
+				RowText(DeathMSG$, x, y + 80*MenuScale, 390*MenuScale, 600*MenuScale)
 			EndIf
-			
-			If KillTimer >= 0 And (Not MainMenuOpen)
-				If DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Quit") Then
-					QuitMSG = 1
-				EndIf
-			EndIf
-			
-			AASetFont Font1
-			If KillTimer < 0 Then RowText(DeathMSG$, x, y + 80*MenuScale, 390*MenuScale, 600*MenuScale)
 		EndIf
 		
 		If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
