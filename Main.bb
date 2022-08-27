@@ -3783,7 +3783,7 @@ Function DrawEnding()
 				AAText(x + width / 2 + 40*MenuScale, y + 20*MenuScale, "THE END", True)
 				AASetFont Font1
 				
-				If AchievementsMenu=0 Then 
+				If AchievementsMenu<=0 Then 
 					x = x+132*MenuScale
 					y = y+122*MenuScale
 					
