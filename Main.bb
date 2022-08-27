@@ -3144,7 +3144,7 @@ Repeat
 		
 		;[End block]
 		
-		If KeyHit(KEY_INV) And VomitTimer >= 0 Then
+		If KeyHit(KEY_INV) And VomitTimer >= 0 And KillTimer >= 0 Then
 			If (Not UnableToMove) And (Not IsZombie) And (Not Using294) Then
 				Local W$ = ""
 				Local V# = 0
@@ -4995,7 +4995,7 @@ Function DrawGUI()
 		KeypadMSG = ""
 	EndIf
 	
-	If KeyHit(1) And EndingTimer=0 And (Not Using294) Then
+	If KeyHit(1) And EndingTimer=0 And (Not Using294) And KillTimer>=-360 Then
 		If MenuOpen Or InvOpen Then
 			ResumeSounds()
 			If OptionsMenu <> 0 Then SaveOptionsINI()
