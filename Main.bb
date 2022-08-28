@@ -7664,6 +7664,13 @@ Function DrawMenu()
 				EndIf
 			Next
 			
+			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
+				AchievementsMenu = 0
+				OptionsMenu = 0
+				QuitMSG = 0
+				MouseHit1 = False
+			EndIf
+			
 			For i=0 To 11
 				If i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS Then
 					If MouseOn(AchvXIMG+((i Mod 4)*SeparationConst),y+((i/4)*120*MenuScale),64*scale,64*scale) Then
@@ -7674,13 +7681,6 @@ Function DrawMenu()
 					Exit
 				EndIf
 			Next
-			
-			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
-				AchievementsMenu = 0
-				OptionsMenu = 0
-				QuitMSG = 0
-				MouseHit1 = False
-			EndIf
 		Else
 			AASetFont Font1
 			AAText x, y, "Difficulty: "+SelectedDifficulty\name
